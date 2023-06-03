@@ -1,5 +1,5 @@
-from functions import add_month, add_transaction, get_months, get_transactions
-from models import Category, Month, MonthId, Transaction, TransactionType
+from functions import add_month, add_plan, add_transaction, get_months, get_transactions
+from models import Category, Month, MonthId, Plan, Transaction, TransactionType
 from datetime import date as _date
 import polars as pl
 
@@ -64,7 +64,7 @@ def prompt_add_month():
 
     new_month = Month(starting_balance=starting_balance, name=month, year=year)
 
-    print(f"Adding {new_month}...")
+    print(f"Adding {new_month}")
 
     add_month(new_month)
 
@@ -82,10 +82,11 @@ def prompt_add_transaction(transaction_type: TransactionType):
 
     description = input("Enter a description:\n")
 
+    category_list = "\n".join(f"{i}: {cat}" for i, cat in enumerate(Category))
     category = transform_input(
-        f"Enter a category (leave blank for {Category.OTHER.value}):\n",
-        test=lambda val: val == "" or val.capitalize() in iter(Category),
-        callback=lambda val: Category(val.capitalize()) if val else Category.OTHER,
+        f"Enter a category (leave blank for {Category.OTHER.value}):\n{category_list}\n",
+        test=lambda val: val == "" or int(val) in range(len(Category)),
+        callback=lambda val: list(Category)[int(val)] if val else Category.OTHER,
     )
 
     new_transaction = Transaction(
@@ -100,6 +101,40 @@ def prompt_add_transaction(transaction_type: TransactionType):
     add_transaction(new_transaction)
 
 
+def prompt_add_plan(transaction_type: TransactionType):
+    category_list = "\n".join(f"{i}: {cat}" for i, cat in enumerate(Category))
+    category = transform_input(
+        f"Enter a category (leave blank for {Category.OTHER.value}):\n{category_list}\n",
+        test=lambda val: val == "" or int(val) in range(len(Category)),
+        callback=lambda val: list(Category)[int(val)] if val else Category.OTHER,
+    )
+
+    amount = transform_input(
+        "Enter the amount:\n", test=lambda val: val == "0" or float(val), callback=float
+    )
+
+    today = _date.today()
+
+    month = transform_input(
+        f"Enter the month (leave blank for {MonthId(today.month)}):\n",
+        test=lambda val: val == "" or MonthId(int(val)),
+        callback=lambda val: MonthId(int(val or today.month)),
+    )
+
+    year = transform_input(
+        f"Enter the year (leave blank for {today.year}):\n",
+        test=lambda val: val == "" or int(val),
+        callback=lambda val: int(val or today.year),
+    )
+
+    new_plan = Plan(
+        month=month, year=year, category=category, amount=amount, type=transaction_type
+    )
+
+    print(f"Adding {new_plan}")
+    add_plan(new_plan)
+
+
 def add():
     match prompt_add():
         case "m":
@@ -108,6 +143,10 @@ def add():
             prompt_add_transaction(TransactionType.EXPENSE)
         case "i":
             prompt_add_transaction(TransactionType.INCOME)
+        case "pe":
+            prompt_add_plan(TransactionType.EXPENSE)
+        case "pi":
+            prompt_add_plan(TransactionType.INCOME)
         case "b":
             return
 
@@ -160,8 +199,6 @@ def show():
     if not income_df.is_empty():
         print("INCOME:")
         print(income_df.sort("Date"))
-
-    exit()
 
 
 if __name__ == "__main__":
