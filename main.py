@@ -1,4 +1,11 @@
-from functions import add_month, add_plan, add_transaction, get_months, get_transactions
+from functions import (
+    add_month,
+    add_plan,
+    add_transaction,
+    get_months,
+    get_plans,
+    get_transactions,
+)
 from models import Category, Month, MonthId, Plan, Transaction, TransactionType
 from datetime import date as _date
 import polars as pl
@@ -176,18 +183,60 @@ def show():
     month = prompt_show(get_months())
     expenses = get_transactions(month.id, TransactionType.EXPENSE)
     income = get_transactions(month.id, TransactionType.INCOME)
+    planned_expenses = get_plans(month.id, TransactionType.EXPENSE)
+    planned_income = get_plans(month.id, TransactionType.INCOME)
 
     total_expenses = round(sum(e.amount for e in expenses), 2)
     total_income = round(sum(i.amount for i in income), 2)
 
+    expense_totals = {
+        category: sum(e.amount for e in expenses if e.category == category)
+        for category in Category
+    }
+    income_totals = {
+        category: sum(i.amount for i in income if i.category == category)
+        for category in Category
+    }
+
     print(f"Starting balance: {month.starting_balance}")
     print(f"Ending balance: {month.starting_balance + total_income - total_expenses}")
     print(f"Amount saved: {total_income-total_expenses}\n")
-    print(f"Planned expenses: {''}")
+
+    print(f"Planned expenses: {sum(e.amount for e in planned_expenses)}")
     print(f"Actual expenses: {total_expenses}\n")
 
-    print(f"Planned income: {''}")
+    print(f"Planned income: {sum(i.amount for i in planned_income)}")
     print(f"Actual income: {total_income}\n")
+
+    planned_expenses_df = pl.DataFrame(
+        [
+            {
+                "Category": item.category,
+                "Planned": item.amount,
+                "Actual": expense_totals[item.category],
+                "Diff": item.amount - expense_totals[item.category],
+            }
+            for item in planned_expenses
+        ]
+    )
+    planned_income_df = pl.DataFrame(
+        [
+            {
+                "Category": item.category,
+                "Planned": item.amount,
+                "Actual": income_totals[item.category],
+                "Diff": income_totals[item.category] - item.amount,
+            }
+            for item in planned_income
+        ]
+    )
+    if not planned_expenses_df.is_empty():
+        print("PLANNED EXPENSES:")
+        print(planned_expenses_df.sort("Category"), end="\n\n")
+
+    if not planned_income_df.is_empty():
+        print("PLANNED INCOME:")
+        print(planned_income_df.sort("Category"), end="\n\n")
 
     expenses_df = pl.DataFrame([item.to_dict() for item in expenses])
     income_df = pl.DataFrame([item.to_dict() for item in income])

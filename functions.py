@@ -82,3 +82,14 @@ def add_plan(plan: Plan):
                 plan.month_id,
             ),
         )
+
+
+def get_plans(month_id: str, transaction_type: TransactionType):
+    with db() as cursor:
+        query = cursor.execute(
+            f"SELECT * from {Table.PLANS} WHERE month_id = ? AND type = ?",
+            (month_id, transaction_type),
+        )
+        res = query.fetchall()
+
+        return [Plan.from_db(item) for item in res]

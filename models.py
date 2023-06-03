@@ -117,8 +117,18 @@ class Plan:
     category: Category = Category.OTHER
     month: MonthId = MonthId(_date.today().month)
     year: int = _date.today().year
-    id: int | None = None
 
     @property
     def month_id(self):
         return f"{self.month}-{self.year}"
+
+    @classmethod
+    def from_db(cls, db_item: tuple[int, int, int, str, float, str, str]):
+        _, month, year, category, amount, transaction_type, _ = db_item
+        return cls(
+            amount=amount,
+            type=TransactionType(transaction_type),
+            category=Category(category),
+            month=MonthId(month),
+            year=year,
+        )
