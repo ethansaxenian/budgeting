@@ -1,0 +1,64 @@
+[tool.poetry]
+name = "budgeting"
+version = "0.1.0"
+description = ""
+authors = ["Ethan Saxenian <ethansaxenian+github@proton.me>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+polars = "^0.18.2"
+fastapi = "^0.96.1"
+pydantic = "^1.10.9"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.0.272"
+black = "^23.3.0"
+uvicorn = "^0.22.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+target-version = "py311"
+extend-exclude = [
+    ".venv",
+    ".idea",
+    ".git",
+    "__pycache__",
+    ".ruff_cache"
+]
+ignore = ["E501", "S311"]
+line-length = 88
+select = [
+    "A",
+    "B",
+    "C",
+    "C4",
+    "E",
+    "F",
+    "I",
+    "ISC",
+    "N",
+    "PGH",
+    "PTH",
+    "Q",
+    "S",
+    "SIM",
+    "TRY",
+    "UP",
+    "W",
+    "YTT"
+]
+
+[tool.ruff.per-file-ignores]
+"queries.py" = ["S608"]
+
+[tool.ruff.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Security"]
+
+[tool.ruff.flake8-builtins]
+builtins-ignorelist = ["id", "type"]
