@@ -8,8 +8,6 @@ from core.dependencies import get_db
 
 DBType = Annotated[Cursor, Depends(get_db)]
 
-QueryResult = dict[str, str | int]
-
 
 class Table(str, Enum):
     TRANSACTIONS = "transactions"

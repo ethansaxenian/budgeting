@@ -5,7 +5,7 @@ from months.queries import db_get_month_by_id
 from plans.queries import db_get_plans
 from transactions.queries import db_get_transactions
 
-stats_router = APIRouter()
+stats_router = APIRouter(prefix="/stats", tags=["stats"])
 
 
 @stats_router.get("/{month_id}")

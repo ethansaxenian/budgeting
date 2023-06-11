@@ -7,21 +7,28 @@ from transactions.queries import (
     db_delete_transaction,
     db_get_transaction_by_id,
     db_get_transactions,
+    db_update_transaction,
 )
 
-transactions_router = APIRouter()
+transactions_router = APIRouter(
+    prefix="/transactions",
+    tags=["transactions"],
+)
 
 
 @transactions_router.get("/", response_model=list[Transaction])
 def get_transactions(
     db: DBType,
-    month_id: str | None = Query(default=None),
-    transaction_type: TransactionType | None = Query(default=None),
+    month_id: str | None = Query(default=None, description="The month id"),
+    transaction_type: TransactionType
+    | None = Query(default=None, description="The transaction type"),
 ):
     return db_get_transactions(db, month_id, transaction_type)
 
 
-@transactions_router.get("/{id}", response_model=Transaction)
+@transactions_router.get(
+    "/{id}", response_model=Transaction, responses={404: {"description": "Not found"}}
+)
 def get_transaction(id: int, db: DBType):
     transaction = db_get_transaction_by_id(db, id)
 
@@ -44,6 +51,6 @@ def remove_transaction(id: int, db: DBType):
     return db_delete_transaction(db, id)
 
 
-# @router.put("/{id}")
-# def update_transaction(id: str, transaction: Transaction, db: DBType):
-#     pass
+@transactions_router.post("/{id}", response_model=int)
+def update_transaction(id: int, transaction: NewTransaction, db: DBType):
+    return db_update_transaction(db, id, transaction.dict())

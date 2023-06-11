@@ -1,6 +1,6 @@
-from sqlite3 import Cursor
+from sqlite3 import Cursor, Row
 
-from core.models import QueryResult, Table
+from core.models import Table
 from months.models import Month
 
 
@@ -28,7 +28,7 @@ def db_get_months(cursor: Cursor):
 def db_get_month_by_id(
     cursor: Cursor,
     month_id: str,
-) -> QueryResult:
+) -> Row:
     query = cursor.execute(
         f"SELECT * from {Table.MONTHS} WHERE id = ?",
         (month_id,),

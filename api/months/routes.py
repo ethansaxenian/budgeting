@@ -4,7 +4,7 @@ from core.models import DBType
 from months.models import Month
 from months.queries import db_get_months
 
-months_router = APIRouter()
+months_router = APIRouter(prefix="/months", tags=["months"])
 
 
 @months_router.get("/", response_model=list[Month])
