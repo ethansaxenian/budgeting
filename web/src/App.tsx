@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from "react";
+import api from "./apiConfig";
+import MonthPage from "./MonthPage";
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+interface Month {
+  id: string;
+  startingBalance: number;
+  name: number;
+  year: number;
 }
 
-export default App
+const App: React.FC = () => {
+  const [months, setMonths] = useState<Month[]>([]);
+  const [activeMonth, setActiveMonth] = useState<string>();
+
+  useEffect(() => {
+    const fetchMonths = async () => {
+      try {
+        const response = await api.get("/months");
+        setMonths(response.data);
+        setActiveMonth(response.data[0].id);
+      } catch (error) {
+        console.error("Error fetching months:", error);
+      }
+    };
+
+    fetchMonths();
+  }, []);
+
+
+  return (
+    <div>
+      <nav>
+        <ul>
+          {months.map((month) => (
+            <li
+              className={activeMonth === month.id ? "active" : ""}
+              onClick={() => setActiveMonth(month.id)}
+            >
+              {month.id}
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <MonthPage monthId={activeMonth as string} />
+    </div>
+  );
+};
+
+export default App;
