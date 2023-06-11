@@ -51,6 +51,6 @@ def remove_transaction(id: int, db: DBType):
     return db_delete_transaction(db, id)
 
 
-@transactions_router.post("/{id}", response_model=int)
+@transactions_router.put("/{id}", response_model=int)
 def update_transaction(id: int, transaction: NewTransaction, db: DBType):
     return db_update_transaction(db, id, transaction.dict())

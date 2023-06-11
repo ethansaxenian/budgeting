@@ -48,6 +48,6 @@ def remove_plan(id: int, db: DBType):
     return db_delete_plan(db, id)
 
 
-@plans_router.post("/{id}", response_model=int)
+@plans_router.put("/{id}", response_model=int)
 def update_plan(id: int, plan: NewPlan, db: DBType):
     return db_update_plan(db, id, plan.dict())

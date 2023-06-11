@@ -1,49 +1,56 @@
-import React, { useEffect, useState } from "react";
-import api from "./apiConfig";
-import MonthPage from "./MonthPage";
-
-interface Month {
-  id: string;
-  startingBalance: number;
-  name: number;
-  year: number;
-}
+import React, { useEffect, useState } from 'react';
+import { getMonths } from './api';
+import MonthPage from './MonthPage';
+import {
+  Container,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from '@chakra-ui/react';
+import { Month } from './types';
 
 const App: React.FC = () => {
   const [months, setMonths] = useState<Month[]>([]);
-  const [activeMonth, setActiveMonth] = useState<string>();
+  const [selectedMonth, setSelectedMonth] = useState(0);
 
   useEffect(() => {
     const fetchMonths = async () => {
       try {
-        const response = await api.get("/months");
-        setMonths(response.data);
-        setActiveMonth(response.data[0].id);
+        const data = await getMonths();
+        setMonths(data);
+        const now = new Date();
+        setSelectedMonth(
+          data
+            .map(({ id }) => id)
+            .indexOf(`${now.getMonth() + 1}-${now.getFullYear()}`)
+        );
       } catch (error) {
-        console.error("Error fetching months:", error);
+        console.error('Error fetching months:', error);
       }
     };
 
     fetchMonths();
   }, []);
 
-
   return (
-    <div>
-      <nav>
-        <ul>
+    <Container minW="1000">
+      <Tabs onChange={(index) => setSelectedMonth(index)} index={selectedMonth}>
+        <TabList>
           {months.map((month) => (
-            <li
-              className={activeMonth === month.id ? "active" : ""}
-              onClick={() => setActiveMonth(month.id)}
-            >
-              {month.id}
-            </li>
+            <Tab key={month.id}>{month.id}</Tab>
           ))}
-        </ul>
-      </nav>
-      <MonthPage monthId={activeMonth as string} />
-    </div>
+        </TabList>
+        <TabPanels>
+          {months.map((month) => (
+            <TabPanel key={month.id}>
+              <MonthPage month={month} />
+            </TabPanel>
+          ))}
+        </TabPanels>
+      </Tabs>
+    </Container>
   );
 };
 

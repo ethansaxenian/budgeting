@@ -1,63 +1,83 @@
-import { useEffect, useState, FC } from 'react';
-import api from './apiConfig';
-
-interface Transaction {
-  id: number;
-  amount: number;
-  type: string;
-  description: string;
-  date: string;
-  category: string;
-}
+import { FC, useEffect } from 'react';
+import { deleteTransaction, getTransactions } from './api';
+import {
+  CloseButton,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@chakra-ui/react';
+import { Transaction, TransactionType } from './types';
+import { strToDate } from './utils';
 
 interface TransactionsTableProps {
   monthId: string;
-  type: string;
+  type: TransactionType;
+  transactions: Transaction[];
+  setTransactions: (transactions: Transaction[]) => void;
 }
 
-const TransactionsTable: FC<TransactionsTableProps> = ({ monthId, type }) => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-
+const TransactionsTable: FC<TransactionsTableProps> = ({
+  monthId,
+  type,
+  transactions,
+  setTransactions,
+}) => {
   useEffect(() => {
     const fetchTransactions = async () => {
-      try {
-        const response = await api.get(
-          `/transactions?month_id=${monthId}&transaction_type=${type}`
-        );
-        setTransactions(response.data);
-      } catch (error) {
-        console.error('Error fetching transactions:', error);
-      }
+      const data = await getTransactions(monthId, type);
+      setTransactions(data);
     };
 
     fetchTransactions();
-  }, [monthId, type]);
+  }, [monthId, type, setTransactions]);
+
+  const deleteTransactionWithId = async (id: number) => {
+    await deleteTransaction(id);
+    const data = await getTransactions(monthId, type);
+    setTransactions(data);
+  };
+
+  const sortedTransactions = transactions.sort(
+    (a, b) => strToDate(b.date).getDate() - strToDate(a.date).getDate()
+  );
 
   return (
-    <div>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Amount</th>
-            <th>Type</th>
-            <th>Description</th>
-            <th>Category</th>
-          </tr>
-        </thead>
-        <tbody>
-          {transactions.map((transaction) => (
-            <tr key={transaction.id}>
-              <td>{transaction.date}</td>
-              <td>{transaction.amount}</td>
-              <td>{transaction.type}</td>
-              <td>{transaction.description}</td>
-              <td>{transaction.category}</td>
-            </tr>
+    <TableContainer>
+      <Table fontSize="12px">
+        <Thead>
+          <Tr>
+            <Th>Date</Th>
+            <Th>Amount</Th>
+            <Th>Description</Th>
+            <Th>Category</Th>
+            <Th />
+          </Tr>
+        </Thead>
+        <Tbody>
+          {sortedTransactions.map((transaction) => (
+            <Tr key={transaction.id}>
+              <Td w="30px">{transaction.date}</Td>
+              <Td w="30px">{transaction.amount}</Td>
+              <Td maxW="30px" whiteSpace="normal">
+                {transaction.description}
+              </Td>
+              <Td w="30px">{transaction.category}</Td>
+              <Td>
+                <CloseButton
+                  color="red"
+                  alignSelf="center"
+                  onClick={() => deleteTransactionWithId(transaction.id)}
+                />
+              </Td>
+            </Tr>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </Tbody>
+      </Table>
+    </TableContainer>
   );
 };
 
