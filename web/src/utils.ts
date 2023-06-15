@@ -14,3 +14,15 @@ export const dateToStr = (date: Date): string => {
 
   return `${date.getFullYear()}-${month}-${day}`;
 };
+
+export const formatAmount = (amount: number): string => {
+  if (amount >= 0) {
+    return `$${amount}`;
+  }
+
+  return `-$${Math.abs(amount)}`;
+};
+
+export const colorAmount = (amount: number): string => {
+  return amount === 0 ? 'black' : amount > 0 ? 'green' : 'red';
+};

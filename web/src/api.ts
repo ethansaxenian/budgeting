@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Category, Month, Transaction, TransactionType } from './types';
+import { Category, Month, Plan, Transaction, TransactionType } from './types';
 import { dateToStr } from './utils';
 
 const api = axios.create({
@@ -10,13 +10,13 @@ const api = axios.create({
 });
 
 export const getMonths = async (): Promise<Month[]> => {
-  const response = await api.get('/months');
-  return response.data.map((month: any) => ({
-    id: month.id,
-    name: month.name,
-    year: month.year,
-    startingBalance: month.starting_balance,
-  }));
+  try {
+    const response = await api.get('/months');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching months:', error);
+    return [];
+  }
 };
 
 export const getTransactions = async (
@@ -65,3 +65,21 @@ export const deleteTransaction = async (id: number) => {
 };
 
 export default api;
+
+
+export const getPlans = async (
+  monthId: string | null,
+  type: TransactionType | null
+): Promise<Plan[]> => {
+  try {
+    const response = await api.get(
+      `/plans?month_id=${monthId}&transaction_type=${
+        type === null ? null : type.toLowerCase()
+      }`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching plans:', error);
+    return [];
+  }
+};

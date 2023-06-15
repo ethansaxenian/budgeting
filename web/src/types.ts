@@ -19,9 +19,30 @@ export enum Category {
   Interest = 'Interest',
 }
 
+export const CategoryByType = {
+  [TransactionType.Income]: [
+    Category.Paycheck,
+    Category.Interest,
+    Category.Bonus,
+    Category.Other,
+  ],
+  [TransactionType.Expense]: [
+    Category.Food,
+    Category.Gifts,
+    Category.Medical,
+    Category.Home,
+    Category.Transportation,
+    Category.Personal,
+    Category.Utilities,
+    Category.Savings,
+    Category.Transportation,
+    Category.Other,
+  ],
+};
+
 export interface Month {
   id: string;
-  startingBalance: number;
+  starting_balance: number;
   name: number;
   year: number;
 }
@@ -33,4 +54,14 @@ export interface Transaction {
   description: string;
   date: string;
   category: Category;
+}
+
+export interface Plan {
+  id: number;
+  amount: number;
+  type: TransactionType;
+  category: Category;
+  month: number;
+  year: number;
+  monthId: number;
 }

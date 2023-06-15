@@ -11,7 +11,7 @@ import {
   Tr,
 } from '@chakra-ui/react';
 import { Transaction, TransactionType } from './types';
-import { strToDate } from './utils';
+import { formatAmount, strToDate } from './utils';
 
 interface TransactionsTableProps {
   monthId: string;
@@ -58,23 +58,25 @@ const TransactionsTable: FC<TransactionsTableProps> = ({
           </Tr>
         </Thead>
         <Tbody>
-          {sortedTransactions.map((transaction) => (
-            <Tr key={transaction.id}>
-              <Td w="30px">{transaction.date}</Td>
-              <Td w="30px">{transaction.amount}</Td>
-              <Td maxW="30px" whiteSpace="normal">
-                {transaction.description}
-              </Td>
-              <Td w="30px">{transaction.category}</Td>
-              <Td>
-                <CloseButton
-                  color="red"
-                  alignSelf="center"
-                  onClick={() => deleteTransactionWithId(transaction.id)}
-                />
-              </Td>
-            </Tr>
-          ))}
+          {sortedTransactions.map(
+            ({ id, date, amount, description, category }) => (
+              <Tr key={id}>
+                <Td w="30px">{date}</Td>
+                <Td w="30px">{formatAmount(amount)}</Td>
+                <Td maxW="30px" whiteSpace="normal">
+                  {description}
+                </Td>
+                <Td w="30px">{category}</Td>
+                <Td>
+                  <CloseButton
+                    color="red"
+                    alignSelf="center"
+                    onClick={() => deleteTransactionWithId(id)}
+                  />
+                </Td>
+              </Tr>
+            )
+          )}
         </Tbody>
       </Table>
     </TableContainer>
