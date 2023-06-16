@@ -5,7 +5,7 @@ import { Category, Month, Plan, Transaction, TransactionType } from './types';
 import AddTransactionModal from './AddTransactionModal';
 import { getTransactions, postTransaction } from './api';
 import PlansTable from './PlansTable';
-import { colorAmount, formatAmount } from './utils';
+import { colorAmount, formatAmount, round } from './utils';
 
 type MonthPageProps = {
   month: Month;
@@ -42,21 +42,21 @@ const MonthPage: FC<MonthPageProps> = ({ month }) => {
     }
   };
 
-  const totalExpenses =
-    Math.round(
-      expenseTransactions.reduce((sum, e) => sum + e.amount, 0) * 100
-    ) / 100;
+  const totalExpenses = round(
+    expenseTransactions.reduce((sum, e) => sum + e.amount, 0)
+  );
 
-  const totalPlannedExpenses =
-    Math.round(plannedExpenses.reduce((sum, e) => sum + e.amount, 0) * 100) /
-    100;
+  const totalPlannedExpenses = round(
+    plannedExpenses.reduce((sum, e) => sum + e.amount, 0)
+  );
 
-  const totalIncome =
-    Math.round(incomeTransactions.reduce((sum, i) => sum + i.amount, 0) * 100) /
-    100;
+  const totalIncome = round(
+    incomeTransactions.reduce((sum, i) => sum + i.amount, 0)
+  );
 
-  const totalPlannedIncome =
-    Math.round(plannedIncome.reduce((sum, e) => sum + e.amount, 0) * 100) / 100;
+  const totalPlannedIncome = round(
+    plannedIncome.reduce((sum, e) => sum + e.amount, 0)
+  );
 
   return (
     <VStack>
@@ -64,12 +64,14 @@ const MonthPage: FC<MonthPageProps> = ({ month }) => {
       <Box>Starting Balance: {formatAmount(month.starting_balance)}</Box>
       <Box>
         Ending Balance:{' '}
-        {formatAmount(month.starting_balance + totalIncome - totalExpenses)}
+        {formatAmount(
+          round(month.starting_balance + totalIncome - totalExpenses)
+        )}
       </Box>
       <HStack>
         <Text>Amount Saved: </Text>
         <Text color={colorAmount(totalIncome - totalExpenses)}>
-          {formatAmount(totalIncome - totalExpenses)}
+          {formatAmount(round(totalIncome - totalExpenses))}
         </Text>
       </HStack>
       <HStack alignItems="flex-start" my={50}>

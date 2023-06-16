@@ -10,7 +10,7 @@ import {
   Tr,
 } from '@chakra-ui/react';
 import { CategoryByType, Plan, Transaction, TransactionType } from './types';
-import { colorAmount, formatAmount } from './utils';
+import { colorAmount, formatAmount, round } from './utils';
 
 interface PlansTableProps {
   monthId: string;
@@ -40,26 +40,24 @@ const PlansTable: FC<PlansTableProps> = ({
 
   for (const cat of CategoryByType[type]) {
     const plansForCategory = plans.filter((p) => p.category === cat);
-    const sumPlansForCategory =
-      Math.round(plansForCategory.reduce((sum, p) => sum + p.amount, 0) * 100) /
-      100;
+    const sumPlansForCategory = round(
+      plansForCategory.reduce((sum, p) => sum + p.amount, 0)
+    );
     const transactionsForCategory = transactions.filter(
       (t) => t.category === cat
     );
-    const sumTransactionsForCategory =
-      Math.round(
-        transactionsForCategory.reduce((sum, t) => sum + t.amount, 0) * 100
-      ) / 100;
+    const sumTransactionsForCategory = round(
+      transactionsForCategory.reduce((sum, t) => sum + t.amount, 0)
+    );
 
     planMap[cat] = {
       planned: sumPlansForCategory,
       actual: sumTransactionsForCategory,
-      diff:
-        Math.round(
-          (type === TransactionType.Expense
-            ? sumPlansForCategory - sumTransactionsForCategory
-            : sumTransactionsForCategory - sumPlansForCategory) * 100
-        ) / 100,
+      diff: round(
+        type === TransactionType.Expense
+          ? sumPlansForCategory - sumTransactionsForCategory
+          : sumTransactionsForCategory - sumPlansForCategory
+      ),
     };
   }
 

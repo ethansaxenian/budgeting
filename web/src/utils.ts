@@ -26,3 +26,7 @@ export const formatAmount = (amount: number): string => {
 export const colorAmount = (amount: number): string => {
   return amount === 0 ? 'black' : amount > 0 ? 'green' : 'red';
 };
+
+export const round = (num: number): number => {
+  return Math.round(num * 100) / 100;
+};

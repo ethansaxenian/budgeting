@@ -1,0 +1,15 @@
+#!/usr/bin/osascript
+
+tell application "iTerm2"
+  tell current session of current window
+    split vertically with default profile
+  end tell
+  tell current tab of current window
+    tell session 1
+      write text "cd ~/Code/budgeting/api; .venv/bin/uvicorn main:app --reload"
+    end tell
+    tell session 2
+      write text "cd ~/Code/budgeting/web; npm run dev"
+    end tell
+  end tell
+end tell
