@@ -81,7 +81,6 @@ const PlansTable: FC<PlansTableProps> = ({
             <Th>Planned</Th>
             <Th>Actual</Th>
             <Th>Difference</Th>
-            <Th />
           </Tr>
         </Thead>
         <Tbody>
