@@ -3,9 +3,10 @@ import TransactionsTable from './TransactionsTable';
 import { Box, Button, HStack, Heading, Text, VStack } from '@chakra-ui/react';
 import { Category, Month, Plan, Transaction, TransactionType } from './types';
 import AddTransactionModal from './AddTransactionModal';
-import { getTransactions, postTransaction } from './api';
+import { getTransactions, postTransaction, putMonth } from './api';
 import PlansTable from './PlansTable';
 import { colorAmount, formatAmount, round } from './utils';
+import EditableField from './EditableField';
 
 type MonthPageProps = {
   month: Month;
@@ -23,7 +24,7 @@ const MonthPage: FC<MonthPageProps> = ({ month }) => {
   const [addingTransaction, setAddingTransaction] = useState(false);
 
   const addTransaction = async (
-    date: Date,
+    date: string,
     amount: number,
     description: string,
     category: Category,
@@ -61,7 +62,16 @@ const MonthPage: FC<MonthPageProps> = ({ month }) => {
   return (
     <VStack>
       <Heading>{month.id}</Heading>
-      <Box>Starting Balance: {formatAmount(month.starting_balance)}</Box>
+      <HStack>
+        <Text m={-2} p={0}>
+          Starting Balance: $
+        </Text>
+        <EditableField
+          initialValue={month.starting_balance}
+          onSubmit={async (val) => await putMonth(month.id, parseFloat(val))}
+          placeholder="00.00"
+        />
+      </HStack>
       <Box>
         Ending Balance:{' '}
         {formatAmount(

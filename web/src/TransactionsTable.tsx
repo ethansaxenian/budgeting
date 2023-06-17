@@ -1,17 +1,10 @@
-import { FC, useEffect } from 'react';
-import { deleteTransaction, getTransactions } from './api';
-import {
-  CloseButton,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react';
+import { FC, useEffect, useState } from 'react';
+import { deleteTransaction, getTransactions, putTransaction } from './api';
+import { Table, TableContainer, Tbody, Th, Thead, Tr } from '@chakra-ui/react';
 import { Transaction, TransactionType } from './types';
-import { formatAmount, strToDate } from './utils';
+import { sortTransactions } from './utils';
+import TransactionRow from './TransactionRow';
+import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 
 interface TransactionsTableProps {
   monthId: string;
@@ -26,6 +19,11 @@ const TransactionsTable: FC<TransactionsTableProps> = ({
   transactions,
   setTransactions,
 }) => {
+  const [sort, setSort] = useState<[keyof Transaction, boolean]>([
+    'date',
+    false,
+  ]);
+
   useEffect(() => {
     const fetchTransactions = async () => {
       const data = await getTransactions(monthId, type);
@@ -41,42 +39,61 @@ const TransactionsTable: FC<TransactionsTableProps> = ({
     setTransactions(data);
   };
 
-  const sortedTransactions = transactions.sort(
-    (a, b) => strToDate(b.date).getDate() - strToDate(a.date).getDate()
-  );
+  const updateTransaction = async (transaction: Transaction) => {
+    await putTransaction(transaction);
+    const data = await getTransactions(monthId, type);
+    setTransactions(data);
+  };
+
+  const updateSort = (field: keyof Transaction) => {
+    if (sort[0] === field) {
+      setSort([sort[0], !sort[1]]);
+    } else {
+      setSort([field, true]);
+    }
+  };
+
+  const sortedTransactions = sortTransactions(transactions, ...sort);
 
   return (
     <TableContainer>
       <Table fontSize="12px">
         <Thead>
           <Tr>
-            <Th>Date</Th>
-            <Th>Amount</Th>
+            <Th onClick={() => updateSort('date')} cursor="pointer">
+              Date{' '}
+              {sort[0] === 'date' ? (
+                sort[1] ? (
+                  <ChevronUpIcon />
+                ) : (
+                  <ChevronDownIcon />
+                )
+              ) : null}
+            </Th>
+            <Th onClick={() => updateSort('amount')} cursor="pointer">
+              Amount{' '}
+              {sort[0] === 'amount' ? (
+                sort[1] ? (
+                  <ChevronUpIcon />
+                ) : (
+                  <ChevronDownIcon />
+                )
+              ) : null}
+            </Th>
             <Th>Description</Th>
             <Th>Category</Th>
             <Th />
           </Tr>
         </Thead>
         <Tbody>
-          {sortedTransactions.map(
-            ({ id, date, amount, description, category }) => (
-              <Tr key={id}>
-                <Td w="30px">{date}</Td>
-                <Td w="30px">{formatAmount(amount)}</Td>
-                <Td maxW="30px" whiteSpace="normal">
-                  {description}
-                </Td>
-                <Td w="30px">{category}</Td>
-                <Td>
-                  <CloseButton
-                    color="red"
-                    alignSelf="center"
-                    onClick={() => deleteTransactionWithId(id)}
-                  />
-                </Td>
-              </Tr>
-            )
-          )}
+          {sortedTransactions.map((transaction) => (
+            <TransactionRow
+              key={transaction.id}
+              transaction={transaction}
+              deleteTransaction={deleteTransactionWithId}
+              updateTransaction={updateTransaction}
+            />
+          ))}
         </Tbody>
       </Table>
     </TableContainer>

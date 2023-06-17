@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Input,
   Modal,
@@ -19,12 +18,12 @@ import {
 } from '@chakra-ui/react';
 import { FC, useState } from 'react';
 import { Category, TransactionType } from './types';
-import DatePicker from 'react-datepicker';
+import { dateToStr } from './utils';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
   create: (
-    date: Date,
+    date: string,
     amount: number,
     description: string,
     category: Category,
@@ -38,7 +37,7 @@ const AddTransactionModal: FC<AddTransactionModalProps> = ({
   create,
   onClose,
 }) => {
-  const [date, setDate] = useState<Date>(new Date());
+  const [date, setDate] = useState<string>(dateToStr(new Date()));
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<Category>(Category.Transportation);
@@ -54,17 +53,11 @@ const AddTransactionModal: FC<AddTransactionModalProps> = ({
         <ModalCloseButton />
         <ModalBody>
           <VStack alignItems="flex-start">
-            <Box
-              px="12px"
-              py="8px"
-              border="1px solid lightgray"
-              borderRadius="6px"
-            >
-              <DatePicker
-                selected={date}
-                onChange={(date) => setDate(date as Date)}
-              />
-            </Box>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
             <NumberInput
               value={amount}
               min={0}
@@ -102,8 +95,8 @@ const AddTransactionModal: FC<AddTransactionModalProps> = ({
               }
               value={transactionType}
             >
-              {Object.keys(TransactionType).map((name) => (
-                <option key={name} value={name}>
+              {Object.entries(TransactionType).map(([name, value]) => (
+                <option key={name} value={value}>
                   {name}
                 </option>
               ))}

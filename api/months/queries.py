@@ -35,3 +35,17 @@ def db_get_month_by_id(
     )
 
     return query.fetchone()
+
+
+def db_update_month(
+    cursor: Cursor, month_id: str, updated_month: dict[str, int | str]
+) -> int:
+    updates = ", ".join(f"{key} = ?" for key in updated_month)
+
+    query_string = f"UPDATE {Table.MONTHS} SET {updates} WHERE id = ?"
+
+    parameters = [*updated_month.values(), month_id]
+
+    cursor.execute(query_string, parameters)
+
+    return cursor.rowcount

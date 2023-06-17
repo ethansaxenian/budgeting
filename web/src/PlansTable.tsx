@@ -1,16 +1,19 @@
 import { FC, useEffect } from 'react';
-import { getPlans } from './api';
+import { getPlan, getPlans, putPlan } from './api';
 import {
+  HStack,
   Table,
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
 } from '@chakra-ui/react';
 import { CategoryByType, Plan, Transaction, TransactionType } from './types';
-import { colorAmount, formatAmount, round } from './utils';
+import { colorAmount, formatAmount, isNumber, round } from './utils';
+import EditableField from './EditableField';
 
 interface PlansTableProps {
   monthId: string;
@@ -36,6 +39,13 @@ const PlansTable: FC<PlansTableProps> = ({
     fetchPlans();
   }, [monthId, type, setPlans]);
 
+  const updatePlanById = async (id: number, amount: string) => {
+    const plan = await getPlan(id);
+    await putPlan({ ...plan, amount: parseFloat(amount) });
+    const data = await getPlans(monthId, type);
+    setPlans(data);
+  };
+
   const planMap: Record<string, Record<string, number>> = {};
 
   for (const cat of CategoryByType[type]) {
@@ -51,6 +61,7 @@ const PlansTable: FC<PlansTableProps> = ({
     );
 
     planMap[cat] = {
+      planId: plansForCategory[0]?.id || -1,
       planned: sumPlansForCategory,
       actual: sumTransactionsForCategory,
       diff: round(
@@ -75,16 +86,30 @@ const PlansTable: FC<PlansTableProps> = ({
         </Thead>
         <Tbody>
           {Object.entries(planMap).map(
-            ([category, { planned, actual, diff }]) => (
-              <Tr key={category}>
-                <Td w="30px">{category}</Td>
-                <Td w="30px">{formatAmount(planned)}</Td>
-                <Td w="30px">{formatAmount(actual)}</Td>
-                <Td w="30px" color={colorAmount(diff)}>
-                  {formatAmount(diff)}
-                </Td>
-              </Tr>
-            )
+            ([category, { planId, planned, actual, diff }]) => {
+              return (
+                <Tr key={category}>
+                  <Td w="30px">{category}</Td>
+                  <Td>
+                    <HStack>
+                      <Text m={-2} p={0}>
+                        $
+                      </Text>
+                      <EditableField
+                        initialValue={`${planned}`}
+                        onSubmit={(val) => updatePlanById(planId, val)}
+                        placeholder="00.00"
+                        validate={isNumber}
+                      />
+                    </HStack>
+                  </Td>
+                  <Td w="30px">{formatAmount(actual)}</Td>
+                  <Td w="30px" color={colorAmount(diff)}>
+                    {formatAmount(diff)}
+                  </Td>
+                </Tr>
+              );
+            }
           )}
         </Tbody>
       </Table>

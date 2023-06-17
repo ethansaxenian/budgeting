@@ -1,3 +1,5 @@
+import { Transaction } from './types';
+
 export const strToDate = (dateStr: string): Date => {
   const parts = dateStr.split('-');
 
@@ -29,4 +31,40 @@ export const colorAmount = (amount: number): string => {
 
 export const round = (num: number): number => {
   return Math.round(num * 100) / 100;
+};
+
+export const isNumber = (num: string): boolean => {
+  return !isNaN(num as unknown as number) && num !== '';
+};
+
+export const isDate = (date: string) => {
+  return /^\d{4}-(0[1-9]|1[012])-([0][1-9]|[12][0-9]|3[01])$/.test(date);
+};
+
+export const isNotEmpty = (val: string) => {
+  return !/^\s*$/.test(val);
+};
+
+export const sortTransactions = (
+  transactions: Transaction[],
+  field: keyof Transaction,
+  asc: boolean
+): Transaction[] => {
+  switch (field) {
+    case 'date':
+      return transactions.sort(
+        (a, b) =>
+          strToDate((asc ? a : b).date).getDate() -
+          strToDate((asc ? b : a).date).getDate()
+      );
+
+    case 'amount':
+      return transactions.sort(
+        (a, b) =>
+          ((asc ? a : b).amount as number) - ((asc ? b : a).amount as number)
+      );
+
+    default:
+      return transactions;
+  }
 };

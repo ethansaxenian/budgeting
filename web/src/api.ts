@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { Category, Month, Plan, Transaction, TransactionType } from './types';
-import { dateToStr } from './utils';
 
 const api = axios.create({
   baseURL: 'http://127.0.0.1:8000/api',
@@ -16,6 +15,16 @@ export const getMonths = async (): Promise<Month[]> => {
   } catch (error) {
     console.error('Error fetching months:', error);
     return [];
+  }
+};
+
+export const putMonth = async (id: string, startingBalance: number) => {
+  try {
+    await api.put(`/months/${id}`, {
+      starting_balance: startingBalance,
+    });
+  } catch (error) {
+    console.error('Error fetching months:', error);
   }
 };
 
@@ -37,7 +46,7 @@ export const getTransactions = async (
 };
 
 export const postTransaction = async (
-  date: Date,
+  date: string,
   amount: number,
   description: string,
   category: Category,
@@ -45,7 +54,7 @@ export const postTransaction = async (
 ) => {
   try {
     await api.post('/transactions', {
-      date: dateToStr(date),
+      date,
       amount,
       description,
       category,
@@ -64,8 +73,19 @@ export const deleteTransaction = async (id: number) => {
   }
 };
 
-export default api;
-
+export const putTransaction = async (transaction: Transaction) => {
+  try {
+    await api.put(`/transactions/${transaction.id}`, {
+      type: transaction.type,
+      amount: transaction.amount,
+      description: transaction.description,
+      category: transaction.category,
+      date: transaction.date,
+    });
+  } catch (error) {
+    console.error('Error updating transaction:', error);
+  }
+};
 
 export const getPlans = async (
   monthId: string | null,
@@ -83,3 +103,29 @@ export const getPlans = async (
     return [];
   }
 };
+
+export const getPlan = async (id: number): Promise<Plan> => {
+  try {
+    const response = await api.get(`/plans/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching plan:', error);
+    return {} as Plan;
+  }
+};
+
+export const putPlan = async (plan: Plan) => {
+  try {
+    await api.put(`/plans/${plan.id}`, {
+      type: plan.type,
+      amount: plan.amount,
+      category: plan.category,
+      month: plan.month,
+      year: plan.year,
+    });
+  } catch (error) {
+    console.error('Error updating plan:', error);
+  }
+};
+
+export default api;
