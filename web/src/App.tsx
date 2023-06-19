@@ -23,7 +23,7 @@ const App: React.FC = () => {
         const now = new Date();
         setSelectedMonth(
           data
-            .map(({ id }) => id)
+            .map(({ month_id }) => month_id)
             .indexOf(`${now.getMonth() + 1}-${now.getFullYear()}`)
         );
       } catch (error) {
@@ -34,16 +34,20 @@ const App: React.FC = () => {
     fetchMonths();
   }, []);
 
+  const sortedMonths = months.sort((a, b) =>
+    a.month_id.localeCompare(b.month_id)
+  );
+
   return (
     <Container minW="1000">
       <Tabs onChange={(index) => setSelectedMonth(index)} index={selectedMonth}>
         <TabList>
-          {months.map((month) => (
-            <Tab key={month.id}>{month.id}</Tab>
+          {sortedMonths.map((month) => (
+            <Tab key={month.id}>{month.month_id}</Tab>
           ))}
         </TabList>
         <TabPanels>
-          {months.map((month) => (
+          {sortedMonths.map((month) => (
             <TabPanel key={month.id}>
               <MonthPage month={month} />
             </TabPanel>

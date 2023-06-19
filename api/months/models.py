@@ -6,11 +6,12 @@ from core.models import MonthId
 
 
 class NewMonth(BaseModel):
+    month_id: str
     starting_balance: float
 
 
 class Month(NewMonth):
-    id: str
+    id: int
     name: int = MonthId(date.today().month)
     year: int = date.today().year
 

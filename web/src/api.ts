@@ -18,9 +18,10 @@ export const getMonths = async (): Promise<Month[]> => {
   }
 };
 
-export const putMonth = async (id: string, startingBalance: number) => {
+export const putMonth = async (id: string, monthId: string, startingBalance: number) => {
   try {
     await api.put(`/months/${id}`, {
+      month_id: monthId,
       starting_balance: startingBalance,
     });
   } catch (error) {

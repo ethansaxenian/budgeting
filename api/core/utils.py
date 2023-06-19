@@ -17,7 +17,7 @@ def build_query_with_optional_params(table: Table, **kwargs) -> tuple[str, list[
 
     for var, value in kwargs.items():
         if value is not None:
-            query_string += f" AND {var} = ?"
+            query_string += f" AND {var} = %s"
             parameters.append(value)
 
     return query_string, parameters

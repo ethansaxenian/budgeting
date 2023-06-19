@@ -1,12 +1,12 @@
 from enum import Enum
-from sqlite3 import Cursor
 from typing import Annotated
 
 from fastapi import Depends
+from psycopg2.extensions import cursor
 
 from core.dependencies import get_db
 
-DBType = Annotated[Cursor, Depends(get_db)]
+DBType = Annotated[cursor, Depends(get_db)]
 
 
 class Table(str, Enum):

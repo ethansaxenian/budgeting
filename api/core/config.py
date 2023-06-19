@@ -11,7 +11,11 @@ class Settings(BaseSettings):
     AUTHOR_NAME: str = "Ethan Saxenian"
     AUTHOR_EMAIL: str = "ethansaxenian+github@proton.me"
     LICENSE: str = "MIT"
-    DB_PATH: str = f"{ROOT_DIR}/budget.sqlite"
+    DB_NAME: str = "postgres"
+    DB_USER: str = "postgres"
+    DB_PASSWORD: str = "postgres"
+    DB_PORT: int = 5432
+    DB_HOST: str = "db"
     TEST_DB_PATH: str = ":memory:"
 
     class Config:

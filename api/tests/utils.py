@@ -45,7 +45,7 @@ def init_db(cursor: Cursor):
 
 def seed_db(cursor: Cursor):
     cursor.execute(
-        f"INSERT INTO {Table.TRANSACTIONS}(id, date, amount, description, category, type, month_id) VALUES(?, ?, ?, ?, ?, ?, ?)",
+        f"INSERT INTO {Table.TRANSACTIONS}(id, date, amount, description, category, type, month_id) VALUES(%s, %s, %s, %s, %s, %s, %s)",
         (
             example_transaction.id,
             example_transaction.date,
@@ -58,7 +58,7 @@ def seed_db(cursor: Cursor):
     )
 
     cursor.execute(
-        f"INSERT INTO {Table.PLANS}(id, month, year, category, amount, type, month_id) VALUES(?, ?, ?, ?, ?, ?, ?)",
+        f"INSERT INTO {Table.PLANS}(id, month, year, category, amount, type, month_id) VALUES(%s, %s, %s, %s, %s, %s, %s)",
         (
             example_plan.id,
             example_plan.month,

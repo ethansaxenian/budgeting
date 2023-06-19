@@ -61,14 +61,16 @@ const MonthPage: FC<MonthPageProps> = ({ month }) => {
 
   return (
     <VStack>
-      <Heading>{month.id}</Heading>
+      <Heading>{month.month_id}</Heading>
       <HStack>
         <Text m={-2} p={0}>
           Starting Balance: $
         </Text>
         <EditableField
           initialValue={month.starting_balance}
-          onSubmit={async (val) => await putMonth(month.id, parseFloat(val))}
+          onSubmit={async (val) =>
+            await putMonth(month.id, month.month_id, parseFloat(val))
+          }
           placeholder="00.00"
         />
       </HStack>

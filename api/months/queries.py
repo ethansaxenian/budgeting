@@ -1,48 +1,42 @@
-from sqlite3 import Cursor, Row
+from psycopg2.extensions import cursor
+from psycopg2.extras import RealDictRow
 
 from core.models import Table
-from months.models import Month
+from months.models import NewMonth
 
 
-def add_month(cursor: Cursor, month: Month):
-    query = cursor.execute(
-        f"SELECT COUNT(id) FROM {Table.MONTHS} WHERE id = ?",
-        (month.id,),
-    )
-    month_exists, *_ = query.fetchall()[0]
-    if month_exists:
-        return
 
+def db_add_month(cursor: cursor, month: NewMonth):
     cursor.execute(
-        f"INSERT INTO {Table.MONTHS}(id, starting_balance) VALUES(?, ?)",
-        (month.id, month.starting_balance),
+        f"INSERT INTO {Table.MONTHS}(month_id, starting_balance) VALUES(%s, %s)",
+        (month.month_id, month.starting_balance),
     )
 
 
-def db_get_months(cursor: Cursor):
-    query = cursor.execute(f"SELECT * from {Table.MONTHS}")
+def db_get_months(cursor: cursor):
+    cursor.execute(f"SELECT * from {Table.MONTHS}")
 
-    return query.fetchall()
+    return cursor.fetchall()
 
 
 def db_get_month_by_id(
-    cursor: Cursor,
+    cursor: cursor,
     month_id: str,
-) -> Row:
-    query = cursor.execute(
-        f"SELECT * from {Table.MONTHS} WHERE id = ?",
+) -> RealDictRow:
+    cursor.execute(
+        f"SELECT * from {Table.MONTHS} WHERE id = %s",
         (month_id,),
     )
 
-    return query.fetchone()
+    return cursor.fetchone()
 
 
 def db_update_month(
-    cursor: Cursor, month_id: str, updated_month: dict[str, int | str]
+    cursor: cursor, month_id: str, updated_month: dict[str, int | str]
 ) -> int:
-    updates = ", ".join(f"{key} = ?" for key in updated_month)
+    updates = ", ".join(f"{key} = %s" for key in updated_month)
 
-    query_string = f"UPDATE {Table.MONTHS} SET {updates} WHERE id = ?"
+    query_string = f"UPDATE {Table.MONTHS} SET {updates} WHERE id = %s"
 
     parameters = [*updated_month.values(), month_id]
 

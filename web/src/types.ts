@@ -42,6 +42,7 @@ export const CategoryByType = {
 
 export interface Month {
   id: string;
+  month_id: string;
   starting_balance: number;
   name: number;
   year: number;
