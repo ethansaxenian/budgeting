@@ -1,13 +1,11 @@
-from datetime import date
-
 from fastapi.encoders import jsonable_encoder
 from fastapi.testclient import TestClient
 
 from core.dependencies import get_db
 from core.models import Category, MonthId, TransactionType
 from main import app
-from tests.utils import example_plan, override_get_db
 from plans.models import NewPlan
+from tests.utils import example_plan, override_get_db
 
 app.dependency_overrides[get_db] = override_get_db
 

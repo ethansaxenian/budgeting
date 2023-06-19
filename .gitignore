@@ -3,6 +3,7 @@
 __pycache__
 *.sqlite
 .pytest_cache
+postgres-data
 
 # Logs
 logs

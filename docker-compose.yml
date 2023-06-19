@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  web:
+    build: web
+    ports:
+      - 8000:5173
+    environment:
+      - VITE_API_URL=http://localhost:8001
+
+  api:
+    build: api
+    ports:
+      - 8001:8080
+    volumes:
+      - ./api:/api
+
+  db:
+    image: "postgres:latest"
+    ports:
+      - 8002:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+      - ./api/init.sql:/docker-entrypoint-initdb.d/create_tables.sql

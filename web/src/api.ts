@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Category, Month, Plan, Transaction, TransactionType } from './types';
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
+  baseURL: `${import.meta.env.VITE_API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -10,7 +10,7 @@ const api = axios.create({
 
 export const getMonths = async (): Promise<Month[]> => {
   try {
-    const response = await api.get('/months');
+    const response = await api.get('/months/');
     return response.data;
   } catch (error) {
     console.error('Error fetching months:', error);
@@ -53,7 +53,7 @@ export const postTransaction = async (
   transactionType: TransactionType
 ) => {
   try {
-    await api.post('/transactions', {
+    await api.post('/transactions/', {
       date,
       amount,
       description,

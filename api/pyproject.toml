@@ -10,17 +10,18 @@ python = "^3.11"
 polars = "^0.18.2"
 fastapi = "^0.96.1"
 pydantic = "^1.10.9"
+psycopg2-binary = "^2.9.6"
+uvicorn = "^0.22.0"
 
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.0.272"
 black = "^23.3.0"
-uvicorn = "^0.22.0"
 pytest = "^7.3.2"
 httpx = "^0.24.1"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core==1.5.1"]
 build-backend = "poetry.core.masonry.api"
 
 
