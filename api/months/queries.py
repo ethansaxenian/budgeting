@@ -5,7 +5,6 @@ from core.models import Table
 from months.models import NewMonth
 
 
-
 def db_add_month(cursor: cursor, month: NewMonth):
     cursor.execute(
         f"INSERT INTO {Table.MONTHS}(month_id, starting_balance) VALUES(%s, %s)",

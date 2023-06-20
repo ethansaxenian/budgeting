@@ -10,6 +10,15 @@ from transactions.models import NewTransaction
 
 
 def db_add_transaction(cursor: cursor, transaction: NewTransaction) -> int:
+    month_id_str = build_month_id(transaction.date.month, transaction.date.year)
+
+    cursor.execute(
+        f"SELECT * from {Table.MONTHS} WHERE month_id = %s",
+        (month_id_str,),
+    )
+
+    month = cursor.fetchone()
+
     cursor.execute(
         f"INSERT INTO {Table.TRANSACTIONS}(date, amount, description, category, type, month_id) VALUES(%s, %s, %s, %s, %s, %s)",
         (
@@ -18,7 +27,7 @@ def db_add_transaction(cursor: cursor, transaction: NewTransaction) -> int:
             transaction.description,
             transaction.category,
             transaction.type,
-            build_month_id(transaction.date.month, transaction.date.year),
+            month["id"],
         ),
     )
     return cursor.lastrowid
