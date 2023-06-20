@@ -16,7 +16,7 @@ import { colorAmount, formatAmount, isNumber, round } from './utils';
 import EditableField from './EditableField';
 
 interface PlansTableProps {
-  monthId: string;
+  monthId: number;
   type: TransactionType;
   plans: Plan[];
   transactions: Transaction[];

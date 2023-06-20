@@ -11,8 +11,8 @@ class NewTransaction(BaseModel):
     description: str | None
     category: Category = Category.OTHER
     date: _date = _date.today()
+    month_id: int
 
 
 class Transaction(NewTransaction):
     id: int
-    month_id: str

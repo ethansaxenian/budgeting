@@ -41,11 +41,9 @@ export const CategoryByType = {
 };
 
 export interface Month {
-  id: string;
+  id: number;
   month_id: string;
   starting_balance: number;
-  name: number;
-  year: number;
 }
 
 export interface Transaction {
@@ -55,6 +53,7 @@ export interface Transaction {
   description: string;
   date: string;
   category: Category;
+  month_id: number;
 }
 
 export interface Plan {
@@ -62,7 +61,5 @@ export interface Plan {
   amount: number;
   type: TransactionType;
   category: Category;
-  month: number;
-  year: number;
-  monthId: number;
+  month_id: number;
 }

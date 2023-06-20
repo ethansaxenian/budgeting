@@ -1,18 +1,14 @@
-from datetime import date
-
 from pydantic import BaseModel
 
-from core.models import Category, MonthId, TransactionType
+from core.models import Category, TransactionType
 
 
 class NewPlan(BaseModel):
     amount: float
     type: TransactionType
     category: Category = Category.OTHER
-    month: MonthId = MonthId(date.today().month)
-    year: int = date.today().year
+    month_id: str
 
 
 class Plan(NewPlan):
     id: int
-    month_id: str

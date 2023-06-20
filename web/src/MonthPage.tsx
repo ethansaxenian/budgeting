@@ -30,7 +30,16 @@ const MonthPage: FC<MonthPageProps> = ({ month }) => {
     category: Category,
     transactionType: TransactionType
   ) => {
-    await postTransaction(date, amount, description, category, transactionType);
+    const newTransaction: Omit<Transaction, 'id'> = {
+      date,
+      amount,
+      description,
+      category,
+      type: transactionType,
+      month_id: month.id,
+    };
+
+    await postTransaction(newTransaction);
 
     setAddingTransaction(false);
 

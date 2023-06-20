@@ -16,7 +16,6 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = "postgres"
     DB_PORT: int = 5432
     DB_HOST: str = "db"
-    TEST_DB_PATH: str = ":memory:"
 
     class Config:
         env_file = ".env"

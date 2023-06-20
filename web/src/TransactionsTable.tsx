@@ -7,7 +7,7 @@ import TransactionRow from './TransactionRow';
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 
 interface TransactionsTableProps {
-  monthId: string;
+  monthId: number;
   type: TransactionType;
   transactions: Transaction[];
   setTransactions: (transactions: Transaction[]) => void;

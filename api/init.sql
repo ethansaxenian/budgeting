@@ -16,8 +16,6 @@ CREATE TABLE IF NOT EXISTS transactions (
 
 CREATE TABLE IF NOT EXISTS plans (
     id SERIAL PRIMARY KEY,
-    month INT NOT NULL,
-    year INT NOT NULL,
     category varchar(250) NOT NULL,
     amount FLOAT NOT NULL,
     type varchar(250) NOT NULL,

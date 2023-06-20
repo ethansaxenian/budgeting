@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Category, Month, Plan, Transaction, TransactionType } from './types';
+import { Month, Plan, Transaction, TransactionType } from './types';
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api`,
@@ -19,7 +19,7 @@ export const getMonths = async (): Promise<Month[]> => {
 };
 
 export const putMonth = async (
-  id: string,
+  id: number,
   monthId: string,
   startingBalance: number
 ) => {
@@ -34,7 +34,7 @@ export const putMonth = async (
 };
 
 export const getTransactions = async (
-  monthId: string | null,
+  monthId: number | null,
   type: TransactionType | null
 ): Promise<Transaction[]> => {
   try {
@@ -50,21 +50,9 @@ export const getTransactions = async (
   }
 };
 
-export const postTransaction = async (
-  date: string,
-  amount: number,
-  description: string,
-  category: Category,
-  transactionType: TransactionType
-) => {
+export const postTransaction = async (transaction: Omit<Transaction, 'id'>) => {
   try {
-    await api.post('/transactions/', {
-      date,
-      amount,
-      description,
-      category,
-      type: transactionType.toLowerCase(),
-    });
+    await api.post('/transactions/', transaction);
   } catch (error) {
     console.error('Error adding transaction:', error);
   }
@@ -86,6 +74,7 @@ export const putTransaction = async (transaction: Transaction) => {
       description: transaction.description,
       category: transaction.category,
       date: transaction.date,
+      month_id: transaction.month_id,
     });
   } catch (error) {
     console.error('Error updating transaction:', error);
@@ -93,7 +82,7 @@ export const putTransaction = async (transaction: Transaction) => {
 };
 
 export const getPlans = async (
-  monthId: string | null,
+  monthId: number | null,
   type: TransactionType | null
 ): Promise<Plan[]> => {
   try {
@@ -125,8 +114,7 @@ export const putPlan = async (plan: Plan) => {
       type: plan.type,
       amount: plan.amount,
       category: plan.category,
-      month: plan.month,
-      year: plan.year,
+      month_id: plan.month_id,
     });
   } catch (error) {
     console.error('Error updating plan:', error);
