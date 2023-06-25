@@ -39,7 +39,7 @@ export const getTransactions = async (
 ): Promise<Transaction[]> => {
   try {
     const response = await api.get(
-      `/transactions?month_id=${monthId}&transaction_type=${
+      `/transactions/?month_id=${monthId}&transaction_type=${
         type === null ? null : type.toLowerCase()
       }`
     );
@@ -87,7 +87,7 @@ export const getPlans = async (
 ): Promise<Plan[]> => {
   try {
     const response = await api.get(
-      `/plans?month_id=${monthId}&transaction_type=${
+      `/plans/?month_id=${monthId}&transaction_type=${
         type === null ? null : type.toLowerCase()
       }`
     );
