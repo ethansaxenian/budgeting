@@ -10,7 +10,7 @@ def get_db():
             user=settings.DB_USER,
             password=settings.DB_PASSWORD,
             database=settings.DB_NAME,
-            port=settings.DB_PORT,
+            port=settings.DB_INNER_PORT,
             host=settings.DB_HOST,
         ) as connection,
         connection.cursor(cursor_factory=RealDictCursor) as cursor,

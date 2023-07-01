@@ -16,8 +16,19 @@ CREATE TABLE IF NOT EXISTS transactions (
 
 CREATE TABLE IF NOT EXISTS plans (
     id SERIAL PRIMARY KEY,
-    category varchar(250) NOT NULL,
-    amount FLOAT NOT NULL,
     type varchar(250) NOT NULL,
-    month_id INT NOT NULL REFERENCES months (id)
+    month_id INT NOT NULL REFERENCES months(id),
+    food FLOAT NOT NULL,
+    gifts FLOAT NOT NULL,
+    medical FLOAT NOT NULL,
+    home FLOAT NOT NULL,
+    transportation FLOAT NOT NULL,
+    personal FLOAT NOT NULL,
+    savings FLOAT NOT NULL,
+    utilities FLOAT NOT NULL,
+    travel FLOAT NOT NULL,
+    other FLOAT NOT NULL,
+    paycheck FLOAT NOT NULL,
+    bonus FLOAT NOT NULL,
+    interest FLOAT NOT NULL
 );
