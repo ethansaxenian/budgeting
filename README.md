@@ -1,6 +1,6 @@
 A simple web app to track monthly expenses. Yes, it doesn't look great. I don't care.
 
-Create a `.env` file and customize the following environment variables:
+Create a `.env` file and customize the following environment variables as you see fit:
 
 ```shell
 WEB_PORT=8000
