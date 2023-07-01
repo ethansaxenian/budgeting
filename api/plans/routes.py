@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query, status
 
 from core.models import DBType, TransactionType
-from plans.models import NewPlan, Plan
+from plans.models import NewPlan, Plan, UpdatePlan
 from plans.queries import (
     db_add_plan,
     db_delete_plan,
@@ -48,6 +48,6 @@ def remove_plan(id: int, db: DBType):
     return db_delete_plan(db, id)
 
 
-@plans_router.put("/{id}", response_model=int)
-def update_plan(id: int, plan: NewPlan, db: DBType):
-    return db_update_plan(db, id, plan.dict())
+@plans_router.patch("/{id}", response_model=int)
+def update_plan(id: int, plan: UpdatePlan, db: DBType):
+    return db_update_plan(db, id, plan.dict(exclude_unset=True))

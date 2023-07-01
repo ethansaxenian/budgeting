@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Month, Plan, Transaction, TransactionType } from './types';
+import { Category, Month, Plan, Transaction, TransactionType } from './types';
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api`,
@@ -86,11 +86,19 @@ export const getPlans = async (
   type: TransactionType | null
 ): Promise<Plan[]> => {
   try {
-    const response = await api.get(
-      `/plans/?month_id=${monthId}&transaction_type=${
-        type === null ? null : type.toLowerCase()
-      }`
-    );
+    let endpoint = '/plans/';
+    const params = [];
+    if (monthId !== null) {
+      params.push(`month_id=${monthId}`);
+    }
+    if (type !== null) {
+      params.push(`transaction_type=${type.toLowerCase()}`);
+    }
+    if (params.length > 0) {
+      endpoint += `?${params.join('&')}`;
+    }
+    const response = await api.get(endpoint);
+
     return response.data;
   } catch (error) {
     console.error('Error fetching plans:', error);
@@ -108,14 +116,12 @@ export const getPlan = async (id: number): Promise<Plan> => {
   }
 };
 
-export const putPlan = async (plan: Plan) => {
+export const patchPlan = async (
+  id: number,
+  { ...values }: { [key in Category]?: number }
+) => {
   try {
-    await api.put(`/plans/${plan.id}`, {
-      type: plan.type,
-      amount: plan.amount,
-      category: plan.category,
-      month_id: plan.month_id,
-    });
+    await api.patch(`/plans/${id}`, { ...values });
   } catch (error) {
     console.error('Error updating plan:', error);
   }

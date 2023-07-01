@@ -5,14 +5,15 @@ from core.models import Table
 from months.models import NewMonth
 
 
-def db_add_month(cursor: cursor, month: NewMonth):
+def db_add_month(cursor: cursor, month: NewMonth) -> int:
     cursor.execute(
         f"INSERT INTO {Table.MONTHS}(month_id, starting_balance) VALUES(%s, %s)",
         (month.month_id, month.starting_balance),
     )
+    return cursor.lastrowid
 
 
-def db_get_months(cursor: cursor):
+def db_get_months(cursor: cursor) -> list[RealDictRow]:
     cursor.execute(f"SELECT * from {Table.MONTHS}")
 
     return cursor.fetchall()

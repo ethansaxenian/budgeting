@@ -4,19 +4,19 @@ export enum TransactionType {
 }
 
 export enum Category {
-  Food = 'Food',
-  Gifts = 'Gifts',
-  Medical = 'Medical',
-  Home = 'Home',
-  Transportation = 'Transportation',
-  Personal = 'Personal',
-  Savings = 'Savings',
-  Utilities = 'Utilities',
-  Travel = 'Travel',
-  Other = 'Other',
-  Paycheck = 'Paycheck',
-  Bonus = 'Bonus',
-  Interest = 'Interest',
+  Food = 'food',
+  Gifts = 'gifts',
+  Medical = 'medical',
+  Home = 'home',
+  Transportation = 'transportation',
+  Personal = 'personal',
+  Savings = 'savings',
+  Utilities = 'utilities',
+  Travel = 'travel',
+  Other = 'other',
+  Paycheck = 'paycheck',
+  Bonus = 'bonus',
+  Interest = 'interest',
 }
 
 export const CategoryByType = {
@@ -35,7 +35,6 @@ export const CategoryByType = {
     Category.Personal,
     Category.Utilities,
     Category.Savings,
-    Category.Transportation,
     Category.Other,
   ],
 };
@@ -58,8 +57,19 @@ export interface Transaction {
 
 export interface Plan {
   id: number;
-  amount: number;
   type: TransactionType;
-  category: Category;
   month_id: number;
+  food: number;
+  gifts: number;
+  medical: number;
+  home: number;
+  transportation: number;
+  personal: number;
+  savings: number;
+  utilities: number;
+  travel: number;
+  other: number;
+  paycheck: number;
+  bonus: number;
+  interest: number;
 }

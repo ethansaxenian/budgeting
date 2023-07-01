@@ -22,7 +22,7 @@ def get_month(id: str, db: DBType):
     return db_get_month_by_id(db, id)
 
 
-@months_router.post("/")
+@months_router.post("/", response_model=int)
 def add_month(month: NewMonth, db: DBType):
     return db_add_month(db, month)
 

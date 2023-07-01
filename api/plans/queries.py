@@ -9,12 +9,25 @@ from plans.models import NewPlan
 def db_add_plan(cursor: cursor, plan: NewPlan) -> int:
     cursor.execute(
         f"INSERT INTO {Table.PLANS}"
-        f"(category, amount, type, month_id) VALUES(%s, %s, %s, %s)",
+        f"(type, month_id, food, gifts, medical, home, transportation, "
+        f"personal, savings, utilities, travel, other, paycheck, bonus, interest) "
+        f"VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
         (
-            plan.category,
-            plan.amount,
             plan.type,
             plan.month_id,
+            plan.food,
+            plan.gifts,
+            plan.medical,
+            plan.home,
+            plan.transportation,
+            plan.personal,
+            plan.savings,
+            plan.utilities,
+            plan.travel,
+            plan.other,
+            plan.paycheck,
+            plan.bonus,
+            plan.interest,
         ),
     )
     return cursor.lastrowid

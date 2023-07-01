@@ -1,4 +1,4 @@
-import { Transaction } from './types';
+import { Category, Plan, Transaction } from './types';
 
 export const strToDate = (dateStr: string): Date => {
   const parts = dateStr.split('-');
@@ -37,11 +37,11 @@ export const isNumber = (num: string): boolean => {
   return !isNaN(num as unknown as number) && num !== '';
 };
 
-export const isDate = (date: string) => {
+export const isDate = (date: string): boolean => {
   return /^\d{4}-(0[1-9]|1[012])-([0][1-9]|[12][0-9]|3[01])$/.test(date);
 };
 
-export const isNotEmpty = (val: string) => {
+export const isNotEmpty = (val: string): boolean => {
   return !/^\s*$/.test(val);
 };
 
@@ -67,4 +67,16 @@ export const sortTransactions = (
     default:
       return transactions;
   }
+};
+
+export const sumPlan = (plan: Plan): number => {
+  let sum = 0;
+  for (const cat of Object.values(Category)) {
+    sum += plan?.[cat] || 0;
+  }
+  return sum;
+};
+
+export const capitalize = (str: string): string => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 };

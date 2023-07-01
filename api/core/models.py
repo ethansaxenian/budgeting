@@ -24,19 +24,19 @@ class TransactionType(str, Enum):
 
 
 class Category(str, Enum):
-    FOOD = "Food"
-    GIFTS = "Gifts"
-    MEDICAL = "Medical"
-    HOME = "Home"
-    TRANSPORTATION = "Transportation"
-    PERSONAL = "Personal"
-    SAVINGS = "Savings"
-    UTILITIES = "Utilities"
-    TRAVEL = "Travel"
-    OTHER = "Other"
-    PAYCHECK = "Paycheck"
-    BONUS = "Bonus"
-    INTEREST = "Interest"
+    FOOD = "food"
+    GIFTS = "gifts"
+    MEDICAL = "medical"
+    HOME = "home"
+    TRANSPORTATION = "transportation"
+    PERSONAL = "personal"
+    SAVINGS = "savings"
+    UTILITIES = "utilities"
+    TRAVEL = "travel"
+    OTHER = "other"
+    PAYCHECK = "paycheck"
+    BONUS = "bonus"
+    INTEREST = "interest"
 
     def __str__(self):
         return self.value

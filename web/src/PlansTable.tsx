@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react';
-import { getPlan, getPlans, putPlan } from './api';
+import { getPlans, patchPlan } from './api';
 import {
   HStack,
   Table,
@@ -11,8 +11,20 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
-import { CategoryByType, Plan, Transaction, TransactionType } from './types';
-import { colorAmount, formatAmount, isNumber, round } from './utils';
+import {
+  Category,
+  CategoryByType,
+  Plan,
+  Transaction,
+  TransactionType,
+} from './types';
+import {
+  capitalize,
+  colorAmount,
+  formatAmount,
+  isNumber,
+  round,
+} from './utils';
 import EditableField from './EditableField';
 
 interface PlansTableProps {
@@ -32,45 +44,24 @@ const PlansTable: FC<PlansTableProps> = ({
 }) => {
   useEffect(() => {
     const fetchPlans = async () => {
-      const data = await getPlans(monthId, type);
+      const data = await getPlans(monthId, null);
       setPlans(data);
     };
 
     fetchPlans();
   }, [monthId, type, setPlans]);
 
-  const updatePlanById = async (id: number, amount: string) => {
-    const plan = await getPlan(id);
-    await putPlan({ ...plan, amount: parseFloat(amount) });
+  const updatePlanById = async (
+    id: number,
+    amount: string,
+    category: Category
+  ) => {
+    await patchPlan(id, { [category]: parseFloat(amount) });
     const data = await getPlans(monthId, type);
     setPlans(data);
   };
 
-  const planMap: Record<string, Record<string, number>> = {};
-
-  for (const cat of CategoryByType[type]) {
-    const plansForCategory = plans.filter((p) => p.category === cat);
-    const sumPlansForCategory = round(
-      plansForCategory.reduce((sum, p) => sum + p.amount, 0)
-    );
-    const transactionsForCategory = transactions.filter(
-      (t) => t.category === cat
-    );
-    const sumTransactionsForCategory = round(
-      transactionsForCategory.reduce((sum, t) => sum + t.amount, 0)
-    );
-
-    planMap[cat] = {
-      planId: plansForCategory[0]?.id || -1,
-      planned: sumPlansForCategory,
-      actual: sumTransactionsForCategory,
-      diff: round(
-        type === TransactionType.Expense
-          ? sumPlansForCategory - sumTransactionsForCategory
-          : sumTransactionsForCategory - sumPlansForCategory
-      ),
-    };
-  }
+  const [plan] = plans.filter((plan) => plan.type === type);
 
   return (
     <TableContainer>
@@ -84,32 +75,41 @@ const PlansTable: FC<PlansTableProps> = ({
           </Tr>
         </Thead>
         <Tbody>
-          {Object.entries(planMap).map(
-            ([category, { planId, planned, actual, diff }]) => {
-              return (
-                <Tr key={category}>
-                  <Td w="30px">{category}</Td>
-                  <Td>
-                    <HStack>
-                      <Text m={-2} p={0}>
-                        $
-                      </Text>
-                      <EditableField
-                        initialValue={`${planned}`}
-                        onSubmit={(val) => updatePlanById(planId, val)}
-                        placeholder="00.00"
-                        validate={isNumber}
-                      />
-                    </HStack>
-                  </Td>
-                  <Td w="30px">{formatAmount(actual)}</Td>
-                  <Td w="30px" color={colorAmount(diff)}>
-                    {formatAmount(diff)}
-                  </Td>
-                </Tr>
-              );
-            }
-          )}
+          {Object.values(CategoryByType[type]).map((category) => {
+            const actual = round(
+              transactions.reduce(
+                (sum, t) =>
+                  sum +
+                  (t.type === type && t.category === category ? t.amount : 0),
+                0
+              )
+            );
+
+            const diff = round((plan?.[category] || 0) - actual);
+
+            return (
+              <Tr key={`${category}-${plan?.id}`}>
+                <Td w="30px">{capitalize(category)}</Td>
+                <Td>
+                  <HStack>
+                    <Text m={-2} p={0}>
+                      $
+                    </Text>
+                    <EditableField
+                      initialValue={plan?.[category] || 0}
+                      onSubmit={(val) => updatePlanById(plan.id, val, category)}
+                      placeholder="00.00"
+                      validate={isNumber}
+                    />
+                  </HStack>
+                </Td>
+                <Td w="30px">{formatAmount(actual)}</Td>
+                <Td w="30px" color={colorAmount(diff)}>
+                  {formatAmount(diff)}
+                </Td>
+              </Tr>
+            );
+          })}
         </Tbody>
       </Table>
     </TableContainer>

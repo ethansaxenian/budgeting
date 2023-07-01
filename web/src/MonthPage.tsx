@@ -5,7 +5,7 @@ import { Category, Month, Plan, Transaction, TransactionType } from './types';
 import AddTransactionModal from './AddTransactionModal';
 import { getTransactions, postTransaction, putMonth } from './api';
 import PlansTable from './PlansTable';
-import { colorAmount, formatAmount, round } from './utils';
+import { colorAmount, formatAmount, round, sumPlan } from './utils';
 import EditableField from './EditableField';
 
 type MonthPageProps = {
@@ -57,7 +57,14 @@ const MonthPage: FC<MonthPageProps> = ({ month }) => {
   );
 
   const totalPlannedExpenses = round(
-    plannedExpenses.reduce((sum, e) => sum + e.amount, 0)
+    plannedExpenses.reduce(
+      (sum, e) =>
+        sum +
+        (e.month_id === month.id && e.type === TransactionType.Expense
+          ? sumPlan(e)
+          : 0),
+      0
+    )
   );
 
   const totalIncome = round(
@@ -65,7 +72,14 @@ const MonthPage: FC<MonthPageProps> = ({ month }) => {
   );
 
   const totalPlannedIncome = round(
-    plannedIncome.reduce((sum, e) => sum + e.amount, 0)
+    plannedIncome.reduce(
+      (sum, i) =>
+        sum +
+        (i.month_id === month.id && i.type === TransactionType.Income
+          ? sumPlan(i)
+          : 0),
+      0
+    )
   );
 
   return (
