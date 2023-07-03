@@ -82,8 +82,8 @@ const AddTransactionModal: FC<AddTransactionModalProps> = ({
               onChange={(e) => setCategory(e.target.value as Category)}
               value={category}
             >
-              {Object.keys(Category).map((name) => (
-                <option key={name} value={name}>
+              {Object.entries(Category).map(([name, value]) => (
+                <option key={name} value={value}>
                   {name}
                 </option>
               ))}

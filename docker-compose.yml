@@ -10,6 +10,7 @@ services:
       - "${WEB_PORT:-8000}:5173"
     environment:
       - VITE_API_URL=http://localhost:${API_PORT:-8001}
+      - VITE_WEB_PORT=${WEB_PORT:-8000}
 
   api:
     env_file: .env

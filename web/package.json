@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "VITE_API_URL=http://localhost:8001 vite",
+    "dev": "VITE_API_URL=http://localhost:8001 vite --force",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx",
@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
+    "@types/node": "^20.3.3",
     "@types/react": "^18.0.37",
     "@types/react-datepicker": "^4.11.2",
     "@types/react-dom": "^18.0.11",
