@@ -1,6 +1,6 @@
 FROM node:lts
 
-WORKDIR "/api"
+WORKDIR "/web"
 
 COPY package.json .
 
