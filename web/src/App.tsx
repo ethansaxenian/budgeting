@@ -10,6 +10,7 @@ import {
   Tabs,
 } from '@chakra-ui/react';
 import { Month } from './types';
+import { compareMonths } from './utils';
 
 const App: React.FC = () => {
   const [months, setMonths] = useState<Month[]>([]);
@@ -34,9 +35,7 @@ const App: React.FC = () => {
     fetchMonths();
   }, []);
 
-  const sortedMonths = months.sort((a, b) =>
-    a.month_id.localeCompare(b.month_id)
-  );
+  const sortedMonths = months.sort((a, b) => compareMonths(a, b));
 
   return (
     <Container minW="1000">

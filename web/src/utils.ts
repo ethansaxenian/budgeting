@@ -1,4 +1,4 @@
-import { Category, Plan, Transaction } from './types';
+import { Category, Month, Plan, Transaction } from './types';
 
 export const strToDate = (dateStr: string): Date => {
   const parts = dateStr.split('-');
@@ -79,4 +79,14 @@ export const sumPlan = (plan: Plan): number => {
 
 export const capitalize = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+export const compareMonths = (a: Month, b: Month): number => {
+  const aParts = a.month_id.split('-');
+  const bParts = b.month_id.split('-');
+
+  const aDate = new Date(parseInt(aParts[1]), parseInt(aParts[0]));
+  const bDate = new Date(parseInt(bParts[1]), parseInt(bParts[0]));
+
+  return aDate.getTime() - bDate.getTime();
 };
