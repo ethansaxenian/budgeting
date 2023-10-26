@@ -31,9 +31,7 @@ def db_get_month_by_id(
     return cursor.fetchone()
 
 
-def db_update_month(
-    cursor: cursor, month_id: str, updated_month: dict[str, int | str]
-) -> int:
+def db_update_month(cursor: cursor, month_id: str, updated_month: dict[str, int | str]) -> int:
     updates = ", ".join(f"{key} = %s" for key in updated_month)
 
     query_string = f"UPDATE {Table.MONTHS} SET {updates} WHERE id = %s"

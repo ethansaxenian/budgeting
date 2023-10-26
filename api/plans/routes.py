@@ -17,15 +17,12 @@ plans_router = APIRouter(prefix="/plans", tags=["plans"])
 def get_plans(
     db: DBType,
     month_id: str | None = Query(default=None, description="The month id"),
-    transaction_type: TransactionType
-    | None = Query(default=None, description="The transaction type"),
+    transaction_type: TransactionType | None = Query(default=None, description="The transaction type"),
 ):
     return db_get_plans(db, month_id, transaction_type)
 
 
-@plans_router.get(
-    "/{id}", response_model=Plan, responses={404: {"description": "Not found"}}
-)
+@plans_router.get("/{id}", response_model=Plan, responses={404: {"description": "Not found"}})
 def get_plan(id: int, db: DBType):
     plan = db_get_plan_by_id(db, id)
 

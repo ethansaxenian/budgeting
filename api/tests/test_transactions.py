@@ -43,9 +43,7 @@ def test_add_transaction():
         category=Category.FOOD,
         date=date(day=3, month=6, year=2023),
     )
-    response = client.post(
-        "/api/transactions/", json=jsonable_encoder(new_transaction.dict())
-    )
+    response = client.post("/api/transactions/", json=jsonable_encoder(new_transaction.dict()))
 
     assert response.status_code == 200
     assert response.json() == 2

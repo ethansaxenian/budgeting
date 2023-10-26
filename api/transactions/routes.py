@@ -20,15 +20,12 @@ transactions_router = APIRouter(
 def get_transactions(
     db: DBType,
     month_id: str | None = Query(default=None, description="The month id"),
-    transaction_type: TransactionType
-    | None = Query(default=None, description="The transaction type"),
+    transaction_type: TransactionType | None = Query(default=None, description="The transaction type"),
 ):
     return db_get_transactions(db, month_id, transaction_type)
 
 
-@transactions_router.get(
-    "/{id}", response_model=Transaction, responses={404: {"description": "Not found"}}
-)
+@transactions_router.get("/{id}", response_model=Transaction, responses={404: {"description": "Not found"}})
 def get_transaction(id: int, db: DBType):
     transaction = db_get_transaction_by_id(db, id)
 

@@ -38,9 +38,7 @@ def db_get_plans(
     month_id: str | None = None,
     transaction_type: TransactionType | None = None,
 ) -> list[RealDictRow]:
-    query_string, parameters = build_query_with_optional_params(
-        Table.PLANS, month_id=month_id, type=transaction_type
-    )
+    query_string, parameters = build_query_with_optional_params(Table.PLANS, month_id=month_id, type=transaction_type)
 
     cursor.execute(query_string, parameters)
 
@@ -67,9 +65,7 @@ def db_delete_plan(cursor: cursor, plan_id: int) -> int:
     return cursor.rowcount
 
 
-def db_update_plan(
-    cursor: cursor, plan_id: int, updated_plan: dict[str, int | str]
-) -> int:
+def db_update_plan(cursor: cursor, plan_id: int, updated_plan: dict[str, int | str]) -> int:
     updates = ", ".join(f"{key} = %s" for key in updated_plan)
 
     query_string = f"UPDATE {Table.PLANS} SET {updates} WHERE id = %s"

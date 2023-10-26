@@ -28,9 +28,7 @@ def db_get_transactions(
     month_id: str | None = None,
     transaction_type: TransactionType | None = None,
 ) -> list[RealDictRow]:
-    query_string, parameters = build_query_with_optional_params(
-        Table.TRANSACTIONS, month_id=month_id, type=transaction_type
-    )
+    query_string, parameters = build_query_with_optional_params(Table.TRANSACTIONS, month_id=month_id, type=transaction_type)
 
     cursor.execute(query_string, parameters)
 
@@ -57,9 +55,7 @@ def db_delete_transaction(cursor: cursor, transaction_id: int) -> int:
     return cursor.rowcount
 
 
-def db_update_transaction(
-    cursor: cursor, transaction_id: int, updated_transaction: dict[str, str | int]
-) -> int:
+def db_update_transaction(cursor: cursor, transaction_id: int, updated_transaction: dict[str, str | int]) -> int:
     updates = ", ".join(f"{key} = %s" for key in updated_transaction)
 
     query_string = f"UPDATE {Table.TRANSACTIONS} SET {updates} WHERE id = %s"

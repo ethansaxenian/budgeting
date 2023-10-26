@@ -35,9 +35,7 @@ def init_db(cursor: Cursor):
     cursor.execute(
         f"CREATE TABLE IF NOT EXISTS {Table.TRANSACTIONS} (id INTEGER PRIMARY KEY, date DATE, amount FLOAT, description TEXT, category TEXT, type TEXT, month_id STRING)"
     )
-    cursor.execute(
-        f"CREATE TABLE IF NOT EXISTS {Table.MONTHS} (id STRING, starting_balance FLOAT)"
-    )
+    cursor.execute(f"CREATE TABLE IF NOT EXISTS {Table.MONTHS} (id STRING, starting_balance FLOAT)")
     cursor.execute(
         f"CREATE TABLE IF NOT EXISTS {Table.PLANS} (id INTEGER PRIMARY KEY, month INTEGER, year INTEGER, category STRING, amount FLOAT, type TEXT, month_id STRING)"
     )
