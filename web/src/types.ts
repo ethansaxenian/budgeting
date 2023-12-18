@@ -24,6 +24,7 @@ export const CategoryByType = {
     Category.Paycheck,
     Category.Interest,
     Category.Bonus,
+    Category.Gifts,
     Category.Other,
   ],
   [TransactionType.Expense]: [
