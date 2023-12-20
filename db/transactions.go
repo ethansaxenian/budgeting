@@ -51,3 +51,61 @@ func GetTransactionByID(id int) (types.Transaction, error) {
 
 	return tr, nil
 }
+
+func CreateTransaction(tr types.TransactionCreate) (int, error) {
+	res, err := DB.Exec("INSERT INTO transactions (description, amount, date, category, type, month_id) VALUES ($1, $2, $3, $4, $5, $6)",
+		tr.Description,
+		tr.Amount,
+		tr.Date,
+		tr.Category,
+		tr.Type,
+		tr.MonthID,
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
+}
+
+func UpdateTransaction(id int, tr types.TransactionCreate) (int, error) {
+	res, err := DB.Exec("UPDATE transactions SET description=$1, amount=$2, date=$3, category=$4, type=$5, month_id=$6 WHERE id=$7",
+		tr.Description,
+		tr.Amount,
+		tr.Date,
+		tr.Category,
+		tr.Type,
+		tr.MonthID,
+		id,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	rowCount, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(rowCount), nil
+}
+
+func DeleteTransaction(id int) (int, error) {
+	res, err := DB.Exec("DELETE FROM transactions WHERE id=$1", id)
+	if err != nil {
+		return 0, err
+	}
+
+	rowCount, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(rowCount), nil
+}

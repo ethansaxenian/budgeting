@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ethansaxenian/budgeting/db"
-	"github.com/ethansaxenian/budgeting/routers"
+	"github.com/ethansaxenian/budgeting/router"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	r := routers.InitRouter()
+	r := router.InitRouter()
 
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		log.Fatal(err)
