@@ -9,7 +9,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func InitDB() (*sql.DB, error) {
+var DB *sql.DB
+
+func InitDB() error {
 	godotenv.Load()
 
 	dsn := fmt.Sprintf(
@@ -23,8 +25,10 @@ func InitDB() (*sql.DB, error) {
 
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return db, nil
+	DB = db
+
+	return nil
 }
