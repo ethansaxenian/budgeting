@@ -1,15 +1,13 @@
 package db
 
 import (
-	"log"
-
 	"github.com/ethansaxenian/budgeting/types"
 )
 
 func GetTransactions() ([]types.Transaction, error) {
 	rows, err := DB.Query("SELECT * FROM transactions")
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	var transactions []types.Transaction
@@ -108,4 +106,32 @@ func DeleteTransaction(id int) (int, error) {
 	}
 
 	return int(rowCount), nil
+}
+
+func GetTransactionsByMonthID(monthID int) ([]types.Transaction, error) {
+	rows, err := DB.Query("SELECT * FROM transactions WHERE month_id=$1", monthID)
+	if err != nil {
+		return nil, err
+	}
+
+	var transactions []types.Transaction
+
+	for rows.Next() {
+		tr := types.Transaction{}
+		if err = rows.Scan(
+			&tr.ID,
+			&tr.Description,
+			&tr.Amount,
+			&tr.Date,
+			&tr.Category,
+			&tr.Type,
+			&tr.MonthID,
+		); err != nil {
+			return nil, err
+		}
+		transactions = append(transactions, tr)
+	}
+
+	return transactions, nil
+
 }

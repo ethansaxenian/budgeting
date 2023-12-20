@@ -100,3 +100,20 @@ func DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(strconv.Itoa(rowCount)))
 
 }
+
+func GetTransactionsByMonthID(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Month with ID %d not found", id), http.StatusBadRequest)
+		return
+	}
+
+	transactions, err := db.GetTransactionsByMonthID(id)
+	if err != nil {
+		http.Error(w, "Error retrieving transactions", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(transactions)
+}

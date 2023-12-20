@@ -29,8 +29,8 @@ func InitRouter() chi.Router {
 func initApiRouter() chi.Router {
 	apiRouter := chi.NewRouter()
 
-	transactionsRouter := initTransactionsRouter()
-	apiRouter.Mount("/transactions", transactionsRouter)
+	apiRouter.Mount("/transactions", initTransactionsRouter())
+	apiRouter.Mount("/months", initMonthsRouter())
 
 	return apiRouter
 }
@@ -42,6 +42,17 @@ func initTransactionsRouter() chi.Router {
 	r.Post("/", handlers.CreateTransaction)
 	r.Put("/{id:^[0-9]+}", handlers.UpdateTransaction)
 	r.Delete("/{id:^[0-9]+}", handlers.DeleteTransaction)
+
+	return r
+}
+
+func initMonthsRouter() chi.Router {
+	r := chi.NewRouter()
+	r.Get("/", handlers.GetMonths)
+	r.Get("/{id:^[0-9]+}", handlers.GetMonthByID)
+	// r.Post("/", handlers.CreateMonth)
+	// r.Put("/{id:^[0-9]+}", handlers.UpdateMonth)
+	r.Get("/{id:^[0-9]+}/transactions", handlers.GetTransactionsByMonthID)
 
 	return r
 }

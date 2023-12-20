@@ -43,3 +43,14 @@ type TransactionCreate struct {
 	Type        TransactionType `json:"type"`
 	MonthID     int             `json:"month_id"`
 }
+
+type Month struct {
+	ID              int     `json:"id"`
+	MonthID         string  `json:"month_id"`
+	StartingBalance float64 `json:"starting_balance"`
+}
+
+type MonthCreate struct {
+	MonthID         string  `json:"month_id"`
+	StartingBalance float64 `json:"starting_balance"`
+}
