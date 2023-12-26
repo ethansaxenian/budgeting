@@ -67,7 +67,7 @@ func UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var tr types.TransactionCreate
+	var tr types.TransactionUpdate
 	if err := json.NewDecoder(r.Body).Decode(&tr); err != nil {
 		http.Error(w, "Invalid transaction data", http.StatusBadRequest)
 		return
@@ -98,7 +98,6 @@ func DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(strconv.Itoa(rowCount)))
-
 }
 
 func GetTransactionsByMonthID(w http.ResponseWriter, r *http.Request) {

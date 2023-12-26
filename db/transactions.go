@@ -72,7 +72,7 @@ func CreateTransaction(tr types.TransactionCreate) (int, error) {
 	return int(id), nil
 }
 
-func UpdateTransaction(id int, tr types.TransactionCreate) (int, error) {
+func UpdateTransaction(id int, tr types.TransactionUpdate) (int, error) {
 	res, err := DB.Exec("UPDATE transactions SET description=$1, amount=$2, date=$3, category=$4, type=$5, month_id=$6 WHERE id=$7",
 		tr.Description,
 		tr.Amount,

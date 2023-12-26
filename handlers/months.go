@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/ethansaxenian/budgeting/db"
+	"github.com/ethansaxenian/budgeting/types"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -36,4 +37,44 @@ func GetMonthByID(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(month)
+}
+
+func CreateMonth(w http.ResponseWriter, r *http.Request) {
+	var month types.MonthCreate
+	if err := json.NewDecoder(r.Body).Decode(&month); err != nil {
+		http.Error(w, "Invalid month data", http.StatusBadRequest)
+		return
+	}
+
+	rowCount, err := db.CreateMonth(month)
+	if err != nil {
+		http.Error(w, "Error creating month", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(strconv.Itoa(rowCount)))
+}
+
+func UpdateMonth(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid month ID", http.StatusBadRequest)
+		return
+	}
+
+	var month types.MonthUpdate
+	if err := json.NewDecoder(r.Body).Decode(&month); err != nil {
+		http.Error(w, "Invalid month data", http.StatusBadRequest)
+		return
+	}
+
+	rowCount, err := db.UpdateMonth(id, month)
+	if err != nil {
+		http.Error(w, "Error updating month", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(strconv.Itoa(rowCount)))
 }

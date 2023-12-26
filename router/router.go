@@ -50,8 +50,8 @@ func initMonthsRouter() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", handlers.GetMonths)
 	r.Get("/{id:^[0-9]+}", handlers.GetMonthByID)
-	// r.Post("/", handlers.CreateMonth)
-	// r.Put("/{id:^[0-9]+}", handlers.UpdateMonth)
+	r.Post("/", handlers.CreateMonth)
+	r.Put("/{id:^[0-9]+}", handlers.UpdateMonth)
 	r.Get("/{id:^[0-9]+}/transactions", handlers.GetTransactionsByMonthID)
 
 	return r
