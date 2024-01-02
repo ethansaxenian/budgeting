@@ -1,4 +1,4 @@
-package handlers
+package server
 
 import (
 	"encoding/json"
@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ethansaxenian/budgeting/db"
 	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
 )
 
-func GetTransactions(w http.ResponseWriter, _ *http.Request) {
-	transactions, err := db.GetTransactions()
+func (s *Server) GetTransactionsHandler(w http.ResponseWriter, _ *http.Request) {
+	transactions, err := s.db.GetTransactions()
 	if err != nil {
 		http.Error(w, "Error retrieving transactions", http.StatusInternalServerError)
 	}
@@ -22,14 +21,14 @@ func GetTransactions(w http.ResponseWriter, _ *http.Request) {
 	json.NewEncoder(w).Encode(transactions)
 }
 
-func GetTransactionByID(w http.ResponseWriter, r *http.Request) {
+func (s *Server) GetTransactionByIDHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "Invalid transaction ID", http.StatusBadRequest)
 		return
 	}
 
-	transaction, err := db.GetTransactionByID(id)
+	transaction, err := s.db.GetTransactionByID(id)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Transaction with id %d not found", id), http.StatusNotFound)
 		return
@@ -39,7 +38,7 @@ func GetTransactionByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(transaction)
 }
 
-func CreateTransaction(w http.ResponseWriter, r *http.Request) {
+func (s *Server) CreateTransactionHandler(w http.ResponseWriter, r *http.Request) {
 	var tr types.TransactionCreate
 	if err := json.NewDecoder(r.Body).Decode(&tr); err != nil {
 		http.Error(w, "Invalid transaction data", http.StatusBadRequest)
@@ -50,7 +49,7 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 		tr.Date = util.GetCurrentDate()
 	}
 
-	id, err := db.CreateTransaction(tr)
+	id, err := s.db.CreateTransaction(tr)
 	if err != nil {
 		http.Error(w, "Error creating transaction", http.StatusInternalServerError)
 		return
@@ -60,7 +59,7 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(strconv.Itoa(id)))
 }
 
-func UpdateTransaction(w http.ResponseWriter, r *http.Request) {
+func (s *Server) UpdateTransactionHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "Invalid transaction ID", http.StatusBadRequest)
@@ -73,7 +72,7 @@ func UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rowCount, err := db.UpdateTransaction(id, tr)
+	rowCount, err := s.db.UpdateTransaction(id, tr)
 	if err != nil {
 		http.Error(w, "Error updating transaction", http.StatusInternalServerError)
 		return
@@ -83,14 +82,14 @@ func UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(strconv.Itoa(rowCount)))
 }
 
-func DeleteTransaction(w http.ResponseWriter, r *http.Request) {
+func (s *Server) DeleteTransactionHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Transaction with id %d not found", id), http.StatusBadRequest)
 		return
 	}
 
-	rowCount, err := db.DeleteTransaction(id)
+	rowCount, err := s.db.DeleteTransaction(id)
 	if err != nil {
 		http.Error(w, "Error deleting transaction", http.StatusInternalServerError)
 		return
@@ -100,14 +99,14 @@ func DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(strconv.Itoa(rowCount)))
 }
 
-func GetTransactionsByMonthID(w http.ResponseWriter, r *http.Request) {
+func (s *Server) GetTransactionsByMonthIDHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Month with ID %d not found", id), http.StatusBadRequest)
 		return
 	}
 
-	transactions, err := db.GetTransactionsByMonthID(id)
+	transactions, err := s.db.GetTransactionsByMonthID(id)
 	if err != nil {
 		http.Error(w, "Error retrieving transactions", http.StatusInternalServerError)
 		return

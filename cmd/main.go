@@ -2,20 +2,17 @@ package main
 
 import (
 	"log"
-	"net/http"
 
-	"github.com/ethansaxenian/budgeting/db"
-	"github.com/ethansaxenian/budgeting/router"
+	"github.com/ethansaxenian/budgeting/server"
 )
 
 func main() {
-	if err := db.InitDB(); err != nil {
+	server, err := server.NewServer()
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	r := router.InitRouter()
-
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 

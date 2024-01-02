@@ -1,11 +1,11 @@
-package db
+package database
 
 import (
 	"github.com/ethansaxenian/budgeting/types"
 )
 
-func GetTransactions() ([]types.Transaction, error) {
-	rows, err := DB.Query("SELECT * FROM transactions")
+func (db *DB) GetTransactions() ([]types.Transaction, error) {
+	rows, err := db.db.Query("SELECT * FROM transactions")
 	if err != nil {
 		return nil, err
 	}
@@ -31,8 +31,8 @@ func GetTransactions() ([]types.Transaction, error) {
 	return transactions, nil
 }
 
-func GetTransactionByID(id int) (types.Transaction, error) {
-	row := DB.QueryRow("SELECT * FROM transactions WHERE id=$1", id)
+func (db *DB) GetTransactionByID(id int) (types.Transaction, error) {
+	row := db.db.QueryRow("SELECT * FROM transactions WHERE id=$1", id)
 
 	tr := types.Transaction{}
 	if err := row.Scan(
@@ -50,8 +50,8 @@ func GetTransactionByID(id int) (types.Transaction, error) {
 	return tr, nil
 }
 
-func CreateTransaction(tr types.TransactionCreate) (int, error) {
-	res, err := DB.Exec("INSERT INTO transactions (description, amount, date, category, type, month_id) VALUES ($1, $2, $3, $4, $5, $6)",
+func (db *DB) CreateTransaction(tr types.TransactionCreate) (int, error) {
+	res, err := db.db.Exec("INSERT INTO transactions (description, amount, date, category, type, month_id) VALUES ($1, $2, $3, $4, $5, $6)",
 		tr.Description,
 		tr.Amount,
 		tr.Date,
@@ -72,8 +72,8 @@ func CreateTransaction(tr types.TransactionCreate) (int, error) {
 	return int(id), nil
 }
 
-func UpdateTransaction(id int, tr types.TransactionUpdate) (int, error) {
-	res, err := DB.Exec("UPDATE transactions SET description=$1, amount=$2, date=$3, category=$4, type=$5, month_id=$6 WHERE id=$7",
+func (db *DB) UpdateTransaction(id int, tr types.TransactionUpdate) (int, error) {
+	res, err := db.db.Exec("UPDATE transactions SET description=$1, amount=$2, date=$3, category=$4, type=$5, month_id=$6 WHERE id=$7",
 		tr.Description,
 		tr.Amount,
 		tr.Date,
@@ -94,8 +94,8 @@ func UpdateTransaction(id int, tr types.TransactionUpdate) (int, error) {
 	return int(rowCount), nil
 }
 
-func DeleteTransaction(id int) (int, error) {
-	res, err := DB.Exec("DELETE FROM transactions WHERE id=$1", id)
+func (db *DB) DeleteTransaction(id int) (int, error) {
+	res, err := db.db.Exec("DELETE FROM transactions WHERE id=$1", id)
 	if err != nil {
 		return 0, err
 	}
@@ -108,8 +108,8 @@ func DeleteTransaction(id int) (int, error) {
 	return int(rowCount), nil
 }
 
-func GetTransactionsByMonthID(monthID int) ([]types.Transaction, error) {
-	rows, err := DB.Query("SELECT * FROM transactions WHERE month_id=$1", monthID)
+func (db *DB) GetTransactionsByMonthID(monthID int) ([]types.Transaction, error) {
+	rows, err := db.db.Query("SELECT * FROM transactions WHERE month_id=$1", monthID)
 	if err != nil {
 		return nil, err
 	}

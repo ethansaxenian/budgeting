@@ -1,9 +1,9 @@
-package db
+package database
 
 import "github.com/ethansaxenian/budgeting/types"
 
-func GetMonths() ([]types.Month, error) {
-	rows, err := DB.Query("SELECT * FROM months")
+func (db *DB) GetMonths() ([]types.Month, error) {
+	rows, err := db.db.Query("SELECT * FROM months")
 	if err != nil {
 		return nil, err
 	}
@@ -25,8 +25,8 @@ func GetMonths() ([]types.Month, error) {
 	return months, nil
 }
 
-func GetMonthByID(id int) (types.Month, error) {
-	row := DB.QueryRow("SELECT * FROM months WHERE id=$1", id)
+func (db *DB) GetMonthByID(id int) (types.Month, error) {
+	row := db.db.QueryRow("SELECT * FROM months WHERE id=$1", id)
 
 	m := types.Month{}
 	if err := row.Scan(
@@ -40,8 +40,8 @@ func GetMonthByID(id int) (types.Month, error) {
 	return m, nil
 }
 
-func CreateMonth(month types.MonthCreate) (int, error) {
-	res, err := DB.Exec("INSERT INTO months (month_id, starting_balance) VALUES ($1, $2)", month.MonthID, month.StartingBalance)
+func (db *DB) CreateMonth(month types.MonthCreate) (int, error) {
+	res, err := db.db.Exec("INSERT INTO months (month_id, starting_balance) VALUES ($1, $2)", month.MonthID, month.StartingBalance)
 
 	if err != nil {
 		return 0, err
@@ -55,8 +55,8 @@ func CreateMonth(month types.MonthCreate) (int, error) {
 	return int(id), nil
 }
 
-func UpdateMonth(id int, month types.MonthUpdate) (int, error) {
-	res, err := DB.Exec("UPDATE months SET month_id=$1, starting_balance=$2 WHERE id=$3", month.MonthID, month.StartingBalance, id)
+func (db *DB) UpdateMonth(id int, month types.MonthUpdate) (int, error) {
+	res, err := db.db.Exec("UPDATE months SET month_id=$1, starting_balance=$2 WHERE id=$3", month.MonthID, month.StartingBalance, id)
 	if err != nil {
 		return 0, err
 	}
