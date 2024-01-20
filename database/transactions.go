@@ -1,13 +1,15 @@
 package database
 
 import (
+	"errors"
+
 	"github.com/ethansaxenian/budgeting/types"
 )
 
 func (db *DB) GetTransactions() ([]types.Transaction, error) {
-	rows, err := db.db.Query("SELECT * FROM transactions")
+	rows, err := db.db.Query("SELECT id, date, amount, description, category, type FROM transactions")
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error retrieving transactions")
 	}
 
 	var transactions []types.Transaction
@@ -21,7 +23,6 @@ func (db *DB) GetTransactions() ([]types.Transaction, error) {
 			&tr.Description,
 			&tr.Category,
 			&tr.Type,
-			&tr.MonthID,
 		); err != nil {
 			return nil, err
 		}
@@ -42,7 +43,6 @@ func (db *DB) GetTransactionByID(id int) (types.Transaction, error) {
 		&tr.Description,
 		&tr.Category,
 		&tr.Type,
-		&tr.MonthID,
 	); err != nil {
 		return types.Transaction{}, err
 	}
@@ -51,13 +51,12 @@ func (db *DB) GetTransactionByID(id int) (types.Transaction, error) {
 }
 
 func (db *DB) CreateTransaction(tr types.TransactionCreate) (int, error) {
-	res, err := db.db.Exec("INSERT INTO transactions (description, amount, date, category, type, month_id) VALUES ($1, $2, $3, $4, $5, $6)",
+	res, err := db.db.Exec("INSERT INTO transactions (description, amount, date, category, type) VALUES ($1, $2, $3, $4, $5, $6)",
 		tr.Description,
 		tr.Amount,
 		tr.Date,
 		tr.Category,
 		tr.Type,
-		tr.MonthID,
 	)
 
 	if err != nil {
@@ -73,13 +72,11 @@ func (db *DB) CreateTransaction(tr types.TransactionCreate) (int, error) {
 }
 
 func (db *DB) UpdateTransaction(id int, tr types.TransactionUpdate) (int, error) {
-	res, err := db.db.Exec("UPDATE transactions SET description=$1, amount=$2, date=$3, category=$4, type=$5, month_id=$6 WHERE id=$7",
+	res, err := db.db.Exec("UPDATE transactions SET description=$1, amount=$2, date=$3, category=$4 WHERE id=$5",
 		tr.Description,
 		tr.Amount,
 		tr.Date,
 		tr.Category,
-		tr.Type,
-		tr.MonthID,
 		id,
 	)
 	if err != nil {
@@ -125,7 +122,6 @@ func (db *DB) GetTransactionsByMonthID(monthID int) ([]types.Transaction, error)
 			&tr.Date,
 			&tr.Category,
 			&tr.Type,
-			&tr.MonthID,
 		); err != nil {
 			return nil, err
 		}

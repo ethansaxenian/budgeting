@@ -17,42 +17,48 @@ func (s *Server) InitRouter() chi.Router {
 
 	assets.Mount(r)
 
-	r.Get("/transactions", s.HandleTransactionsShow)
+	r.Mount("/transactions", s.initTransactionsRouter())
 
-	apiRouter := s.initApiRouter()
-
-	r.Mount("/api", apiRouter)
+	// r.Mount("/api", s.initAPIRouter())
 
 	return r
-}
-
-func (s *Server) initApiRouter() chi.Router {
-	apiRouter := chi.NewRouter()
-
-	apiRouter.Mount("/transactions", s.initTransactionsRouter())
-	apiRouter.Mount("/months", s.initMonthsRouter())
-
-	return apiRouter
 }
 
 func (s *Server) initTransactionsRouter() chi.Router {
 	r := chi.NewRouter()
-	r.Get("/", s.HandleGetTransactions)
-	r.Get("/{id:^[0-9]+}", s.HandleGetTransactionByID)
-	r.Post("/", s.HandleCreateTransaction)
-	r.Put("/{id:^[0-9]+}", s.HandleUpdateTransaction)
-	r.Delete("/{id:^[0-9]+}", s.HandleDeleteTransaction)
+	r.Get("/", s.HandleTransactionsShow)
+	r.Put("/{id:^[0-9]+}", s.HandleTransactionEdit)
 
 	return r
 }
 
-func (s *Server) initMonthsRouter() chi.Router {
-	r := chi.NewRouter()
-	r.Get("/", s.HandleGetMonths)
-	r.Get("/{id:^[0-9]+}", s.HandleGetMonthByID)
-	r.Post("/", s.HandleCreateMonth)
-	r.Put("/{id:^[0-9]+}", s.HandleUpdateMonth)
-	r.Get("/{id:^[0-9]+}/transactions", s.HandleGetTransactionsByMonthID)
+// func (s *Server) initAPIRouter() chi.Router {
+// 	apiRouter := chi.NewRouter()
 
-	return r
-}
+// 	apiRouter.Mount("/transactions", s.initTransactionsAPIRouter())
+// 	apiRouter.Mount("/months", s.initMonthsAPIRouter())
+
+// 	return apiRouter
+// }
+
+// func (s *Server) initTransactionsAPIRouter() chi.Router {
+// 	r := chi.NewRouter()
+// 	r.Get("/", s.HandleGetTransactions)
+// 	r.Get("/{id:^[0-9]+}", s.HandleGetTransactionByID)
+// 	r.Post("/", s.HandleCreateTransaction)
+// 	r.Put("/{id:^[0-9]+}", s.HandleUpdateTransaction)
+// 	r.Delete("/{id:^[0-9]+}", s.HandleDeleteTransaction)
+
+// 	return r
+// }
+
+// func (s *Server) initMonthsAPIRouter() chi.Router {
+// 	r := chi.NewRouter()
+// 	r.Get("/", s.HandleGetMonths)
+// 	r.Get("/{id:^[0-9]+}", s.HandleGetMonthByID)
+// 	r.Post("/", s.HandleCreateMonth)
+// 	r.Put("/{id:^[0-9]+}", s.HandleUpdateMonth)
+// 	r.Get("/{id:^[0-9]+}/transactions", s.HandleGetTransactionsByMonthID)
+
+// 	return r
+// }

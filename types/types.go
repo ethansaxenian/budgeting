@@ -27,26 +27,39 @@ const (
 	INTREST        Category = "intrest"
 )
 
-type Transaction struct {
-	ID          int             `json:"id"`
+var ALL_CATEGORIES = []Category{
+	FOOD,
+	GIFTS,
+	MEDICAL,
+	HOME,
+	TRANSPORTATION,
+	PERSONAL,
+	SAVINGS,
+	UTILITIES,
+	TRAVEL,
+	OTHER,
+	PAYCHECK,
+	BONUS,
+	INTREST,
+}
+
+type TransactionUpdate struct {
 	Description string          `json:"description"`
 	Amount      float64         `json:"amount"`
 	Date        time.Time       `json:"date"`
 	Category    Category        `json:"category"`
 	Type        TransactionType `json:"type"`
-	MonthID     int             `json:"month_id"`
 }
 
 type TransactionCreate struct {
-	Description string          `json:"description"`
-	Amount      float64         `json:"amount"`
-	Date        string          `json:"date"`
-	Category    Category        `json:"category"`
-	Type        TransactionType `json:"type"`
-	MonthID     int             `json:"month_id"`
+	TransactionUpdate
+	MonthID int `json:"month_id"`
 }
 
-type TransactionUpdate TransactionCreate
+type Transaction struct {
+	TransactionUpdate
+	ID int `json:"id"`
+}
 
 type Month struct {
 	ID              int     `json:"id"`

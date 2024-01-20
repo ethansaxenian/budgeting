@@ -17,6 +17,10 @@ func FormatDate(date time.Time) string {
 	return date.Format("2006-01-02")
 }
 
+func ParseDate(date string) (time.Time, error) {
+	return time.Parse("2006-01-02", date)
+}
+
 func FormatAmount(amount float64) string {
 	rounded := fmt.Sprintf("%.2f", amount)
 
