@@ -33,3 +33,4 @@ dist-ssr
 .env
 cmd/main
 assets/dist/*
+*_templ.go
