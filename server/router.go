@@ -1,8 +1,7 @@
 package server
 
 import (
-	"net/http"
-
+	"github.com/ethansaxenian/budgeting/assets"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -16,9 +15,9 @@ func (s *Server) InitRouter() chi.Router {
 	r.Use(cors.Handler(cors.Options{AllowedOrigins: []string{"*"}}))
 	r.Use(middleware.RedirectSlashes)
 
-	r.Get("/", func(w http.ResponseWriter, _ *http.Request) {
-		w.Write([]byte("<h1>Hello, world!</h1>"))
-	})
+	assets.Mount(r)
+
+	r.Get("/transactions", s.HandleTransactionsShow)
 
 	apiRouter := s.initApiRouter()
 

@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 type TransactionType string
 
 const (
@@ -29,7 +31,7 @@ type Transaction struct {
 	ID          int             `json:"id"`
 	Description string          `json:"description"`
 	Amount      float64         `json:"amount"`
-	Date        string          `json:"date"`
+	Date        time.Time       `json:"date"`
 	Category    Category        `json:"category"`
 	Type        TransactionType `json:"type"`
 	MonthID     int             `json:"month_id"`

@@ -31,7 +31,7 @@ func NewServer() (*http.Server, error) {
 	}
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
+		Addr:    fmt.Sprintf("localhost:%d", port),
 		Handler: s.InitRouter(),
 	}
 

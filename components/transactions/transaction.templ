@@ -1,0 +1,72 @@
+package transactions
+
+import (
+	"fmt"
+	"github.com/ethansaxenian/budgeting/types"
+	"github.com/ethansaxenian/budgeting/util"
+	"time"
+	"github.com/ethansaxenian/budgeting/components/layout"
+)
+
+templ TransactionTable(transactions []types.Transaction) {
+	@layout.Base() {
+		<table class="w-full text-left border-collapse">
+			<thead>
+				<tr class="border-b">
+					<th scope="col" class="px-6 py-4">Date</th>
+					<th scope="col" class="px-6 py-4">Amount</th>
+					<th scope="col" class="px-6 py-4">Description</th>
+					<th scope="col" class="px-6 py-4">Category</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, t := range transactions {
+					@transactionRow(t)
+				}
+			</tbody>
+		</table>
+	}
+}
+
+templ transactionRow(t types.Transaction) {
+	<tr class="border-b">
+		<td class="px-6 py-2">
+			@date(t.Date)
+		</td>
+		<td class="px-6 py-2">
+			@amount(t.Amount)
+		</td>
+		<td class="px-6 py-2">
+			@desc(t.Description)
+		</td>
+		<td class="px-6 py-2">
+			@category(t.Category)
+		</td>
+	</tr>
+}
+
+templ date(d time.Time) {
+	<input type="date" class="py-2" value={ util.FormatDate(d) }/>
+}
+
+templ amount(a float64) {
+	<span>
+		<span class="-mr-1">$</span>
+		<input
+			class="py-2"
+			type="number"
+			min="0"
+			step=".01"
+			placeholder="00.00"
+			value={ util.FormatAmount(a) }
+		/>
+	</span>
+}
+
+templ desc(d string) {
+	<input class="py-2" placeholder="description" value={ d }/>
+}
+
+templ category(c types.Category) {
+	<input class="py-2" value={ util.Capitalize(fmt.Sprintf("%s", c)) }/>
+}

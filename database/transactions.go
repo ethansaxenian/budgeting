@@ -16,9 +16,9 @@ func (db *DB) GetTransactions() ([]types.Transaction, error) {
 		tr := types.Transaction{}
 		if err = rows.Scan(
 			&tr.ID,
-			&tr.Description,
-			&tr.Amount,
 			&tr.Date,
+			&tr.Amount,
+			&tr.Description,
 			&tr.Category,
 			&tr.Type,
 			&tr.MonthID,
@@ -37,9 +37,9 @@ func (db *DB) GetTransactionByID(id int) (types.Transaction, error) {
 	tr := types.Transaction{}
 	if err := row.Scan(
 		&tr.ID,
-		&tr.Description,
-		&tr.Amount,
 		&tr.Date,
+		&tr.Amount,
+		&tr.Description,
 		&tr.Category,
 		&tr.Type,
 		&tr.MonthID,

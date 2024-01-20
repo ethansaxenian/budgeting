@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/a-h/templ v0.2.513 // indirect
 	github.com/go-chi/cors v1.2.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect

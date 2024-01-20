@@ -1,15 +1,26 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/ethansaxenian/budgeting/components/transactions"
 	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
 )
+
+func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) {
+	allTransactions, err := s.db.GetTransactions()
+	if err != nil {
+		http.Error(w, "Error retrieving transactions", http.StatusInternalServerError)
+		return
+	}
+	transactions.TransactionTable(allTransactions).Render(context.Background(), w)
+}
 
 func (s *Server) HandleGetTransactions(w http.ResponseWriter, _ *http.Request) {
 	transactions, err := s.db.GetTransactions()
