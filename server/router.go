@@ -38,22 +38,22 @@ func (s *Server) initApiRouter() chi.Router {
 
 func (s *Server) initTransactionsRouter() chi.Router {
 	r := chi.NewRouter()
-	r.Get("/", s.GetTransactionsHandler)
-	r.Get("/{id:^[0-9]+}", s.GetTransactionByIDHandler)
-	r.Post("/", s.CreateTransactionHandler)
-	r.Put("/{id:^[0-9]+}", s.UpdateTransactionHandler)
-	r.Delete("/{id:^[0-9]+}", s.DeleteTransactionHandler)
+	r.Get("/", s.HandleGetTransactions)
+	r.Get("/{id:^[0-9]+}", s.HandleGetTransactionByID)
+	r.Post("/", s.HandleCreateTransaction)
+	r.Put("/{id:^[0-9]+}", s.HandleUpdateTransaction)
+	r.Delete("/{id:^[0-9]+}", s.HandleDeleteTransaction)
 
 	return r
 }
 
 func (s *Server) initMonthsRouter() chi.Router {
 	r := chi.NewRouter()
-	r.Get("/", s.GetMonthsHandler)
-	r.Get("/{id:^[0-9]+}", s.GetMonthByIDHandler)
-	r.Post("/", s.CreateMonthHandler)
-	r.Put("/{id:^[0-9]+}", s.UpdateMonthHandler)
-	r.Get("/{id:^[0-9]+}/transactions", s.GetTransactionsByMonthIDHandler)
+	r.Get("/", s.HandleGetMonths)
+	r.Get("/{id:^[0-9]+}", s.HandleGetMonthByID)
+	r.Post("/", s.HandleCreateMonth)
+	r.Put("/{id:^[0-9]+}", s.HandleUpdateMonth)
+	r.Get("/{id:^[0-9]+}/transactions", s.HandleGetTransactionsByMonthID)
 
 	return r
 }

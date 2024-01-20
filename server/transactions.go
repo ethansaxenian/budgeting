@@ -11,17 +11,18 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (s *Server) GetTransactionsHandler(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) HandleGetTransactions(w http.ResponseWriter, _ *http.Request) {
 	transactions, err := s.db.GetTransactions()
 	if err != nil {
 		http.Error(w, "Error retrieving transactions", http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(transactions)
 }
 
-func (s *Server) GetTransactionByIDHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleGetTransactionByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "Invalid transaction ID", http.StatusBadRequest)
@@ -38,7 +39,7 @@ func (s *Server) GetTransactionByIDHandler(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(transaction)
 }
 
-func (s *Server) CreateTransactionHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleCreateTransaction(w http.ResponseWriter, r *http.Request) {
 	var tr types.TransactionCreate
 	if err := json.NewDecoder(r.Body).Decode(&tr); err != nil {
 		http.Error(w, "Invalid transaction data", http.StatusBadRequest)
@@ -59,7 +60,7 @@ func (s *Server) CreateTransactionHandler(w http.ResponseWriter, r *http.Request
 	w.Write([]byte(strconv.Itoa(id)))
 }
 
-func (s *Server) UpdateTransactionHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleUpdateTransaction(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "Invalid transaction ID", http.StatusBadRequest)
@@ -82,7 +83,7 @@ func (s *Server) UpdateTransactionHandler(w http.ResponseWriter, r *http.Request
 	w.Write([]byte(strconv.Itoa(rowCount)))
 }
 
-func (s *Server) DeleteTransactionHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleDeleteTransaction(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Transaction with id %d not found", id), http.StatusBadRequest)
@@ -99,7 +100,7 @@ func (s *Server) DeleteTransactionHandler(w http.ResponseWriter, r *http.Request
 	w.Write([]byte(strconv.Itoa(rowCount)))
 }
 
-func (s *Server) GetTransactionsByMonthIDHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleGetTransactionsByMonthID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Month with ID %d not found", id), http.StatusBadRequest)
