@@ -31,6 +31,6 @@ dist-ssr
 *.sw?
 
 .env
-cmd/main
 assets/dist/*
 *_templ.go
+bin
