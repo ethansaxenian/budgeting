@@ -1,6 +1,12 @@
 package layout
 
-templ Base() {
+import (
+	"github.com/ethansaxenian/budgeting/types"
+	"strconv"
+	"github.com/ethansaxenian/budgeting/util"
+)
+
+templ Base(allMonths []types.Month) {
 	<html lang="en">
 		<head>
 			<meta charset="UTF-8"/>
@@ -9,7 +15,28 @@ templ Base() {
 			<script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
 		</head>
 		<body>
-			{ children... }
+			@monthSelector(allMonths, util.GetCurrMonthCtx(ctx))
+			<span id="month-page"></span>
 		</body>
 	</html>
+}
+
+templ monthSelector(allMonths []types.Month, currMonth string) {
+	<select
+		id="month-selector"
+		hx-target="#month-page"
+		hx-swap="innerHTML"
+		hx-get="/months"
+		hx-on="htmx:configRequest: event.detail.path = /months/ + this.value"
+		hx-trigger="change, load"
+	>
+		for _, month := range allMonths {
+			<option
+				selected?={ month.FormatStr() == currMonth }
+				value={ strconv.Itoa(month.ID) }
+			>
+				{ month.Month.String() } { strconv.Itoa(month.Year) }
+			</option>
+		}
+	</select>
 }

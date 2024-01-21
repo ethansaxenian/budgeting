@@ -1,7 +1,13 @@
 package server
 
 import (
+	"context"
+	"net/http"
+	"sort"
+
 	"github.com/ethansaxenian/budgeting/assets"
+	"github.com/ethansaxenian/budgeting/components/layout"
+	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -17,9 +23,37 @@ func (s *Server) InitRouter() chi.Router {
 
 	assets.Mount(r)
 
+	r.Get("/", s.baseHandler)
 	r.Mount("/transactions", s.initTransactionsRouter())
+	r.Mount("/months", s.initMonthsRouter())
 
-	// r.Mount("/api", s.initAPIRouter())
+	return r
+}
+
+func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
+	allMonths, err := s.db.GetMonths()
+	if err != nil {
+		http.Error(w, "Error retrieving months", http.StatusInternalServerError)
+		return
+	}
+
+	currMonth, err := s.db.GetMonthByMonthAndYear(util.GetCurrMonthCtx(r.Context()))
+	if err != nil {
+		http.Error(w, "Error retrieving current month", http.StatusInternalServerError)
+		return
+	}
+
+	sort.Slice(allMonths, func(i, j int) bool {
+		return allMonths[i].Year > allMonths[j].Year || (allMonths[i].Year == allMonths[j].Year && allMonths[i].Month > allMonths[j].Month)
+	})
+
+	ctx := context.WithValue(context.Background(), util.ContextKeyCurrMonth, currMonth)
+	layout.Base(allMonths).Render(ctx, w)
+}
+
+func (s *Server) initMonthsRouter() chi.Router {
+	r := chi.NewRouter()
+	r.Get("/{id:^[0-9]+}", s.HandleMonthShow)
 
 	return r
 }
@@ -31,34 +65,3 @@ func (s *Server) initTransactionsRouter() chi.Router {
 
 	return r
 }
-
-// func (s *Server) initAPIRouter() chi.Router {
-// 	apiRouter := chi.NewRouter()
-
-// 	apiRouter.Mount("/transactions", s.initTransactionsAPIRouter())
-// 	apiRouter.Mount("/months", s.initMonthsAPIRouter())
-
-// 	return apiRouter
-// }
-
-// func (s *Server) initTransactionsAPIRouter() chi.Router {
-// 	r := chi.NewRouter()
-// 	r.Get("/", s.HandleGetTransactions)
-// 	r.Get("/{id:^[0-9]+}", s.HandleGetTransactionByID)
-// 	r.Post("/", s.HandleCreateTransaction)
-// 	r.Put("/{id:^[0-9]+}", s.HandleUpdateTransaction)
-// 	r.Delete("/{id:^[0-9]+}", s.HandleDeleteTransaction)
-
-// 	return r
-// }
-
-// func (s *Server) initMonthsAPIRouter() chi.Router {
-// 	r := chi.NewRouter()
-// 	r.Get("/", s.HandleGetMonths)
-// 	r.Get("/{id:^[0-9]+}", s.HandleGetMonthByID)
-// 	r.Post("/", s.HandleCreateMonth)
-// 	r.Put("/{id:^[0-9]+}", s.HandleUpdateMonth)
-// 	r.Get("/{id:^[0-9]+}/transactions", s.HandleGetTransactionsByMonthID)
-
-// 	return r
-// }

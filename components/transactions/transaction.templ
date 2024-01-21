@@ -4,32 +4,48 @@ import (
 	"fmt"
 	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
-	"github.com/ethansaxenian/budgeting/components/layout"
 )
 
 templ TransactionTable(transactions []types.Transaction) {
-	@layout.Base() {
-		<table
-			class="w-full text-left border-collapse"
-			hx-get="/transactions"
-			hx-swap="outerHTML"
-			hx-trigger="newDate from:#transaction-date"
-		>
-			<thead>
-				<tr class="border-b">
-					<th scope="col" class="px-6 py-4">Date</th>
-					<th scope="col" class="px-6 py-4">Amount</th>
-					<th scope="col" class="px-6 py-4">Description</th>
-					<th scope="col" class="px-6 py-4">Category</th>
-				</tr>
-			</thead>
-			<tbody>
-				for _, t := range transactions {
-					@TransactionRow(t)
-				}
-			</tbody>
-		</table>
-	}
+	<table
+		id="transaction-table"
+		class="w-full text-left border-collapse"
+		hx-get="/transactions"
+		hx-swap="outerHTML"
+		hx-trigger="newDate from:#transaction-date"
+	>
+		<thead>
+			<tr class="border-b">
+				<th
+					scope="col"
+					class="px-6 py-4"
+					hx-trigger="click"
+					hx-get={ fmt.Sprintf("/transactions?sort=date%s&month=%s", util.GetNextSortCtx(ctx), util.GetCurrMonthCtx(ctx)) }
+					hx-target="#transaction-table"
+					hx-swap="outerHTML"
+				>
+					Date
+				</th>
+				<th
+					scope="col"
+					class="px-6 py-4"
+					hx-trigger="click"
+					hx-get={ fmt.Sprintf("/transactions?sort=amount%s&month=%s", util.GetNextSortCtx(ctx), util.GetCurrMonthCtx(ctx)) }
+					hx-target="#transaction-table"
+					hx-swap="outerHTML"
+				>
+					Amount
+				</th>
+				<th scope="col" class="px-6 py-4">Description</th>
+				<th scope="col" class="px-6 py-4">Category</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, t := range transactions {
+				@TransactionRow(t)
+			}
+		</tbody>
+	</table>
 }
 
 templ TransactionRow(t types.Transaction) {

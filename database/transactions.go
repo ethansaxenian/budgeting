@@ -104,30 +104,3 @@ func (db *DB) DeleteTransaction(id int) (int, error) {
 
 	return int(rowCount), nil
 }
-
-func (db *DB) GetTransactionsByMonthID(monthID int) ([]types.Transaction, error) {
-	rows, err := db.db.Query("SELECT * FROM transactions WHERE month_id=$1", monthID)
-	if err != nil {
-		return nil, err
-	}
-
-	var transactions []types.Transaction
-
-	for rows.Next() {
-		tr := types.Transaction{}
-		if err = rows.Scan(
-			&tr.ID,
-			&tr.Description,
-			&tr.Amount,
-			&tr.Date,
-			&tr.Category,
-			&tr.Type,
-		); err != nil {
-			return nil, err
-		}
-		transactions = append(transactions, tr)
-	}
-
-	return transactions, nil
-
-}

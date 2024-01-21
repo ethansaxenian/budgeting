@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type TransactionType string
 
@@ -43,7 +46,7 @@ var ALL_CATEGORIES = []Category{
 	INTREST,
 }
 
-type TransactionUpdate struct {
+type TransactionCreate struct {
 	Description string          `json:"description"`
 	Amount      float64         `json:"amount"`
 	Date        time.Time       `json:"date"`
@@ -51,25 +54,24 @@ type TransactionUpdate struct {
 	Type        TransactionType `json:"type"`
 }
 
-type TransactionCreate struct {
-	TransactionUpdate
-	MonthID int `json:"month_id"`
-}
+type TransactionUpdate TransactionCreate
 
 type Transaction struct {
 	TransactionUpdate
 	ID int `json:"id"`
 }
 
-type Month struct {
-	ID              int     `json:"id"`
-	MonthID         string  `json:"month_id"`
-	StartingBalance float64 `json:"starting_balance"`
-}
-
 type MonthCreate struct {
-	MonthID         string  `json:"month_id"`
 	StartingBalance float64 `json:"starting_balance"`
+	Month           time.Month
+	Year            int
 }
 
-type MonthUpdate MonthCreate
+type Month struct {
+	ID int `json:"id"`
+	MonthCreate
+}
+
+func (m Month) FormatStr() string {
+	return fmt.Sprintf("%d-%02d", m.Year, m.Month)
+}

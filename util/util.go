@@ -7,18 +7,24 @@ import (
 	"unicode"
 )
 
+func GetCurrentMonth() string {
+	d := time.Now()
+
+	return d.Format("2006-01")
+}
+
 func GetCurrentDate() string {
 	d := time.Now()
 
-	return d.Format("2006-01-02")
+	return d.Format(time.DateOnly)
 }
 
 func FormatDate(date time.Time) string {
-	return date.Format("2006-01-02")
+	return date.Format(time.DateOnly)
 }
 
 func ParseDate(date string) (time.Time, error) {
-	return time.Parse("2006-01-02", date)
+	return time.Parse(time.DateOnly, date)
 }
 
 func FormatAmount(amount float64) string {

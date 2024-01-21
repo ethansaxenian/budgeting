@@ -1,0 +1,16 @@
+package months
+
+import (
+	"github.com/ethansaxenian/budgeting/types"
+	"github.com/ethansaxenian/budgeting/util"
+	"fmt"
+)
+
+templ MonthPage(month types.Month, monthTransactions []types.Transaction) {
+	<span
+		hx-get={ fmt.Sprintf("/transactions?month=%s", util.GetCurrMonthCtx(ctx)) }
+		hx-target="this"
+		hx-swap="outerHTML"
+		hx-trigger="load"
+	></span>
+}

@@ -1,12 +1,15 @@
 package server
 
 import (
+	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/ethansaxenian/budgeting/database"
+	"github.com/ethansaxenian/budgeting/util"
 )
 
 type Server struct {
@@ -33,6 +36,12 @@ func NewServer() (*http.Server, error) {
 	server := &http.Server{
 		Addr:    fmt.Sprintf("localhost:%d", port),
 		Handler: s.InitRouter(),
+		BaseContext: func(_ net.Listener) context.Context {
+			ctx := context.Background()
+			ctx = util.WithCurrMonthCtx(ctx, util.GetCurrMonthCtx(ctx))
+			ctx = util.WithNextSortCtx(ctx, util.GetNextSortCtx(ctx))
+			return ctx
+		},
 	}
 
 	return server, nil

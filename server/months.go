@@ -1,27 +1,17 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/ethansaxenian/budgeting/components/months"
 	"github.com/ethansaxenian/budgeting/types"
+	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
 )
 
-func (s *Server) HandleGetMonths(w http.ResponseWriter, _ *http.Request) {
-	months, err := s.db.GetMonths()
-	if err != nil {
-		http.Error(w, "Error retrieving months", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(months)
-}
-
-func (s *Server) HandleGetMonthByID(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleMonthShow(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "Invalid month ID", http.StatusBadRequest)
@@ -34,46 +24,19 @@ func (s *Server) HandleGetMonthByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(month)
-}
-
-func (s *Server) HandleCreateMonth(w http.ResponseWriter, r *http.Request) {
-	var month types.MonthCreate
-	if err := json.NewDecoder(r.Body).Decode(&month); err != nil {
-		http.Error(w, "Invalid month data", http.StatusBadRequest)
-		return
-	}
-
-	rowCount, err := s.db.CreateMonth(month)
+	allTransactions, err := s.db.GetTransactions()
 	if err != nil {
-		http.Error(w, "Error creating month", http.StatusInternalServerError)
+		http.Error(w, "Error retrieving transactions", http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(strconv.Itoa(rowCount)))
-}
-
-func (s *Server) HandleUpdateMonth(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		http.Error(w, "Invalid month ID", http.StatusBadRequest)
-		return
+	monthTransactions := []types.Transaction{}
+	for _, tr := range allTransactions {
+		if tr.Date.Month() == month.Month && tr.Date.Year() == month.Year {
+			monthTransactions = append(monthTransactions, tr)
+		}
 	}
 
-	var month types.MonthUpdate
-	if err := json.NewDecoder(r.Body).Decode(&month); err != nil {
-		http.Error(w, "Invalid month data", http.StatusBadRequest)
-		return
-	}
-
-	rowCount, err := s.db.UpdateMonth(id, month)
-	if err != nil {
-		http.Error(w, "Error updating month", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(strconv.Itoa(rowCount)))
+	ctx := util.WithCurrMonthCtx(r.Context(), month.FormatStr())
+	months.MonthPage(month, monthTransactions).Render(ctx, w)
 }
