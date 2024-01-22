@@ -7,10 +7,18 @@ import (
 )
 
 templ MonthPage(month types.Month, monthTransactions []types.Transaction) {
-	<span
-		hx-get={ fmt.Sprintf("/transactions?month=%s", util.GetCurrMonthCtx(ctx)) }
-		hx-target="this"
-		hx-swap="outerHTML"
-		hx-trigger="load"
-	></span>
+	<div class="flex flex-row justify-around gap-x-4">
+		<span
+			hx-get={ fmt.Sprintf("/transactions?month=%s&type=expense", util.GetCurrMonthCtx(ctx)) }
+			hx-target="this"
+			hx-swap="outerHTML"
+			hx-trigger="load"
+		></span>
+		<span
+			hx-get={ fmt.Sprintf("/transactions?month=%s&type=income", util.GetCurrMonthCtx(ctx)) }
+			hx-target="this"
+			hx-swap="outerHTML"
+			hx-trigger="load"
+		></span>
+	</div>
 }

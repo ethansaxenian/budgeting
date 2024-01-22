@@ -9,7 +9,7 @@ import (
 templ TransactionTable(transactions []types.Transaction) {
 	<table
 		id="transaction-table"
-		class="w-full text-left border-collapse"
+		class="text-left border-collapse h-0"
 		hx-get="/transactions"
 		hx-swap="outerHTML"
 		hx-trigger="newDate from:#transaction-date"
@@ -50,20 +50,24 @@ templ TransactionTable(transactions []types.Transaction) {
 
 templ TransactionRow(t types.Transaction) {
 	<tr class="border-b" id="transaction-row" hx-target="this" hx-swap="outerHTML">
-		<td class="px-6 py-2">
+		<td class="px-4 py-2">
 			@date(t)
 		</td>
-		<td class="px-6 py-2">
+		<td class="px-4 py-2">
 			@amount(t)
 		</td>
-		<td class="px-6 py-2">
+		<td class="px-4 py-2">
 			@desc(t)
 		</td>
-		<td class="px-6 py-2">
+		<td class="px-4 py-2">
 			@category(t)
 		</td>
-		<td class="px-6 py-2">
-			<button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+		<td class="px-4 py-2">
+			<button
+				class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+				hx-target="closest tr"
+				hx-delete={ fmt.Sprintf("/transactions/%d", t.ID) }
+			>
 				X
 			</button>
 		</td>
@@ -75,7 +79,7 @@ templ date(t types.Transaction) {
 		id="transaction-date"
 		name="date"
 		type="date"
-		class="py-2"
+		class="py-2 text-sm w-24"
 		value={ util.FormatDate(t.Date) }
 		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
 		hx-include="closest #transaction-row"
@@ -84,10 +88,10 @@ templ date(t types.Transaction) {
 
 templ amount(t types.Transaction) {
 	<span class="flex flex-nowrap">
-		<span class="py-2">$</span>
+		<span class="py-2 text-sm">$</span>
 		<input
 			name="amount"
-			class="py-2"
+			class="py-2 text-sm w-20"
 			type="number"
 			min="0"
 			step=".01"
@@ -102,7 +106,7 @@ templ amount(t types.Transaction) {
 templ desc(t types.Transaction) {
 	<input
 		name="description"
-		class="py-2"
+		class="py-2 text-sm"
 		placeholder="description"
 		value={ t.Description }
 		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
@@ -113,7 +117,7 @@ templ desc(t types.Transaction) {
 templ category(t types.Transaction) {
 	<select
 		name="category"
-		class="py-2"
+		class="py-2 text-sm"
 		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
 		hx-include="closest #transaction-row"
 	>

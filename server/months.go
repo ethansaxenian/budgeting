@@ -38,5 +38,6 @@ func (s *Server) HandleMonthShow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := util.WithCurrMonthCtx(r.Context(), month.FormatStr())
+	w.WriteHeader(http.StatusOK)
 	months.MonthPage(month, monthTransactions).Render(ctx, w)
 }

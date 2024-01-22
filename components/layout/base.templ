@@ -22,21 +22,24 @@ templ Base(allMonths []types.Month) {
 }
 
 templ monthSelector(allMonths []types.Month, currMonth string) {
-	<select
-		id="month-selector"
-		hx-target="#month-page"
-		hx-swap="innerHTML"
-		hx-get="/months"
-		hx-on="htmx:configRequest: event.detail.path = /months/ + this.value"
-		hx-trigger="change, load"
-	>
-		for _, month := range allMonths {
-			<option
-				selected?={ month.FormatStr() == currMonth }
-				value={ strconv.Itoa(month.ID) }
-			>
-				{ month.Month.String() } { strconv.Itoa(month.Year) }
-			</option>
-		}
-	</select>
+	<div class="flex flex-row w-full justify-center">
+		<select
+			id="month-selector"
+			class="rounded-md m-2 p-2"
+			hx-target="#month-page"
+			hx-swap="innerHTML"
+			hx-get="/months"
+			hx-on="htmx:configRequest: event.detail.path = /months/ + this.value"
+			hx-trigger="change, load"
+		>
+			for _, month := range allMonths {
+				<option
+					selected?={ month.FormatStr() == currMonth }
+					value={ strconv.Itoa(month.ID) }
+				>
+					{ month.Month.String() } { strconv.Itoa(month.Year) }
+				</option>
+			}
+		</select>
+	</div>
 }

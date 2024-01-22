@@ -53,10 +53,12 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 	}
 
 	month := r.URL.Query().Get("month")
-	monthTransactions := []types.Transaction{}
+	transactionType := r.URL.Query().Get("type")
+
+	filteredTransactions := []types.Transaction{}
 	for _, tr := range allTransactions {
-		if tr.Date.Format("2006-01") == month {
-			monthTransactions = append(monthTransactions, tr)
+		if (util.GetDateMonth(tr.Date) == month || month == "") && (string(tr.Type) == transactionType || transactionType == "") {
+			filteredTransactions = append(filteredTransactions, tr)
 		}
 	}
 
@@ -65,7 +67,7 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 		sortParam = "date" + util.GetNextSortCtx(r.Context())
 	}
 
-	sortTransactions(monthTransactions, sortParam)
+	sortTransactions(filteredTransactions, sortParam)
 
 	var dir string
 	if strings.HasSuffix(sortParam, util.ContextValueSortDirDesc) {
@@ -76,7 +78,8 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 	ctx := util.WithNextSortCtx(r.Context(), dir)
 	ctx = util.WithCurrMonthCtx(ctx, month)
 
-	transactions.TransactionTable(monthTransactions).Render(ctx, w)
+	w.WriteHeader(http.StatusOK)
+	transactions.TransactionTable(filteredTransactions).Render(ctx, w)
 }
 
 func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
@@ -118,5 +121,22 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("HX-Trigger", "newDate")
+	w.WriteHeader(http.StatusOK)
 	transactions.TransactionRow(t).Render(context.Background(), w)
+}
+
+func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid transaction ID", http.StatusBadRequest)
+		return
+	}
+
+	_, err = s.db.DeleteTransaction(id)
+	if err != nil {
+		http.Error(w, "Error deleting transaction", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

@@ -13,6 +13,10 @@ func GetCurrentMonth() string {
 	return d.Format("2006-01")
 }
 
+func GetDateMonth(date time.Time) string {
+	return date.Format("2006-01")
+}
+
 func GetCurrentDate() string {
 	d := time.Now()
 
