@@ -61,6 +61,7 @@ func (s *Server) initMonthsRouter() chi.Router {
 func (s *Server) initTransactionsRouter() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", s.HandleTransactionsShow)
+	r.Post("/", s.HandleTransactionAdd)
 	r.Put("/{id:^[0-9]+}", s.HandleTransactionEdit)
 	r.Delete("/{id:^[0-9]+}", s.HandleTransactionDelete)
 

@@ -34,7 +34,15 @@ func ParseDate(date string) (time.Time, error) {
 func FormatAmount(amount float64) string {
 	rounded := fmt.Sprintf("%.2f", amount)
 
-	return strings.TrimRight(rounded, ".0")
+	if strings.HasSuffix(rounded, ".00") {
+		return strings.TrimSuffix(rounded, ".00")
+	}
+
+	if strings.HasSuffix(rounded, ".0") {
+		return strings.TrimSuffix(rounded, ".0")
+	}
+
+	return rounded
 }
 
 func Capitalize(str string) string {

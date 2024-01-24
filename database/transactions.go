@@ -50,8 +50,8 @@ func (db *DB) GetTransactionByID(id int) (types.Transaction, error) {
 	return tr, nil
 }
 
-func (db *DB) CreateTransaction(tr types.TransactionCreate) (int, error) {
-	res, err := db.db.Exec("INSERT INTO transactions (description, amount, date, category, type) VALUES ($1, $2, $3, $4, $5, $6)",
+func (db *DB) CreateTransaction(tr types.TransactionCreate) error {
+	_, err := db.db.Exec("INSERT INTO transactions (description, amount, date, category, type) VALUES ($1, $2, $3, $4, $5)",
 		tr.Description,
 		tr.Amount,
 		tr.Date,
@@ -60,19 +60,14 @@ func (db *DB) CreateTransaction(tr types.TransactionCreate) (int, error) {
 	)
 
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(id), nil
+	return nil
 }
 
-func (db *DB) UpdateTransaction(id int, tr types.TransactionUpdate) (int, error) {
-	res, err := db.db.Exec("UPDATE transactions SET description=$1, amount=$2, date=$3, category=$4 WHERE id=$5",
+func (db *DB) UpdateTransaction(id int, tr types.TransactionUpdate) error {
+	_, err := db.db.Exec("UPDATE transactions SET description=$1, amount=$2, date=$3, category=$4 WHERE id=$5",
 		tr.Description,
 		tr.Amount,
 		tr.Date,
@@ -80,27 +75,17 @@ func (db *DB) UpdateTransaction(id int, tr types.TransactionUpdate) (int, error)
 		id,
 	)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	rowCount, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(rowCount), nil
+	return nil
 }
 
-func (db *DB) DeleteTransaction(id int) (int, error) {
-	res, err := db.db.Exec("DELETE FROM transactions WHERE id=$1", id)
+func (db *DB) DeleteTransaction(id int) error {
+	_, err := db.db.Exec("DELETE FROM transactions WHERE id=$1", id)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	rowCount, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(rowCount), nil
+	return nil
 }

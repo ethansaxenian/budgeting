@@ -10,9 +10,9 @@ templ TransactionTable(transactions []types.Transaction) {
 	<table
 		id="transaction-table"
 		class="text-left border-collapse h-0"
-		hx-get="/transactions"
+		hx-get={ fmt.Sprintf("/transactions?type=%s&month=%s", util.GetTransactionTypeCtx(ctx), util.GetCurrMonthCtx(ctx)) }
 		hx-swap="outerHTML"
-		hx-trigger="newDate from:#transaction-date"
+		hx-trigger="newDate from:#transaction-date, newTransaction from:#add-transaction-button"
 	>
 		<thead>
 			<tr class="border-b">

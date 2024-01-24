@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ethansaxenian/budgeting/components/layout"
 	"github.com/ethansaxenian/budgeting/components/transactions"
 	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
@@ -77,6 +78,7 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 	}
 	ctx := util.WithNextSortCtx(r.Context(), dir)
 	ctx = util.WithCurrMonthCtx(ctx, month)
+	ctx = util.WithTransactionTypeCtx(ctx, transactionType)
 
 	w.WriteHeader(http.StatusOK)
 	transactions.TransactionTable(filteredTransactions).Render(ctx, w)
@@ -109,8 +111,7 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 		Category:    types.Category(r.FormValue("category")),
 	}
 
-	_, err = s.db.UpdateTransaction(id, newTransaction)
-	if err != nil {
+	if err = s.db.UpdateTransaction(id, newTransaction); err != nil {
 		http.Error(w, "Error updating transaction", http.StatusInternalServerError)
 		return
 	}
@@ -132,11 +133,43 @@ func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	_, err = s.db.DeleteTransaction(id)
-	if err != nil {
+	if err = s.db.DeleteTransaction(id); err != nil {
 		http.Error(w, "Error deleting transaction", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
+	if err != nil {
+		http.Error(w, "Invalid amount", http.StatusBadRequest)
+		return
+	}
+
+	date, err := util.ParseDate(r.FormValue("date"))
+	if err != nil {
+		http.Error(w, "Invalid date", http.StatusBadRequest)
+		return
+	}
+
+	newTransaction := types.TransactionCreate{
+		Description: r.FormValue("description"),
+		Amount:      amt,
+		Date:        date,
+		Category:    types.Category(r.FormValue("category")),
+		Type:        types.TransactionType(r.FormValue("type")),
+	}
+
+	if err := s.db.CreateTransaction(newTransaction); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("HX-Trigger", "newTransaction")
+	w.WriteHeader(http.StatusOK)
+	layout.AddTransactionForm().Render(context.Background(), w)
 }

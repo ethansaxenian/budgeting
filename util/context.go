@@ -1,12 +1,17 @@
 package util
 
-import "context"
+import (
+	"context"
+
+	"github.com/ethansaxenian/budgeting/types"
+)
 
 type contextKey string
 
 const (
-	ContextKeySortDir   = contextKey("sort")
-	ContextKeyCurrMonth = contextKey("currMonth")
+	ContextKeySortDir         = contextKey("sort")
+	ContextKeyCurrMonth       = contextKey("currMonth")
+	ContextKeyTransactionType = contextKey("transactionType")
 )
 
 const (
@@ -42,4 +47,17 @@ func GetCurrMonthCtx(ctx context.Context) string {
 
 func WithCurrMonthCtx(ctx context.Context, month string) context.Context {
 	return context.WithValue(ctx, ContextKeyCurrMonth, month)
+}
+
+func GetTransactionTypeCtx(ctx context.Context) string {
+	transactionType, ok := ctx.Value(ContextKeyTransactionType).(string)
+	if !ok {
+		return string(types.INCOME)
+	}
+
+	return transactionType
+}
+
+func WithTransactionTypeCtx(ctx context.Context, transactionType string) context.Context {
+	return context.WithValue(ctx, ContextKeyTransactionType, transactionType)
 }
