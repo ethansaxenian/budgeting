@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  db:
+    env_file: .env
+    image: "postgres:latest"
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}

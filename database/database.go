@@ -14,9 +14,9 @@ type DB struct {
 }
 
 var (
-	database = os.Getenv("DB_DATABASE")
+	database = os.Getenv("DB_NAME")
 	password = os.Getenv("DB_PASSWORD")
-	username = os.Getenv("DB_USERNAME")
+	username = os.Getenv("DB_USER")
 	port     = os.Getenv("DB_PORT")
 	host     = os.Getenv("DB_HOST")
 )

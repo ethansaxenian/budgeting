@@ -23,7 +23,7 @@ build: tailwind templ
 	@go build -o ./bin/main cmd/main.go
 
 backup:
-	@pg_dump postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE} -a > "backups/backup_$(shell date --iso="seconds").sql"
+	@pg_dump postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME} -a > "backups/backup_$(shell date --iso="seconds").sql"
 
 clean:
 	@rm -rfv ./bin
