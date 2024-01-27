@@ -1,0 +1,134 @@
+package transactions
+
+import (
+	"fmt"
+	"github.com/ethansaxenian/budgeting/types"
+	"github.com/ethansaxenian/budgeting/util"
+)
+
+templ TransactionTable(transactions []types.Transaction) {
+	<table
+		id="transaction-table"
+		class="text-left border-collapse h-0"
+		hx-get={ fmt.Sprintf("/transactions?type=%s&month=%s", util.GetTransactionTypeCtx(ctx), util.GetCurrMonthCtx(ctx)) }
+		hx-swap="outerHTML"
+		hx-trigger="editTransaction from:#transaction-date, newTransaction from:#add-transaction-button"
+	>
+		<thead>
+			<tr class="border-b">
+				<th
+					scope="col"
+					class="px-6 py-4"
+					hx-trigger="click"
+					hx-get={ fmt.Sprintf("/transactions?sort=date%s&month=%s", util.GetNextSortCtx(ctx), util.GetCurrMonthCtx(ctx)) }
+					hx-target="#transaction-table"
+					hx-swap="outerHTML"
+				>
+					Date
+				</th>
+				<th
+					scope="col"
+					class="px-6 py-4"
+					hx-trigger="click"
+					hx-get={ fmt.Sprintf("/transactions?sort=amount%s&month=%s", util.GetNextSortCtx(ctx), util.GetCurrMonthCtx(ctx)) }
+					hx-target="#transaction-table"
+					hx-swap="outerHTML"
+				>
+					Amount
+				</th>
+				<th scope="col" class="px-6 py-4">Description</th>
+				<th scope="col" class="px-6 py-4">Category</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, t := range transactions {
+				@TransactionRow(t)
+			}
+		</tbody>
+	</table>
+}
+
+templ TransactionRow(t types.Transaction) {
+	<tr class="border-b" id="transaction-row" hx-target="this" hx-swap="outerHTML">
+		<td class="px-4 py-2">
+			@date(t)
+		</td>
+		<td class="px-4 py-2">
+			@amount(t)
+		</td>
+		<td class="px-4 py-2">
+			@desc(t)
+		</td>
+		<td class="px-4 py-2">
+			@category(t)
+		</td>
+		<td class="px-4 py-2">
+			<button
+				class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+				hx-target="closest tr"
+				hx-delete={ fmt.Sprintf("/transactions/%d", t.ID) }
+			>
+				X
+			</button>
+		</td>
+	</tr>
+}
+
+templ date(t types.Transaction) {
+	<input
+		id="transaction-date"
+		name="date"
+		type="date"
+		class="py-2 text-sm w-24"
+		value={ util.FormatDate(t.Date) }
+		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
+		hx-include="closest #transaction-row"
+	/>
+}
+
+templ amount(t types.Transaction) {
+	<span class="flex flex-nowrap">
+		<span class="py-2 text-sm">$</span>
+		<input
+			id="transaction-amount"
+			name="amount"
+			class="py-2 text-sm w-20"
+			type="number"
+			min="0"
+			step=".01"
+			placeholder="00.00"
+			value={ util.FormatAmount(t.Amount) }
+			hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
+			hx-include="closest #transaction-row"
+		/>
+	</span>
+}
+
+templ desc(t types.Transaction) {
+	<input
+		name="description"
+		class="py-2 text-sm"
+		placeholder="description"
+		value={ t.Description }
+		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
+		hx-include="closest #transaction-row"
+	/>
+}
+
+templ category(t types.Transaction) {
+	<select
+		name="category"
+		class="py-2 text-sm"
+		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
+		hx-include="closest #transaction-row"
+	>
+		for _, cat := range types.ALL_CATEGORIES {
+			<option
+				selected?={ t.Category == cat }
+				value={ string(cat) }
+			>
+				{ util.Capitalize(string(cat)) }
+			</option>
+		}
+	</select>
+}

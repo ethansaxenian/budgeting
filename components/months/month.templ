@@ -1,0 +1,38 @@
+package months
+
+import (
+	"github.com/ethansaxenian/budgeting/types"
+	"github.com/ethansaxenian/budgeting/util"
+	"fmt"
+)
+
+templ MonthPage(month types.Month, monthTransactions []types.Transaction) {
+	<div class="flex flex-row justify-evenly gap-x-4 mb-10">
+		<span
+			hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=expense", month.ID) }
+			hx-target="this"
+			hx-swap="outerHTML"
+			hx-trigger="load"
+		></span>
+		<span
+			hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=income", month.ID) }
+			hx-target="this"
+			hx-swap="outerHTML"
+			hx-trigger="load"
+		></span>
+	</div>
+	<div class="flex flex-row justify-around gap-x-4">
+		<span
+			hx-get={ fmt.Sprintf("/transactions?month=%s&type=expense", util.GetCurrMonthCtx(ctx)) }
+			hx-target="this"
+			hx-swap="outerHTML"
+			hx-trigger="load"
+		></span>
+		<span
+			hx-get={ fmt.Sprintf("/transactions?month=%s&type=income", util.GetCurrMonthCtx(ctx)) }
+			hx-target="this"
+			hx-swap="outerHTML"
+			hx-trigger="load"
+		></span>
+	</div>
+}

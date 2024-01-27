@@ -1,0 +1,100 @@
+package budgets
+
+import (
+	"github.com/ethansaxenian/budgeting/types"
+	"github.com/ethansaxenian/budgeting/util"
+	"fmt"
+)
+
+templ BudgetTable(items []types.BudgetItem) {
+	<table
+		class="text-left border-collapse h-0"
+		hx-get={ fmt.Sprintf("/budgets?type=%s&month_id=%d", util.GetTransactionTypeCtx(ctx), util.GetCurrMonthIDCtx(ctx)) }
+		hx-swap="outerHTML"
+		hx-trigger="editTransaction from:body, newTransaction from:#add-transaction-button"
+		hx-target="this"
+	>
+		<thead>
+			<tr class="border-b">
+				<th scope="col" class="px-6 py-4">
+					Category
+				</th>
+				<th scope="col" class="px-6 py-4">
+					Planned
+				</th>
+				<th scope="col" class="px-6 py-4">
+					Actual
+				</th>
+				<th scope="col" class="px-6 py-4">
+					Difference
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, item := range items {
+				@BudgetRow(item)
+			}
+		</tbody>
+	</table>
+}
+
+templ BudgetRow(b types.BudgetItem) {
+	<tr class="border-b">
+		<td class="px-4 py-2">
+			@category(b.Category)
+		</td>
+		<td class="px-4 py-2">
+			@planned(b)
+		</td>
+		<td class="px-4 py-2">
+			@actual(b.Actual)
+		</td>
+		if util.GetTransactionTypeCtx(ctx) == string(types.EXPENSE) {
+			<td class="px-4 py-2">
+				@difference(b.Planned - b.Actual)
+			</td>
+		} else {
+			<td class="px-4 py-2">
+				@difference(b.Actual - b.Planned)
+			</td>
+		}
+	</tr>
+}
+
+templ category(category types.Category) {
+	<span class="py-2 text-sm">{ util.Capitalize(string(category)) } </span>
+}
+
+templ planned(b types.BudgetItem) {
+	<span class="flex flex-nowrap">
+		<span class="py-2 text-sm">$</span>
+		<input
+			name="amount"
+			class="py-2 text-sm w-20"
+			type="number"
+			min="0"
+			step=".01"
+			placeholder="00.00"
+			value={ util.FormatAmount(b.Planned) }
+			hx-patch={ fmt.Sprintf("/budgets/%d", b.ID) }
+			hx-target="closest tr"
+		/>
+	</span>
+}
+
+templ actual(actual float64) {
+	<span class="py-2 text-sm">{ util.FormatAmountWithDollarSign(actual) }</span>
+}
+
+templ difference(difference float64) {
+	<span
+		class={
+			"py-2",
+			"text-sm",
+			templ.KV("text-red-500", difference < 0),
+			templ.KV("text-green-600", difference > 0),
+		}
+	>
+		{ util.FormatAmountWithDollarSign(difference) }
+	</span>
+}

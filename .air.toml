@@ -1,0 +1,14 @@
+root = "."
+
+[build]
+  bin = "bin/main"
+  cmd = "make build"
+  exclude_dir = ["_legacy", "postgres-data", "assets/dist", "bin", "backups", "migrations"]
+  exclude_regex = ["_templ\\.go"]
+  exclude_unchanged = true
+  include_ext = ["go", "templ", "html"]
+
+[misc]
+clean_on_exit = true
+
+
