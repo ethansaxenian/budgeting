@@ -91,6 +91,8 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	r.ParseForm()
+
 	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
 	if err != nil {
 		http.Error(w, "Invalid amount", http.StatusBadRequest)
@@ -103,7 +105,6 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.ParseForm()
 	newTransaction := types.TransactionUpdate{
 		Description: r.FormValue("description"),
 		Amount:      amt,

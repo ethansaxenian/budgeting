@@ -72,6 +72,7 @@ func (s *Server) initTransactionsRouter() chi.Router {
 func (s *Server) initBudgetsRouter() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", s.HandleBudgetsShow)
+	r.Patch("/{id:^[0-9]+}", s.HandleBudgetEdit)
 
 	return r
 }

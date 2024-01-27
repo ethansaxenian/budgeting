@@ -70,6 +70,8 @@ templ planned(b types.BudgetItem) {
 			step=".01"
 			placeholder="00.00"
 			value={ util.FormatAmount(b.Planned) }
+			hx-patch={ fmt.Sprintf("/budgets/%d", b.ID) }
+			hx-target="closest tr"
 		/>
 	</span>
 }

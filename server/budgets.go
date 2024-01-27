@@ -8,6 +8,7 @@ import (
 	"github.com/ethansaxenian/budgeting/components/budgets"
 	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
+	"github.com/go-chi/chi/v5"
 )
 
 func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
@@ -86,4 +87,60 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	budgets.BudgetTable(budgetItems).Render(ctx, w)
+}
+
+func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	r.ParseForm()
+
+	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err = s.db.PatchBudget(id, amt); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	budget, err := s.db.GetBudgetByID(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	allTransactions, err := s.db.GetTransactions()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	month, err := s.db.GetMonthByID(budget.MonthID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var actual float64
+	for _, t := range allTransactions {
+		if util.GetDateMonth(t.Date) == month.FormatStr() && t.Type == budget.Type && t.Category == budget.Category {
+			actual += t.Amount
+		}
+	}
+
+	budgetItem := types.BudgetItem{
+		ID:       budget.ID,
+		Category: budget.Category,
+		Planned:  budget.Amount,
+		Actual:   actual,
+	}
+
+	w.WriteHeader(http.StatusOK)
+	budgets.BudgetRow(budgetItem).Render(r.Context(), w)
 }

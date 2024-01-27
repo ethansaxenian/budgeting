@@ -26,3 +26,29 @@ func (db *DB) GetBudgets(monthID int) ([]types.Budget, error) {
 
 	return budgets, nil
 }
+
+func (db *DB) GetBudgetByID(id int) (types.Budget, error) {
+	row := db.db.QueryRow("SELECT id, month_id, category, amount, type FROM budgets WHERE id = $1", id)
+
+	b := types.Budget{}
+	if err := row.Scan(
+		&b.ID,
+		&b.MonthID,
+		&b.Category,
+		&b.Amount,
+		&b.Type,
+	); err != nil {
+		return types.Budget{}, err
+	}
+
+	return b, nil
+}
+
+func (db *DB) PatchBudget(id int, amount float64) error {
+	_, err := db.db.Exec("UPDATE budgets SET amount = $1 WHERE id = $2", amount, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
