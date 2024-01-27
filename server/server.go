@@ -23,7 +23,7 @@ func NewServer() (*http.Server, error) {
 		return nil, err
 	}
 
-	port, err := strconv.Atoi(os.Getenv("API_PORT"))
+	port, err := strconv.Atoi(os.Getenv("APP_PORT"))
 	if err != nil {
 		port = 8080
 	}
