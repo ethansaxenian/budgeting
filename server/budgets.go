@@ -142,5 +142,6 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	budgets.BudgetRow(budgetItem).Render(r.Context(), w)
+	ctx := util.WithTransactionTypeCtx(r.Context(), string(budget.Type))
+	budgets.BudgetRow(budgetItem).Render(ctx, w)
 }

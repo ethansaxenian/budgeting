@@ -49,9 +49,15 @@ templ BudgetRow(b types.BudgetItem) {
 		<td class="px-4 py-2">
 			@actual(b.Actual)
 		</td>
-		<td class="px-4 py-2">
-			@difference(b.Planned - b.Actual)
-		</td>
+		if util.GetTransactionTypeCtx(ctx) == string(types.EXPENSE) {
+			<td class="px-4 py-2">
+				@difference(b.Planned - b.Actual)
+			</td>
+		} else {
+			<td class="px-4 py-2">
+				@difference(b.Actual - b.Planned)
+			</td>
+		}
 	</tr>
 }
 
@@ -77,15 +83,18 @@ templ planned(b types.BudgetItem) {
 }
 
 templ actual(actual float64) {
-	<span class="flex flex-nowrap">
-		<span class="py-2 text-sm">$</span>
-		<span class="py-2 text-sm">{ util.FormatAmount(actual) }</span>
-	</span>
+	<span class="py-2 text-sm">{ util.FormatAmountWithDollarSign(actual) }</span>
 }
 
 templ difference(difference float64) {
-	<span class="flex flex-nowrap">
-		<span class="py-2 text-sm">$</span>
-		<span class="py-2 text-sm">{ util.FormatAmount(difference) }</span>
+	<span
+		class={
+			"py-2",
+			"text-sm",
+			templ.KV("text-red-500", difference < 0),
+			templ.KV("text-green-600", difference > 0),
+		}
+	>
+		{ util.FormatAmountWithDollarSign(difference) }
 	</span>
 }

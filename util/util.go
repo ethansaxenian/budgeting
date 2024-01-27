@@ -45,6 +45,20 @@ func FormatAmount(amount float64) string {
 	return rounded
 }
 
+func FormatAmountWithDollarSign(amount float64) string {
+	str := fmt.Sprintf("%.2f", amount)
+
+	str = strings.TrimSuffix(str, ".00")
+
+	str = strings.TrimSuffix(str, ".0")
+
+	if !strings.Contains(str, "-") {
+		return "$" + str
+	}
+
+	return "-" + "$" + strings.TrimLeft(str, "-")
+}
+
 func Capitalize(str string) string {
 	if len(str) == 0 {
 		return str
