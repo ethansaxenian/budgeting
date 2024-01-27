@@ -11,6 +11,7 @@ type contextKey string
 const (
 	ContextKeySortDir         = contextKey("sort")
 	ContextKeyCurrMonth       = contextKey("currMonth")
+	ContextKeyCurrMonthID     = contextKey("currMonthID")
 	ContextKeyTransactionType = contextKey("transactionType")
 )
 
@@ -47,6 +48,19 @@ func GetCurrMonthCtx(ctx context.Context) string {
 
 func WithCurrMonthCtx(ctx context.Context, month string) context.Context {
 	return context.WithValue(ctx, ContextKeyCurrMonth, month)
+}
+
+func GetCurrMonthIDCtx(ctx context.Context) int {
+	monthID, ok := ctx.Value(ContextKeyCurrMonthID).(int)
+	if !ok {
+		return 0
+	}
+
+	return monthID
+}
+
+func WithCurrMonthIDCtx(ctx context.Context, monthID int) context.Context {
+	return context.WithValue(ctx, ContextKeyCurrMonthID, monthID)
 }
 
 func GetTransactionTypeCtx(ctx context.Context) string {

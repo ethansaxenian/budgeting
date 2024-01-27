@@ -121,7 +121,7 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 		ID:                id,
 	}
 
-	w.Header().Set("HX-Trigger", "newDate")
+	w.Header().Set("HX-Trigger", "editTransaction")
 	w.WriteHeader(http.StatusOK)
 	transactions.TransactionRow(t).Render(context.Background(), w)
 }

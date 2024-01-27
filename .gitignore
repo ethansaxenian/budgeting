@@ -34,3 +34,4 @@ dist-ssr
 assets/dist/*
 *_templ.go
 bin
+backups

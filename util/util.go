@@ -54,3 +54,13 @@ func Capitalize(str string) string {
 	runes[0] = unicode.ToUpper(runes[0])
 	return string(runes)
 }
+
+func Includes[T comparable](arr []T, item T) bool {
+	for _, i := range arr {
+		if i == item {
+			return true
+		}
+	}
+
+	return false
+}

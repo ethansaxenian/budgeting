@@ -46,32 +46,74 @@ var ALL_CATEGORIES = []Category{
 	INTREST,
 }
 
+var EXPENSE_CATEGORIES = []Category{
+	FOOD,
+	GIFTS,
+	MEDICAL,
+	HOME,
+	TRANSPORTATION,
+	PERSONAL,
+	SAVINGS,
+	UTILITIES,
+	TRAVEL,
+	OTHER,
+}
+
+var INCOME_CATEGORIES = []Category{
+	PAYCHECK,
+	BONUS,
+	INTREST,
+	GIFTS,
+	OTHER,
+}
+
 type TransactionCreate struct {
-	Description string          `json:"description"`
-	Amount      float64         `json:"amount"`
-	Date        time.Time       `json:"date"`
-	Category    Category        `json:"category"`
-	Type        TransactionType `json:"type"`
+	Description string
+	Amount      float64
+	Date        time.Time
+	Category    Category
+	Type        TransactionType
 }
 
 type TransactionUpdate TransactionCreate
 
 type Transaction struct {
 	TransactionUpdate
-	ID int `json:"id"`
+	ID int
 }
 
 type MonthCreate struct {
-	StartingBalance float64 `json:"starting_balance"`
+	StartingBalance float64
 	Month           time.Month
 	Year            int
 }
 
 type Month struct {
-	ID int `json:"id"`
+	ID int
 	MonthCreate
 }
 
 func (m Month) FormatStr() string {
 	return fmt.Sprintf("%d-%02d", m.Year, m.Month)
+}
+
+type BudgetCreate struct {
+	MonthID  int
+	Category Category
+	Amount   float64
+	Type     TransactionType
+}
+
+type BudgetUpdate BudgetCreate
+
+type Budget struct {
+	BudgetCreate
+	ID int
+}
+
+type BudgetItem struct {
+	ID       int
+	Category Category
+	Planned  float64
+	Actual   float64
 }

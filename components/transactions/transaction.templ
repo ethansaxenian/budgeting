@@ -12,7 +12,7 @@ templ TransactionTable(transactions []types.Transaction) {
 		class="text-left border-collapse h-0"
 		hx-get={ fmt.Sprintf("/transactions?type=%s&month=%s", util.GetTransactionTypeCtx(ctx), util.GetCurrMonthCtx(ctx)) }
 		hx-swap="outerHTML"
-		hx-trigger="newDate from:#transaction-date, newTransaction from:#add-transaction-button"
+		hx-trigger="editTransaction from:#transaction-date, newTransaction from:#add-transaction-button"
 	>
 		<thead>
 			<tr class="border-b">
@@ -90,6 +90,7 @@ templ amount(t types.Transaction) {
 	<span class="flex flex-nowrap">
 		<span class="py-2 text-sm">$</span>
 		<input
+			id="transaction-amount"
 			name="amount"
 			class="py-2 text-sm w-20"
 			type="number"

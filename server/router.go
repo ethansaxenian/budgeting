@@ -26,6 +26,7 @@ func (s *Server) InitRouter() chi.Router {
 	r.Get("/", s.baseHandler)
 	r.Mount("/transactions", s.initTransactionsRouter())
 	r.Mount("/months", s.initMonthsRouter())
+	r.Mount("/budgets", s.initBudgetsRouter())
 
 	return r
 }
@@ -64,6 +65,13 @@ func (s *Server) initTransactionsRouter() chi.Router {
 	r.Post("/", s.HandleTransactionAdd)
 	r.Put("/{id:^[0-9]+}", s.HandleTransactionEdit)
 	r.Delete("/{id:^[0-9]+}", s.HandleTransactionDelete)
+
+	return r
+}
+
+func (s *Server) initBudgetsRouter() chi.Router {
+	r := chi.NewRouter()
+	r.Get("/", s.HandleBudgetsShow)
 
 	return r
 }
