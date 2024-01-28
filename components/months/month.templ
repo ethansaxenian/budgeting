@@ -7,32 +7,44 @@ import (
 )
 
 templ MonthPage(month types.Month, monthTransactions []types.Transaction) {
-	<div class="flex flex-row justify-evenly gap-x-4 mb-10">
-		<span
-			hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=expense", month.ID) }
-			hx-target="this"
-			hx-swap="outerHTML"
-			hx-trigger="load"
-		></span>
-		<span
-			hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=income", month.ID) }
-			hx-target="this"
-			hx-swap="outerHTML"
-			hx-trigger="load"
-		></span>
+	<div class="flex flex-row justify-evenly gap-x-4">
+		<div class="flex flex-col items-center py-5">
+			<div class="font-bold text-2xl pb-2">Planned Expenses</div>
+			<span
+				hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=expense", month.ID) }
+				hx-target="this"
+				hx-swap="outerHTML"
+				hx-trigger="load"
+			></span>
+		</div>
+		<div class="flex flex-col items-center py-5">
+			<div class="font-bold text-2xl pb-2">Planned Income</div>
+			<span
+				hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=income", month.ID) }
+				hx-target="this"
+				hx-swap="outerHTML"
+				hx-trigger="load"
+			></span>
+		</div>
 	</div>
 	<div class="flex flex-row justify-around gap-x-4">
-		<span
-			hx-get={ fmt.Sprintf("/transactions?month=%s&type=expense", util.GetCurrMonthCtx(ctx)) }
-			hx-target="this"
-			hx-swap="outerHTML"
-			hx-trigger="load"
-		></span>
-		<span
-			hx-get={ fmt.Sprintf("/transactions?month=%s&type=income", util.GetCurrMonthCtx(ctx)) }
-			hx-target="this"
-			hx-swap="outerHTML"
-			hx-trigger="load"
-		></span>
+		<div class="flex flex-col items-center py-5">
+			<div class="font-bold text-2xl pb-2">Expenses</div>
+			<span
+				hx-get={ fmt.Sprintf("/transactions?month=%s&type=expense", util.GetCurrMonthCtx(ctx)) }
+				hx-target="this"
+				hx-swap="outerHTML"
+				hx-trigger="load"
+			></span>
+		</div>
+		<div class="flex flex-col items-center py-5">
+			<div class="font-bold text-2xl pb-2">Income</div>
+			<span
+				hx-get={ fmt.Sprintf("/transactions?month=%s&type=income", util.GetCurrMonthCtx(ctx)) }
+				hx-target="this"
+				hx-swap="outerHTML"
+				hx-trigger="load"
+			></span>
+		</div>
 	</div>
 }

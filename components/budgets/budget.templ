@@ -6,6 +6,22 @@ import (
 	"fmt"
 )
 
+func sumPlanned(items []types.BudgetItem) float64 {
+	sum := 0.0
+	for _, item := range items {
+		sum += item.Planned
+	}
+	return sum
+}
+
+func sumActual(items []types.BudgetItem) float64 {
+	sum := 0.0
+	for _, item := range items {
+		sum += item.Actual
+	}
+	return sum
+}
+
 templ BudgetTable(items []types.BudgetItem) {
 	<table
 		class="text-left border-collapse h-0"
@@ -20,7 +36,7 @@ templ BudgetTable(items []types.BudgetItem) {
 					Category
 				</th>
 				<th scope="col" class="px-6 py-4">
-					Planned
+					Budget
 				</th>
 				<th scope="col" class="px-6 py-4">
 					Actual
@@ -35,6 +51,9 @@ templ BudgetTable(items []types.BudgetItem) {
 				@BudgetRow(item)
 			}
 		</tbody>
+		<tfoot>
+			@totalRow(items, sumPlanned(items), sumActual(items))
+		</tfoot>
 	</table>
 }
 
@@ -97,4 +116,44 @@ templ difference(difference float64) {
 	>
 		{ util.FormatAmountWithDollarSign(difference) }
 	</span>
+}
+
+templ totalRow(items []types.BudgetItem, sumPlanned, sumActual float64) {
+	<tr>
+		<td class="px-4 py-2">
+			<span class="py-2 text-sm font-bold">Total</span>
+		</td>
+		<td class="px-4 py-2">
+			<span class="py-2 text-sm">{ util.FormatAmountWithDollarSign(sumPlanned) }</span>
+		</td>
+		<td class="px-4 py-2">
+			<span class="py-2 text-sm">{ util.FormatAmountWithDollarSign(sumActual) }</span>
+		</td>
+		<td class="px-4 py-2">
+			switch util.GetTransactionTypeCtx(ctx) {
+				case string(types.EXPENSE):
+					<span
+						class={
+							"py-2",
+							"text-sm",
+							templ.KV("text-red-500", sumPlanned-sumActual < 0),
+							templ.KV("text-green-600", sumPlanned-sumActual > 0),
+						}
+					>
+						{ util.FormatAmountWithDollarSign(sumPlanned-sumActual) }
+					</span>
+				case string(types.INCOME):
+					<span
+						class={
+							"py-2",
+							"text-sm",
+							templ.KV("text-red-500", sumActual-sumPlanned < 0),
+							templ.KV("text-green-600", sumActual-sumPlanned > 0),
+						}
+					>
+						{ util.FormatAmountWithDollarSign(sumActual-sumPlanned) }
+					</span>
+			}
+		</td>
+	</tr>
 }
