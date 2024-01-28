@@ -2,11 +2,16 @@ package server
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"net/http"
 	"sort"
+	"time"
 
 	"github.com/ethansaxenian/budgeting/assets"
 	"github.com/ethansaxenian/budgeting/components/layout"
+	"github.com/ethansaxenian/budgeting/database"
+	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -31,16 +36,42 @@ func (s *Server) InitRouter() chi.Router {
 	return r
 }
 
-func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
-	allMonths, err := s.db.GetMonths()
+func createCurrMonth(db *database.DB) (types.Month, error) {
+	m := time.Now().Month()
+	y := time.Now().Year()
+
+	id, err := db.CreateMonth(types.MonthCreate{Month: m, Year: y})
 	if err != nil {
-		http.Error(w, "Error retrieving months", http.StatusInternalServerError)
-		return
+		return types.Month{}, err
 	}
 
+	if err = db.CreateNewBudgetsForMonth(id); err != nil {
+		return types.Month{}, err
+	}
+
+	currMonth := types.Month{ID: id, Month: m, Year: y}
+
+	return currMonth, nil
+}
+
+func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
 	currMonth, err := s.db.GetMonthByMonthAndYear(util.GetCurrMonthCtx(r.Context()))
 	if err != nil {
-		http.Error(w, "Error retrieving current month", http.StatusInternalServerError)
+		if !errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		currMonth, err = createCurrMonth(s.db)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	allMonths, err := s.db.GetMonths()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -48,7 +79,7 @@ func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
 		return allMonths[i].Year > allMonths[j].Year || (allMonths[i].Year == allMonths[j].Year && allMonths[i].Month > allMonths[j].Month)
 	})
 
-	ctx := context.WithValue(context.Background(), util.ContextKeyCurrMonth, currMonth)
+	ctx := util.WithCurrMonthCtx(context.Background(), currMonth.FormatStr())
 	layout.Base(allMonths).Render(ctx, w)
 }
 

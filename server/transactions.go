@@ -87,7 +87,7 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "Invalid transaction ID", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -95,31 +95,37 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 
 	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
 	if err != nil {
-		http.Error(w, "Invalid amount", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	date, err := util.ParseDate(r.FormValue("date"))
 	if err != nil {
-		http.Error(w, "Invalid date", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	desc := r.FormValue("description")
+	cat := types.Category(r.FormValue("category"))
+
 	newTransaction := types.TransactionUpdate{
-		Description: r.FormValue("description"),
+		Description: desc,
 		Amount:      amt,
 		Date:        date,
-		Category:    types.Category(r.FormValue("category")),
+		Category:    cat,
 	}
 
 	if err = s.db.UpdateTransaction(id, newTransaction); err != nil {
-		http.Error(w, "Error updating transaction", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	t := types.Transaction{
-		TransactionUpdate: newTransaction,
-		ID:                id,
+		Description: desc,
+		Amount:      amt,
+		Date:        date,
+		Category:    cat,
+		ID:          id,
 	}
 
 	w.Header().Set("HX-Trigger", "editTransaction")
@@ -130,12 +136,12 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "Invalid transaction ID", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if err = s.db.DeleteTransaction(id); err != nil {
-		http.Error(w, "Error deleting transaction", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -147,13 +153,13 @@ func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
 
 	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
 	if err != nil {
-		http.Error(w, "Invalid amount", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	date, err := util.ParseDate(r.FormValue("date"))
 	if err != nil {
-		http.Error(w, "Invalid date", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

@@ -78,19 +78,23 @@ type TransactionCreate struct {
 type TransactionUpdate TransactionCreate
 
 type Transaction struct {
-	TransactionUpdate
-	ID int
+	Description string
+	Amount      float64
+	Date        time.Time
+	Category    Category
+	Type        TransactionType
+	ID          int
 }
 
 type MonthCreate struct {
-	StartingBalance float64
-	Month           time.Month
-	Year            int
+	Month time.Month
+	Year  int
 }
 
 type Month struct {
-	ID int
-	MonthCreate
+	ID    int
+	Month time.Month
+	Year  int
 }
 
 func (m Month) FormatStr() string {
@@ -107,8 +111,11 @@ type BudgetCreate struct {
 type BudgetUpdate BudgetCreate
 
 type Budget struct {
-	BudgetCreate
-	ID int
+	MonthID  int
+	Category Category
+	Amount   float64
+	Type     TransactionType
+	ID       int
 }
 
 type BudgetItem struct {

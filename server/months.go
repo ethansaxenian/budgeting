@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -14,19 +13,19 @@ import (
 func (s *Server) HandleMonthShow(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "Invalid month ID", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	month, err := s.db.GetMonthByID(id)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Month with id %d not found", id), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	allTransactions, err := s.db.GetTransactions()
 	if err != nil {
-		http.Error(w, "Error retrieving transactions", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
