@@ -7,7 +7,7 @@ import (
 	"unicode"
 )
 
-func GetCurrentMonth() string {
+func GetCurrentMonthStr() string {
 	d := time.Now()
 
 	return d.Format("2006-01")

@@ -84,6 +84,8 @@ func (db *DB) CreateNewBudgetsForMonth(monthID int) error {
 			($1, 'bonus', 0, 'income'),
 			($1, 'interest', 0, 'expense'),
 			($1, 'interest', 0, 'income'),
+			($1, 'cashback', 0, 'income'),
+			($1, 'cashback', 0, 'expense')
 		`, monthID)
 
 	if err != nil {

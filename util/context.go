@@ -40,7 +40,7 @@ func WithNextSortCtx(ctx context.Context, dir string) context.Context {
 func GetCurrMonthCtx(ctx context.Context) string {
 	month, ok := ctx.Value(ContextKeyCurrMonth).(string)
 	if !ok {
-		return GetCurrentMonth()
+		return GetCurrentMonthStr()
 	}
 
 	return month

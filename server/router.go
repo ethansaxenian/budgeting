@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"sort"
 	"time"
@@ -40,16 +41,21 @@ func createCurrMonth(db *database.DB) (types.Month, error) {
 	m := time.Now().Month()
 	y := time.Now().Year()
 
-	id, err := db.CreateMonth(types.MonthCreate{Month: m, Year: y})
+	if err := db.CreateMonth(types.MonthCreate{Month: m, Year: y}); err != nil {
+		return types.Month{}, err
+	}
+	fmt.Println("Created new month")
+
+	currMonth, err := db.GetMonthByMonthAndYear(util.GetCurrentMonthStr())
 	if err != nil {
 		return types.Month{}, err
 	}
+	fmt.Println("Got new month")
 
-	if err = db.CreateNewBudgetsForMonth(id); err != nil {
+	if err := db.CreateNewBudgetsForMonth(currMonth.ID); err != nil {
 		return types.Month{}, err
 	}
-
-	currMonth := types.Month{ID: id, Month: m, Year: y}
+	fmt.Println("Created new budgets")
 
 	return currMonth, nil
 }

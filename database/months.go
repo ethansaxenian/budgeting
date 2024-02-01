@@ -60,16 +60,11 @@ func (db *DB) GetMonthByMonthAndYear(monthStr string) (types.Month, error) {
 	return m, nil
 }
 
-func (db *DB) CreateMonth(newMonth types.MonthCreate) (int, error) {
-	res, err := db.db.Exec("INSERT INTO months (month, year) VALUES ($1, $2)", newMonth.Month, newMonth.Year)
+func (db *DB) CreateMonth(newMonth types.MonthCreate) error {
+	_, err := db.db.Exec("INSERT INTO months (month, year) VALUES ($1, $2)", newMonth.Month, newMonth.Year)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(id), nil
+	return nil
 }

@@ -27,7 +27,8 @@ const (
 	OTHER          Category = "other"
 	PAYCHECK       Category = "paycheck"
 	BONUS          Category = "bonus"
-	INTREST        Category = "intrest"
+	INTEREST       Category = "interest"
+	CASHBACK       Category = "cashback"
 )
 
 var ALL_CATEGORIES = []Category{
@@ -43,7 +44,8 @@ var ALL_CATEGORIES = []Category{
 	OTHER,
 	PAYCHECK,
 	BONUS,
-	INTREST,
+	INTEREST,
+	CASHBACK,
 }
 
 var EXPENSE_CATEGORIES = []Category{
@@ -62,9 +64,10 @@ var EXPENSE_CATEGORIES = []Category{
 var INCOME_CATEGORIES = []Category{
 	PAYCHECK,
 	BONUS,
-	INTREST,
+	INTEREST,
 	GIFTS,
 	OTHER,
+	CASHBACK,
 }
 
 type TransactionCreate struct {
