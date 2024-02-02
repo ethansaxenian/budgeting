@@ -9,7 +9,7 @@ import (
 )
 
 type DB struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
 var (
@@ -35,5 +35,5 @@ func InitDB() (*DB, error) {
 		return nil, err
 	}
 
-	return &DB{db: db}, nil
+	return &DB{DB: db}, nil
 }

@@ -2,8 +2,8 @@ root = "."
 
 [build]
   bin = "bin/main"
-  cmd = "make build"
-  exclude_dir = ["postgres-data", "assets/dist", "bin", "backups", "migrations"]
+  cmd = "make db; make build"
+  exclude_dir = ["postgres-data", "assets/dist", "bin", "backups", "cmd/migrate/"]
   exclude_regex = ["_templ\\.go"]
   exclude_unchanged = true
   include_ext = ["go", "templ", "html"]

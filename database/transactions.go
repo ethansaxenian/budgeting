@@ -7,7 +7,7 @@ import (
 )
 
 func (db *DB) GetTransactions() ([]types.Transaction, error) {
-	rows, err := db.db.Query("SELECT id, date, amount, description, category, type FROM transactions")
+	rows, err := db.DB.Query("SELECT id, date, amount, description, category, type FROM transactions")
 	if err != nil {
 		return nil, errors.New("error retrieving transactions")
 	}
@@ -33,7 +33,7 @@ func (db *DB) GetTransactions() ([]types.Transaction, error) {
 }
 
 func (db *DB) GetTransactionByID(id int) (types.Transaction, error) {
-	row := db.db.QueryRow("SELECT * FROM transactions WHERE id=$1", id)
+	row := db.DB.QueryRow("SELECT * FROM transactions WHERE id=$1", id)
 
 	tr := types.Transaction{}
 	if err := row.Scan(
@@ -51,7 +51,7 @@ func (db *DB) GetTransactionByID(id int) (types.Transaction, error) {
 }
 
 func (db *DB) CreateTransaction(tr types.TransactionCreate) error {
-	_, err := db.db.Exec("INSERT INTO transactions (description, amount, date, category, type) VALUES ($1, $2, $3, $4, $5)",
+	_, err := db.DB.Exec("INSERT INTO transactions (description, amount, date, category, type) VALUES ($1, $2, $3, $4, $5)",
 		tr.Description,
 		tr.Amount,
 		tr.Date,
@@ -67,7 +67,7 @@ func (db *DB) CreateTransaction(tr types.TransactionCreate) error {
 }
 
 func (db *DB) UpdateTransaction(id int, tr types.TransactionUpdate) error {
-	_, err := db.db.Exec("UPDATE transactions SET description=$1, amount=$2, date=$3, category=$4 WHERE id=$5",
+	_, err := db.DB.Exec("UPDATE transactions SET description=$1, amount=$2, date=$3, category=$4 WHERE id=$5",
 		tr.Description,
 		tr.Amount,
 		tr.Date,
@@ -82,7 +82,7 @@ func (db *DB) UpdateTransaction(id int, tr types.TransactionUpdate) error {
 }
 
 func (db *DB) DeleteTransaction(id int) error {
-	_, err := db.db.Exec("DELETE FROM transactions WHERE id=$1", id)
+	_, err := db.DB.Exec("DELETE FROM transactions WHERE id=$1", id)
 	if err != nil {
 		return err
 	}

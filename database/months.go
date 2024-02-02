@@ -7,7 +7,7 @@ import (
 )
 
 func (db *DB) GetMonths() ([]types.Month, error) {
-	rows, err := db.db.Query("SELECT id, month, year FROM months")
+	rows, err := db.DB.Query("SELECT id, month, year FROM months")
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func (db *DB) GetMonths() ([]types.Month, error) {
 }
 
 func (db *DB) GetMonthByID(id int) (types.Month, error) {
-	row := db.db.QueryRow("SELECT id, month, year  FROM months WHERE id=$1", id)
+	row := db.DB.QueryRow("SELECT id, month, year  FROM months WHERE id=$1", id)
 
 	m := types.Month{}
 	if err := row.Scan(
@@ -46,7 +46,7 @@ func (db *DB) GetMonthByID(id int) (types.Month, error) {
 
 func (db *DB) GetMonthByMonthAndYear(monthStr string) (types.Month, error) {
 	parts := strings.Split(monthStr, "-")
-	row := db.db.QueryRow("SELECT id, month, year FROM months WHERE month=$1 AND year=$2", parts[1], parts[0])
+	row := db.DB.QueryRow("SELECT id, month, year FROM months WHERE month=$1 AND year=$2", parts[1], parts[0])
 
 	m := types.Month{}
 	if err := row.Scan(
@@ -61,7 +61,7 @@ func (db *DB) GetMonthByMonthAndYear(monthStr string) (types.Month, error) {
 }
 
 func (db *DB) CreateMonth(newMonth types.MonthCreate) error {
-	_, err := db.db.Exec("INSERT INTO months (month, year) VALUES ($1, $2)", newMonth.Month, newMonth.Year)
+	_, err := db.DB.Exec("INSERT INTO months (month, year) VALUES ($1, $2)", newMonth.Month, newMonth.Year)
 	if err != nil {
 		return err
 	}
