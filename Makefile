@@ -1,10 +1,13 @@
 include .env
 
-.PHONY: run run-exe tailwind templ build clean dev backup help db migrate migrate-create stop
+.PHONY: all run run-exe tailwind templ build clean dev backup help db migrate migrate-create stop
+
+all: run
 
 help:
 	@echo "Usage: make [target]"
 	@echo "Targets:"
+	@echo "  install                   - Install dependencies"
 	@echo "  run                       - Run the application"
 	@echo "  run-exe                   - Run the compiled application"
 	@echo "  dev                       - Run the application with hot reloading"
@@ -19,13 +22,16 @@ help:
 	@echo "  backup                    - Backup the database"
 	@echo "  help                      - Show this help message"
 
-run: db tailwind templ
+install:
+	@go mod download
+
+run: install migrate tailwind templ
 	@go run cmd/app/main.go
 
 dev:
 	@air -c .air.toml
 
-run-exe: db build
+run-exe: migrate build
 	@./bin/main
 
 tailwind:
@@ -34,13 +40,13 @@ tailwind:
 templ:
 	@templ generate
 
-build: tailwind templ
+build: install tailwind templ
 	@go build -o ./bin/main cmd/app/main.go
 
 db:
 	@docker-compose up -d
 
-migrate: db
+migrate: db install
 	@go run cmd/migrate/main.go
 
 migrate-create: db
