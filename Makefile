@@ -1,8 +1,19 @@
 include .env
 
-.PHONY: all run run-exe tailwind templ build clean dev backup
+.PHONY: run run-exe tailwind templ build clean dev backup help
 
-all: build run-exe
+help:
+	@echo "Usage: make [target]"
+	@echo "Targets:"
+	@echo "  run        - Run the application"
+	@echo "  run-exe    - Run the compiled application"
+	@echo "  dev        - Run the application with hot reloading"
+	@echo "  build      - Build the application"
+	@echo "  clean      - Clean the application"
+	@echo "  tailwind   - Compile tailwindcss"
+	@echo "  templ      - Generate templates"
+	@echo "  backup     - Backup the database"
+	@echo "  help       - Show this help message"
 
 run: tailwind templ
 	@go run cmd/main.go
@@ -10,7 +21,7 @@ run: tailwind templ
 dev:
 	@air -c .air.toml
 
-run-exe:
+run-exe: build
 	@./bin/main
 
 tailwind:
