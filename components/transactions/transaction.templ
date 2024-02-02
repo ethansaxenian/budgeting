@@ -79,7 +79,7 @@ templ date(t types.Transaction) {
 		id="transaction-date"
 		name="date"
 		type="date"
-		class="py-2 text-sm w-24"
+		class="bg-zinc-900 py-2 text-sm w-24"
 		value={ util.FormatDate(t.Date) }
 		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
 		hx-include="closest #transaction-row"
@@ -92,7 +92,7 @@ templ amount(t types.Transaction) {
 		<input
 			id="transaction-amount"
 			name="amount"
-			class="py-2 text-sm w-20"
+			class="bg-zinc-900 py-2 text-sm w-20"
 			type="number"
 			min="0"
 			step=".01"
@@ -107,7 +107,7 @@ templ amount(t types.Transaction) {
 templ desc(t types.Transaction) {
 	<input
 		name="description"
-		class="py-2 text-sm"
+		class="bg-zinc-900 py-2 text-sm"
 		placeholder="description"
 		value={ t.Description }
 		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
@@ -118,7 +118,7 @@ templ desc(t types.Transaction) {
 templ category(t types.Transaction) {
 	<select
 		name="category"
-		class="py-2 text-sm"
+		class="bg-zinc-900 py-2 text-sm"
 		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
 		hx-include="closest #transaction-row"
 	>

@@ -15,7 +15,7 @@ templ Base(allMonths []types.Month) {
 			<link href="/dist/tailwind.css" rel="stylesheet"/>
 			<script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
 		</head>
-		<body>
+		<body class="bg-zinc-900 text-zinc-300">
 			@monthSelector(allMonths, util.GetCurrMonthCtx(ctx))
 			@AddTransactionForm()
 			<span id="month-page"></span>
@@ -27,7 +27,7 @@ templ monthSelector(allMonths []types.Month, currMonth string) {
 	<div class="flex flex-row w-full justify-center">
 		<select
 			id="month-selector"
-			class="rounded-md m-2 p-2"
+			class="rounded-md m-2 p-2 bg-zinc-800 border border-gray-500"
 			hx-target="#month-page"
 			hx-swap="innerHTML"
 			hx-get="/months"
@@ -51,29 +51,29 @@ templ AddTransactionForm() {
 		<input
 			name="date"
 			type="date"
-			class="border border-gray-500 rounded-md m-2 p-2 w-30"
+			class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2 w-30"
 			value={ time.Now().Format(time.DateOnly) }
 		/>
 		<input
 			name="amount"
 			type="number"
 			placeholder="00.00"
-			class="border border-gray-500 rounded-md m-2 p-2 w-24"
+			class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2 w-24"
 		/>
 		<input
 			name="description"
 			type="text"
 			placeholder="description"
-			class="border border-gray-500 rounded-md m-2 p-2"
+			class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2"
 		/>
-		<select name="category" class="border border-gray-500 rounded-md m-2 p-2">
+		<select name="category" class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2">
 			for _, cat := range types.ALL_CATEGORIES {
 				<option value={ string(cat) } selected?={ cat == types.TRANSPORTATION }>
 					{ util.Capitalize(string(cat)) }
 				</option>
 			}
 		</select>
-		<select name="type" class="border border-gray-500 rounded-md m-2 p-2">
+		<select name="type" class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2">
 			<option selected value={ string(types.EXPENSE) }>Expense</option>
 			<option value={ string(types.INCOME) }>Income</option>
 		</select>
