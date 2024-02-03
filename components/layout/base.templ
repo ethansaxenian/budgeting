@@ -82,8 +82,7 @@ templ AddTransactionForm() {
 			class="bg-green-500 hover:bg-green-700 text-white font-bold p-2 m-2 rounded-md"
 			hx-post="/transactions"
 			hx-include="closest #add-transaction-form"
-			hx-swap="outerHTML"
-			hx-target="closest #add-transaction-form"
+			hx-swap="none"
 		>
 			Add
 		</button>

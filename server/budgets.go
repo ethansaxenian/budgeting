@@ -96,8 +96,6 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.ParseForm()
-
 	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

@@ -25,13 +25,13 @@ help:
 install:
 	@go mod download
 
-run: install migrate tailwind templ
+run: install db tailwind templ
 	@go run cmd/app/main.go
 
 dev:
 	@air -c .air.toml
 
-run-exe: migrate build
+run-exe: db build
 	@./bin/main
 
 tailwind:

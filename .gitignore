@@ -4,3 +4,4 @@ assets/dist/*
 *_templ.go
 bin
 backups
+tmp

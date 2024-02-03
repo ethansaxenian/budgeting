@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ethansaxenian/budgeting/components/layout"
 	"github.com/ethansaxenian/budgeting/components/transactions"
 	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
@@ -33,17 +32,6 @@ func sortTransactions(transactionSlice []types.Transaction, sortParam string) {
 			return transactionSlice[i].Amount < transactionSlice[j].Amount
 		})
 	}
-}
-
-func sortContext(sortParam string) context.Context {
-	var dir string
-	if strings.HasSuffix(sortParam, util.ContextValueSortDirDesc) {
-		dir = util.ContextValueSortDirDesc
-	} else {
-		dir = util.ContextValueSortDirAsc
-	}
-	ctx := context.WithValue(context.Background(), util.ContextKeySortDir, dir)
-	return ctx
 }
 
 func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) {
@@ -90,8 +78,6 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	r.ParseForm()
 
 	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
 	if err != nil {
@@ -149,8 +135,6 @@ func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-
 	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -177,6 +161,5 @@ func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("HX-Trigger", "newTransaction")
-	w.WriteHeader(http.StatusOK)
-	layout.AddTransactionForm().Render(context.Background(), w)
+	w.WriteHeader(http.StatusNoContent)
 }
