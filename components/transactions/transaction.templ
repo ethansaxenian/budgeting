@@ -79,7 +79,7 @@ templ date(t types.Transaction) {
 		id="transaction-date"
 		name="date"
 		type="date"
-		class="bg-zinc-900 py-2 text-sm w-24"
+		class="bg-zinc-900 py-2 text-sm w-28"
 		value={ util.FormatDate(t.Date) }
 		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
 		hx-include="closest #transaction-row"
