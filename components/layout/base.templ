@@ -1,13 +1,6 @@
 package layout
 
-import (
-	"github.com/ethansaxenian/budgeting/types"
-	"strconv"
-	"github.com/ethansaxenian/budgeting/util"
-	"time"
-)
-
-templ Base(allMonths []types.Month) {
+templ Base() {
 	<html lang="en">
 		<head>
 			<meta charset="UTF-8"/>
@@ -16,75 +9,7 @@ templ Base(allMonths []types.Month) {
 			<script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
 		</head>
 		<body class="bg-zinc-900 text-zinc-300">
-			@monthSelector(allMonths, util.GetCurrMonthCtx(ctx))
-			@AddTransactionForm()
-			<span id="month-page"></span>
+			{ children... }
 		</body>
 	</html>
-}
-
-templ monthSelector(allMonths []types.Month, currMonth string) {
-	<div class="flex flex-row w-full justify-center">
-		<select
-			id="month-selector"
-			class="rounded-md m-2 p-2 bg-zinc-800 border border-gray-500"
-			hx-target="#month-page"
-			hx-swap="innerHTML"
-			hx-get="/months"
-			hx-on="htmx:configRequest: event.detail.path = /months/ + this.value"
-			hx-trigger="change, load"
-		>
-			for _, month := range allMonths {
-				<option
-					selected?={ month.FormatStr() == currMonth }
-					value={ strconv.Itoa(month.ID) }
-				>
-					{ month.Month.String() } { strconv.Itoa(month.Year) }
-				</option>
-			}
-		</select>
-	</div>
-}
-
-templ AddTransactionForm() {
-	<div id="add-transaction-form" class="flex flex-row w-full justify-center">
-		<input
-			name="date"
-			type="date"
-			class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2 w-30"
-			value={ time.Now().Format(time.DateOnly) }
-		/>
-		<input
-			name="amount"
-			type="number"
-			placeholder="00.00"
-			class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2 w-24"
-		/>
-		<input
-			name="description"
-			type="text"
-			placeholder="description"
-			class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2"
-		/>
-		<select name="category" class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2">
-			for _, cat := range types.ALL_CATEGORIES {
-				<option value={ string(cat) } selected?={ cat == types.TRANSPORTATION }>
-					{ util.Capitalize(string(cat)) }
-				</option>
-			}
-		</select>
-		<select name="type" class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2">
-			<option selected value={ string(types.EXPENSE) }>Expense</option>
-			<option value={ string(types.INCOME) }>Income</option>
-		</select>
-		<button
-			id="add-transaction-button"
-			class="bg-green-500 hover:bg-green-700 text-white font-bold p-2 m-2 rounded-md"
-			hx-post="/transactions"
-			hx-include="closest #add-transaction-form"
-			hx-swap="none"
-		>
-			Add
-		</button>
-	</div>
 }

@@ -1,19 +1,11 @@
 package server
 
 import (
-	"context"
-	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
-	"sort"
 	"time"
 
 	"github.com/ethansaxenian/budgeting/assets"
-	"github.com/ethansaxenian/budgeting/components/layout"
-	"github.com/ethansaxenian/budgeting/database"
-	"github.com/ethansaxenian/budgeting/types"
-	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -39,56 +31,14 @@ func (s *Server) InitRouter() chi.Router {
 	return r
 }
 
-func createCurrMonth(db *database.DB) (types.Month, error) {
-	m := time.Now().Month()
-	y := time.Now().Year()
-
-	if err := db.CreateMonth(types.MonthCreate{Month: m, Year: y}); err != nil {
-		return types.Month{}, err
-	}
-	fmt.Println("Created new month")
-
-	currMonth, err := db.GetMonthByMonthAndYear(util.GetCurrentMonthStr())
-	if err != nil {
-		return types.Month{}, err
-	}
-	fmt.Println("Got new month")
-
-	if err := db.CreateNewBudgetsForMonth(currMonth.ID); err != nil {
-		return types.Month{}, err
-	}
-	fmt.Println("Created new budgets")
-
-	return currMonth, nil
-}
-
 func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
-	currMonth, err := s.db.GetMonthByMonthAndYear(util.GetCurrMonthCtx(r.Context()))
+	currMonth, err := s.db.GetOrCreateCurrentMonth()
 	if err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		currMonth, err = createCurrMonth(s.db)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-
-	allMonths, err := s.db.GetMonths()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Errorf("Failed to create new month for %s %d", time.Now().Month().String(), time.Now().Year()).Error(), http.StatusInternalServerError)
 		return
 	}
 
-	sort.Slice(allMonths, func(i, j int) bool {
-		return allMonths[i].Year > allMonths[j].Year || (allMonths[i].Year == allMonths[j].Year && allMonths[i].Month > allMonths[j].Month)
-	})
-
-	ctx := util.WithCurrMonthCtx(context.Background(), currMonth.FormatStr())
-	layout.Base(allMonths).Render(ctx, w)
+	http.Redirect(w, r, fmt.Sprintf("/months/%d", currMonth.ID), http.StatusFound)
 }
 
 func (s *Server) initMonthsRouter() chi.Router {

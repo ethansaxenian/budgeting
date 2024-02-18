@@ -1,6 +1,7 @@
 package graph
 
 import "github.com/ethansaxenian/budgeting/types"
+import "github.com/ethansaxenian/budgeting/components/layout"
 
 script showGraph(datasets []types.GraphData) {
     new Chart(
@@ -16,9 +17,11 @@ script showGraph(datasets []types.GraphData) {
 }
 
 templ Graph(datasets []types.GraphData) {
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<canvas id="expense-chart"></canvas>
-	<div>
-		@showGraph(datasets)
-	</div>
+	@layout.Base() {
+		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+		<canvas id="expense-chart"></canvas>
+		<div>
+			@showGraph(datasets)
+		</div>
+	}
 }

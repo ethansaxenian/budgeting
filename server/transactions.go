@@ -41,12 +41,23 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	month := r.URL.Query().Get("month")
+	monthID, err := strconv.Atoi(r.URL.Query().Get("month_id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	month, err := s.db.GetMonthByID(monthID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	transactionType := r.URL.Query().Get("type")
 
 	filteredTransactions := []types.Transaction{}
 	for _, tr := range allTransactions {
-		if (util.GetDateMonth(tr.Date) == month || month == "") && (string(tr.Type) == transactionType || transactionType == "") {
+		if month.HasDate(tr.Date) && (string(tr.Type) == transactionType || transactionType == "") {
 			filteredTransactions = append(filteredTransactions, tr)
 		}
 	}
@@ -65,7 +76,7 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 		dir = util.ContextValueSortDirAsc
 	}
 	ctx := util.WithNextSortCtx(r.Context(), dir)
-	ctx = util.WithCurrMonthCtx(ctx, month)
+	ctx = util.WithCurrMonthIDCtx(ctx, monthID)
 	ctx = util.WithTransactionTypeCtx(ctx, transactionType)
 
 	w.WriteHeader(http.StatusOK)

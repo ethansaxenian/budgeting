@@ -10,7 +10,7 @@ templ TransactionTable(transactions []types.Transaction) {
 	<table
 		id="transaction-table"
 		class="text-left border-collapse h-0"
-		hx-get={ fmt.Sprintf("/transactions?type=%s&month=%s", util.GetTransactionTypeCtx(ctx), util.GetCurrMonthCtx(ctx)) }
+		hx-get={ fmt.Sprintf("/transactions?type=%s&month_id=%d", util.GetTransactionTypeCtx(ctx), util.GetCurrMonthIDCtx(ctx)) }
 		hx-swap="outerHTML"
 		hx-trigger="editTransaction from:#transaction-date, newTransaction from:#add-transaction-button"
 	>
@@ -20,7 +20,7 @@ templ TransactionTable(transactions []types.Transaction) {
 					scope="col"
 					class="px-6 py-4"
 					hx-trigger="click"
-					hx-get={ fmt.Sprintf("/transactions?sort=date%s&month=%s", util.GetNextSortCtx(ctx), util.GetCurrMonthCtx(ctx)) }
+					hx-get={ fmt.Sprintf("/transactions?sort=date%s&month_id=%d", util.GetNextSortCtx(ctx), util.GetCurrMonthIDCtx(ctx)) }
 					hx-target="#transaction-table"
 					hx-swap="outerHTML"
 				>
@@ -30,7 +30,7 @@ templ TransactionTable(transactions []types.Transaction) {
 					scope="col"
 					class="px-6 py-4"
 					hx-trigger="click"
-					hx-get={ fmt.Sprintf("/transactions?sort=amount%s&month=%s", util.GetNextSortCtx(ctx), util.GetCurrMonthCtx(ctx)) }
+					hx-get={ fmt.Sprintf("/transactions?sort=amount%s&month_id=%d", util.GetNextSortCtx(ctx), util.GetCurrMonthIDCtx(ctx)) }
 					hx-target="#transaction-table"
 					hx-swap="outerHTML"
 				>
