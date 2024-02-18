@@ -34,6 +34,8 @@ func (s *Server) InitRouter() chi.Router {
 	r.Mount("/months", s.initMonthsRouter())
 	r.Mount("/budgets", s.initBudgetsRouter())
 
+	r.Get("/graph", s.HandleGraphShow)
+
 	return r
 }
 

@@ -127,3 +127,8 @@ type BudgetItem struct {
 	Planned  float64
 	Actual   float64
 }
+
+type GraphData struct {
+	Label string    `json:"label"`
+	Data  []float64 `json:"data"`
+}
