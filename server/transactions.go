@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -36,34 +35,18 @@ func sortTransactions(transactionSlice []types.Transaction, sortParam string) {
 }
 
 func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) {
-	allTransactions, err := s.db.GetTransactions()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	monthID, err := strconv.Atoi(r.URL.Query().Get("month_id"))
+	monthID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	month, err := s.db.GetMonthByID(monthID)
+	transactionType := types.TransactionType(chi.URLParam(r, "transactionType"))
+
+	monthTransactions, err := s.db.GetTransactionsByMonthIDAndType(monthID, transactionType)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-
-	transactionType := r.URL.Query().Get("type")
-	if transactionType == "" {
-		log.Println("Error: transaction type not found")
-	}
-
-	filteredTransactions := []types.Transaction{}
-	for _, tr := range allTransactions {
-		if month.HasDate(tr.Date) && (string(tr.Type) == transactionType || transactionType == "") {
-			filteredTransactions = append(filteredTransactions, tr)
-		}
 	}
 
 	sortParam := r.URL.Query().Get("sort")
@@ -71,7 +54,7 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 		sortParam = "date" + util.GetNextSortCtx(r.Context())
 	}
 
-	sortTransactions(filteredTransactions, sortParam)
+	sortTransactions(monthTransactions, sortParam)
 
 	var nextDir string
 	if strings.HasSuffix(sortParam, util.ContextValueSortDirDesc) {
@@ -81,11 +64,9 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 	}
 
 	ctx := util.WithNextSortCtx(r.Context(), nextDir)
-	ctx = util.WithCurrMonthIDCtx(ctx, monthID)
-	ctx = util.WithTransactionTypeCtx(ctx, transactionType)
 
 	w.WriteHeader(http.StatusOK)
-	transactions.TransactionTable(filteredTransactions).Render(ctx, w)
+	transactions.TransactionTable(monthTransactions, monthID, transactionType).Render(ctx, w)
 }
 
 func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {

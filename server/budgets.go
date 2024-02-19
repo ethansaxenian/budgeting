@@ -12,61 +12,37 @@ import (
 )
 
 func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
-	monthID, err := strconv.Atoi(r.URL.Query().Get("month_id"))
+	monthID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	transactionType := types.TransactionType(chi.URLParam(r, "transactionType"))
+
+	monthBudgets, err := s.db.GetBudgetsByMonthIDAndType(monthID, transactionType)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	monthBudgets, err := s.db.GetBudgets(monthID)
+	monthTransactions, err := s.db.GetTransactionsByMonthIDAndType(monthID, transactionType)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	allTransactions, err := s.db.GetTransactions()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	byCategory := map[types.Category]float64{}
+	for _, t := range monthTransactions {
+		byCategory[t.Category] += t.Amount
 	}
-
-	month, err := s.db.GetMonthByID(monthID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	transactionType := r.URL.Query().Get("type")
-
-	expensesByCategory := map[types.Category]float64{}
-	for _, t := range allTransactions {
-		if month.HasDate(t.Date) && t.Type == types.EXPENSE {
-			expensesByCategory[t.Category] += t.Amount
-		}
-	}
-
-	incomeByCategory := map[types.Category]float64{}
-	for _, t := range allTransactions {
-		if month.HasDate(t.Date) && t.Type == types.INCOME {
-			incomeByCategory[t.Category] += t.Amount
-		}
-	}
-
-	typeSums := map[types.TransactionType]map[types.Category]float64{}
-	typeSums[types.EXPENSE] = expensesByCategory
-	typeSums[types.INCOME] = incomeByCategory
 
 	budgetItems := []types.BudgetItem{}
+
+	availableCategories := types.CATEGORIES_BY_TYPE[transactionType]
+
 	for _, b := range monthBudgets {
-		if b.Type != types.TransactionType(transactionType) {
-			continue
-		}
-
-		if b.Type == types.INCOME && !util.Includes[types.Category](types.INCOME_CATEGORIES, b.Category) {
-			continue
-		}
-
-		if b.Type == types.EXPENSE && !util.Includes[types.Category](types.EXPENSE_CATEGORIES, b.Category) {
+		if !util.Includes[types.Category](availableCategories, b.Category) {
 			continue
 		}
 
@@ -74,7 +50,8 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 			ID:       b.ID,
 			Category: b.Category,
 			Planned:  b.Amount,
-			Actual:   typeSums[b.Type][b.Category],
+			Actual:   byCategory[b.Category],
+			Type:     b.Type,
 		})
 	}
 
@@ -82,11 +59,8 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 		return budgetItems[i].Category < budgetItems[j].Category
 	})
 
-	ctx := util.WithTransactionTypeCtx(r.Context(), transactionType)
-	ctx = util.WithCurrMonthIDCtx(ctx, monthID)
-
 	w.WriteHeader(http.StatusOK)
-	budgets.BudgetTable(budgetItems).Render(ctx, w)
+	budgets.BudgetTable(budgetItems, monthID, transactionType).Render(r.Context(), w)
 }
 
 func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
@@ -113,23 +87,15 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allTransactions, err := s.db.GetTransactions()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	month, err := s.db.GetMonthByID(budget.MonthID)
+	monthTransactions, err := s.db.GetTransactionsByMonthIDAndCategoryAndType(budget.MonthID, budget.Category, budget.Type)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	var actual float64
-	for _, t := range allTransactions {
-		if month.HasDate(t.Date) && t.Type == budget.Type && t.Category == budget.Category {
-			actual += t.Amount
-		}
+	for _, t := range monthTransactions {
+		actual += t.Amount
 	}
 
 	budgetItem := types.BudgetItem{
@@ -137,9 +103,9 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 		Category: budget.Category,
 		Planned:  budget.Amount,
 		Actual:   actual,
+		Type:     budget.Type,
 	}
 
 	w.WriteHeader(http.StatusOK)
-	ctx := util.WithTransactionTypeCtx(r.Context(), string(budget.Type))
-	budgets.BudgetRow(budgetItem).Render(ctx, w)
+	budgets.BudgetRow(budgetItem).Render(r.Context(), w)
 }

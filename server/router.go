@@ -34,7 +34,7 @@ func (s *Server) InitRouter() chi.Router {
 func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
 	currMonth, err := s.db.GetOrCreateCurrentMonth()
 	if err != nil {
-		http.Error(w, fmt.Errorf("Failed to create new month for %s %d", time.Now().Month().String(), time.Now().Year()).Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Errorf("failed to create new month for %s %d", time.Now().Month().String(), time.Now().Year()).Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -44,13 +44,14 @@ func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) initMonthsRouter() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/{id:^[0-9]+}", s.HandleMonthShow)
+	r.Get("/{id:^[0-9]+}/transactions/{transactionType:(income|expense)}", s.HandleTransactionsShow)
+	r.Get("/{id:^[0-9]+}/budgets/{transactionType:(income|expense)}", s.HandleBudgetsShow)
 
 	return r
 }
 
 func (s *Server) initTransactionsRouter() chi.Router {
 	r := chi.NewRouter()
-	r.Get("/", s.HandleTransactionsShow)
 	r.Post("/", s.HandleTransactionAdd)
 	r.Put("/{id:^[0-9]+}", s.HandleTransactionEdit)
 	r.Delete("/{id:^[0-9]+}", s.HandleTransactionDelete)
@@ -60,7 +61,6 @@ func (s *Server) initTransactionsRouter() chi.Router {
 
 func (s *Server) initBudgetsRouter() chi.Router {
 	r := chi.NewRouter()
-	r.Get("/", s.HandleBudgetsShow)
 	r.Patch("/{id:^[0-9]+}", s.HandleBudgetEdit)
 
 	return r

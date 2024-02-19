@@ -2,8 +2,8 @@ package database
 
 import "github.com/ethansaxenian/budgeting/types"
 
-func (db *DB) GetBudgets(monthID int) ([]types.Budget, error) {
-	rows, err := db.DB.Query("SELECT id, month_id, category, amount, type FROM budgets WHERE month_id = $1", monthID)
+func (db *DB) GetBudgetsByMonthIDAndType(monthID int, transactionType types.TransactionType) ([]types.Budget, error) {
+	rows, err := db.DB.Query("SELECT id, month_id, category, amount, transaction_type FROM budgets WHERE month_id = $1 AND transaction_type = $2", monthID, transactionType)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func (db *DB) GetBudgets(monthID int) ([]types.Budget, error) {
 }
 
 func (db *DB) GetBudgetByID(id int) (types.Budget, error) {
-	row := db.DB.QueryRow("SELECT id, month_id, category, amount, type FROM budgets WHERE id = $1", id)
+	row := db.DB.QueryRow("SELECT id, month_id, category, amount, transaction_type FROM budgets WHERE id = $1", id)
 
 	b := types.Budget{}
 	if err := row.Scan(
@@ -56,7 +56,7 @@ func (db *DB) PatchBudget(id int, amount float64) error {
 func (db *DB) CreateNewBudgetsForMonth(monthID int) error {
 	_, err := db.DB.Exec(`
 		INSERT INTO
-			budgets (month_id, category, amount, type)
+			budgets (month_id, category, amount, transaction_type)
 		VALUES
 			($1, 'food', 0, 'expense'),
 			($1, 'food', 0, 'income'),

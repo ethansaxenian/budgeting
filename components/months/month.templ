@@ -9,12 +9,12 @@ import (
 	"github.com/ethansaxenian/budgeting/components/layout"
 )
 
-templ MonthPage(month types.Month, monthTransactions []types.Transaction, allMonths []types.Month) {
+templ MonthPage(month types.Month, allMonths []types.Month) {
 	@layout.Base() {
 		<span id="month-page">
 			@monthSelector(allMonths, month.ID)
 			@addTransactionForm()
-			@monthTables(month, monthTransactions)
+			@monthTables(month)
 		</span>
 	}
 }
@@ -86,12 +86,12 @@ templ addTransactionForm() {
 	</div>
 }
 
-templ monthTables(month types.Month, monthTransactions []types.Transaction) {
+templ monthTables(month types.Month) {
 	<div class="flex flex-row justify-evenly gap-x-4">
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Planned Expenses</div>
 			<span
-				hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=%s", month.ID, types.EXPENSE) }
+				hx-get={ fmt.Sprintf("/months/%d/budgets/%s", month.ID, types.EXPENSE) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"
@@ -100,7 +100,7 @@ templ monthTables(month types.Month, monthTransactions []types.Transaction) {
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Planned Income</div>
 			<span
-				hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=%s", month.ID, types.INCOME) }
+				hx-get={ fmt.Sprintf("/months/%d/budgets/%s", month.ID, types.INCOME) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"
@@ -111,7 +111,7 @@ templ monthTables(month types.Month, monthTransactions []types.Transaction) {
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Expenses</div>
 			<span
-				hx-get={ fmt.Sprintf("/transactions?month_id=%d&type=%s", month.ID, types.EXPENSE) }
+				hx-get={ fmt.Sprintf("/months/%d/transactions/%s", month.ID, types.EXPENSE) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"
@@ -120,7 +120,7 @@ templ monthTables(month types.Month, monthTransactions []types.Transaction) {
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Income</div>
 			<span
-				hx-get={ fmt.Sprintf("/transactions?month_id=%d&type=%s", month.ID, types.INCOME) }
+				hx-get={ fmt.Sprintf("/months/%d/transactions/%s", month.ID, types.INCOME) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"

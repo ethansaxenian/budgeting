@@ -22,10 +22,10 @@ func sumActual(items []types.BudgetItem) float64 {
 	return sum
 }
 
-templ BudgetTable(items []types.BudgetItem) {
+templ BudgetTable(items []types.BudgetItem, monthID int, transactionType types.TransactionType) {
 	<table
 		class="text-left border-collapse h-0"
-		hx-get={ fmt.Sprintf("/budgets?type=%s&month_id=%d", util.GetTransactionTypeCtx(ctx), util.GetCurrMonthIDCtx(ctx)) }
+		hx-get={ fmt.Sprintf("/months/%d/budgets/%s", monthID, transactionType) }
 		hx-swap="outerHTML"
 		hx-trigger="editTransaction from:body, newTransaction from:#add-transaction-button, deleteTransaction from:body"
 		hx-target="this"
@@ -52,7 +52,7 @@ templ BudgetTable(items []types.BudgetItem) {
 			}
 		</tbody>
 		<tfoot>
-			@totalRow(items, sumPlanned(items), sumActual(items))
+			@totalRow(items, sumPlanned(items), sumActual(items), transactionType)
 		</tfoot>
 	</table>
 }
@@ -68,7 +68,7 @@ templ BudgetRow(b types.BudgetItem) {
 		<td class="px-4 py-2">
 			@actual(b.Actual)
 		</td>
-		if util.GetTransactionTypeCtx(ctx) == string(types.EXPENSE) {
+		if b.Type == types.EXPENSE {
 			<td class="px-4 py-2">
 				@difference(b.Planned - b.Actual)
 			</td>
@@ -118,7 +118,7 @@ templ difference(difference float64) {
 	</span>
 }
 
-templ totalRow(items []types.BudgetItem, sumPlanned, sumActual float64) {
+templ totalRow(items []types.BudgetItem, sumPlanned, sumActual float64, transactionType types.TransactionType) {
 	<tr>
 		<td class="px-4 py-2">
 			<span class="py-2 text-sm font-bold">Total</span>
@@ -130,8 +130,8 @@ templ totalRow(items []types.BudgetItem, sumPlanned, sumActual float64) {
 			<span class="py-2 text-sm">{ util.FormatAmountWithDollarSign(sumActual) }</span>
 		</td>
 		<td class="px-4 py-2">
-			switch util.GetTransactionTypeCtx(ctx) {
-				case string(types.EXPENSE):
+			switch transactionType {
+				case types.EXPENSE:
 					<span
 						class={
 							"py-2",
@@ -142,7 +142,7 @@ templ totalRow(items []types.BudgetItem, sumPlanned, sumActual float64) {
 					>
 						{ util.FormatAmountWithDollarSign(sumPlanned-sumActual) }
 					</span>
-				case string(types.INCOME):
+				case types.INCOME:
 					<span
 						class={
 							"py-2",

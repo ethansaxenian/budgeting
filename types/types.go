@@ -70,6 +70,11 @@ var INCOME_CATEGORIES = []Category{
 	CASHBACK,
 }
 
+var CATEGORIES_BY_TYPE = map[TransactionType][]Category{
+	EXPENSE: EXPENSE_CATEGORIES,
+	INCOME:  INCOME_CATEGORIES,
+}
+
 type TransactionCreate struct {
 	Description string
 	Amount      float64
@@ -108,6 +113,12 @@ func (m Month) HasDate(date time.Time) bool {
 	return m.Month == date.Month() && m.Year == date.Year()
 }
 
+func (m Month) StartEndDates() (time.Time, time.Time) {
+	start := time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.UTC)
+	end := start.AddDate(0, 1, -1)
+	return start, end
+}
+
 type BudgetCreate struct {
 	MonthID  int
 	Category Category
@@ -130,6 +141,7 @@ type BudgetItem struct {
 	Category Category
 	Planned  float64
 	Actual   float64
+	Type     TransactionType
 }
 
 type GraphData struct {
