@@ -2,20 +2,16 @@ package util
 
 import "time"
 
-func GetCurrentMonthStr() string {
-	d := time.Now()
-
-	return d.Format("2006-01")
+func CurrentYear() int {
+	return time.Now().Year()
 }
 
-func GetDateMonth(date time.Time) string {
-	return date.Format("2006-01")
+func CurrentMonth() time.Month {
+	return time.Now().Month()
 }
 
-func GetCurrentDate() string {
-	d := time.Now()
-
-	return d.Format(time.DateOnly)
+func CurrentDate() (int, time.Month, int) {
+	return time.Now().Date()
 }
 
 func FormatDate(date time.Time) string {

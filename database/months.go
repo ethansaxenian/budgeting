@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ethansaxenian/budgeting/types"
+	"github.com/ethansaxenian/budgeting/util"
 )
 
 func (db *DB) GetMonths() ([]types.Month, error) {
@@ -87,7 +88,7 @@ func (db *DB) createCurrMonth(m time.Month, y int) (types.Month, error) {
 }
 
 func (db *DB) GetOrCreateCurrentMonth() (types.Month, error) {
-	currYear, currMonth, _ := time.Now().Date()
+	currYear, currMonth, _ := util.CurrentDate()
 
 	row := db.DB.QueryRow("SELECT id, month, year FROM months WHERE month=$1 AND year=$2", currMonth, currYear)
 

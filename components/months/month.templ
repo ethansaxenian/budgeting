@@ -49,7 +49,7 @@ templ addTransactionForm() {
 			name="date"
 			type="date"
 			class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2 w-30"
-			value={ time.Now().Format(time.DateOnly) }
+			value={ util.FormatDate(time.Now()) }
 		/>
 		<input
 			name="amount"

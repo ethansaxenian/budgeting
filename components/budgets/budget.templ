@@ -27,7 +27,7 @@ templ BudgetTable(items []types.BudgetItem) {
 		class="text-left border-collapse h-0"
 		hx-get={ fmt.Sprintf("/budgets?type=%s&month_id=%d", util.GetTransactionTypeCtx(ctx), util.GetCurrMonthIDCtx(ctx)) }
 		hx-swap="outerHTML"
-		hx-trigger="editTransaction from:body, newTransaction from:#add-transaction-button"
+		hx-trigger="editTransaction from:body, newTransaction from:#add-transaction-button, deleteTransaction from:body"
 		hx-target="this"
 	>
 		<thead>

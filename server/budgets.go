@@ -40,14 +40,14 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 
 	expensesByCategory := map[types.Category]float64{}
 	for _, t := range allTransactions {
-		if util.GetDateMonth(t.Date) == month.FormatStr() && t.Type == types.EXPENSE {
+		if month.HasDate(t.Date) && t.Type == types.EXPENSE {
 			expensesByCategory[t.Category] += t.Amount
 		}
 	}
 
 	incomeByCategory := map[types.Category]float64{}
 	for _, t := range allTransactions {
-		if util.GetDateMonth(t.Date) == month.FormatStr() && t.Type == types.INCOME {
+		if month.HasDate(t.Date) && t.Type == types.INCOME {
 			incomeByCategory[t.Category] += t.Amount
 		}
 	}
@@ -127,7 +127,7 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 
 	var actual float64
 	for _, t := range allTransactions {
-		if util.GetDateMonth(t.Date) == month.FormatStr() && t.Type == budget.Type && t.Category == budget.Category {
+		if month.HasDate(t.Date) && t.Type == budget.Type && t.Category == budget.Category {
 			actual += t.Amount
 		}
 	}

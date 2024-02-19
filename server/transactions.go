@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -54,6 +55,9 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 	}
 
 	transactionType := r.URL.Query().Get("type")
+	if transactionType == "" {
+		log.Println("Error: transaction type not found")
+	}
 
 	filteredTransactions := []types.Transaction{}
 	for _, tr := range allTransactions {
@@ -69,13 +73,14 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 
 	sortTransactions(filteredTransactions, sortParam)
 
-	var dir string
+	var nextDir string
 	if strings.HasSuffix(sortParam, util.ContextValueSortDirDesc) {
-		dir = util.ContextValueSortDirDesc
+		nextDir = util.ContextValueSortDirDesc
 	} else {
-		dir = util.ContextValueSortDirAsc
+		nextDir = util.ContextValueSortDirAsc
 	}
-	ctx := util.WithNextSortCtx(r.Context(), dir)
+
+	ctx := util.WithNextSortCtx(r.Context(), nextDir)
 	ctx = util.WithCurrMonthIDCtx(ctx, monthID)
 	ctx = util.WithTransactionTypeCtx(ctx, transactionType)
 
@@ -142,6 +147,7 @@ func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	w.Header().Set("HX-Trigger", "deleteTransaction")
 	w.WriteHeader(http.StatusOK)
 }
 

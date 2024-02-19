@@ -20,7 +20,7 @@ templ TransactionTable(transactions []types.Transaction) {
 					scope="col"
 					class="px-6 py-4"
 					hx-trigger="click"
-					hx-get={ fmt.Sprintf("/transactions?sort=date%s&month_id=%d", util.GetNextSortCtx(ctx), util.GetCurrMonthIDCtx(ctx)) }
+					hx-get={ fmt.Sprintf("/transactions?sort=date%s&month_id=%d&type=%s", util.GetNextSortCtx(ctx), util.GetCurrMonthIDCtx(ctx), util.GetTransactionTypeCtx(ctx)) }
 					hx-target="#transaction-table"
 					hx-swap="outerHTML"
 				>
@@ -30,7 +30,7 @@ templ TransactionTable(transactions []types.Transaction) {
 					scope="col"
 					class="px-6 py-4"
 					hx-trigger="click"
-					hx-get={ fmt.Sprintf("/transactions?sort=amount%s&month_id=%d", util.GetNextSortCtx(ctx), util.GetCurrMonthIDCtx(ctx)) }
+					hx-get={ fmt.Sprintf("/transactions?sort=amount%s&month_id=%d&type=%s", util.GetNextSortCtx(ctx), util.GetCurrMonthIDCtx(ctx), util.GetTransactionTypeCtx(ctx)) }
 					hx-target="#transaction-table"
 					hx-swap="outerHTML"
 				>
