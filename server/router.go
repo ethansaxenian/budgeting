@@ -26,8 +26,6 @@ func (s *Server) InitRouter() chi.Router {
 	r.Mount("/months", s.initMonthsRouter())
 	r.Mount("/budgets", s.initBudgetsRouter())
 
-	r.Get("/graph", s.HandleGraphShow)
-
 	return r
 }
 
@@ -46,6 +44,7 @@ func (s *Server) initMonthsRouter() chi.Router {
 	r.Get("/{id:^[0-9]+}", s.HandleMonthShow)
 	r.Get("/{id:^[0-9]+}/transactions/{transactionType:(income|expense)}", s.HandleTransactionsShow)
 	r.Get("/{id:^[0-9]+}/budgets/{transactionType:(income|expense)}", s.HandleBudgetsShow)
+	r.Get("/{id:^[0-9]+}/graph", s.HandleGraphShow)
 
 	return r
 }

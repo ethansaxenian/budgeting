@@ -1,37 +1,10 @@
 package database
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/ethansaxenian/budgeting/types"
 )
-
-func (db *DB) GetTransactions() ([]types.Transaction, error) {
-	rows, err := db.DB.Query("SELECT id, date, amount, description, category, transaction_type FROM transactions")
-	if err != nil {
-		return nil, errors.New("error retrieving transactions")
-	}
-
-	var transactions []types.Transaction
-
-	for rows.Next() {
-		tr := types.Transaction{}
-		if err = rows.Scan(
-			&tr.ID,
-			&tr.Date,
-			&tr.Amount,
-			&tr.Description,
-			&tr.Category,
-			&tr.Type,
-		); err != nil {
-			return nil, err
-		}
-		transactions = append(transactions, tr)
-	}
-
-	return transactions, nil
-}
 
 func (db *DB) GetTransactionsByMonthIDAndType(monthID int, transactionType types.TransactionType) ([]types.Transaction, error) {
 	month, err := db.GetMonthByID(monthID)

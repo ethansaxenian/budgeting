@@ -2,13 +2,15 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/ethansaxenian/budgeting/components/graph"
 	"github.com/ethansaxenian/budgeting/types"
-	"github.com/ethansaxenian/budgeting/util"
+	"github.com/go-chi/chi/v5"
 )
 
 func getGraphData(transactions []types.Transaction, year int, month time.Month) types.GraphData {
@@ -41,22 +43,42 @@ func getGraphData(transactions []types.Transaction, year int, month time.Month) 
 }
 
 func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
-	transactions, err := s.db.GetTransactions()
+	monthID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid month ID", http.StatusBadRequest)
+		return
+	}
+
+	monthTransactions, err := s.db.GetTransactionsByMonthIDAndType(monthID, types.EXPENSE)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	months, err := s.db.GetMonths()
+	month, err := s.db.GetMonthByID(monthID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	datasets := []types.GraphData{}
-	for _, m := range months {
-		if (m.Month == util.CurrentMonth() || m.Month == util.CurrentMonth()-1) && m.Year == util.CurrentYear() {
-			datasets = append(datasets, getGraphData(transactions, m.Year, m.Month))
+	monthDate, err := month.Date()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	datasets := []types.GraphData{getGraphData(monthTransactions, month.Year, month.Month)}
+
+	y, m, _ := monthDate.AddDate(0, -1, 0).Date()
+	lastMonth, err := s.db.GetMonthByMonthAndYear(m, y)
+	if err != nil {
+		log.Printf("Failed to get last month (%s %d): %s", m, y, err)
+	} else {
+		lastMonthTransactions, err := s.db.GetTransactionsByMonthIDAndType(lastMonth.ID, types.EXPENSE)
+		if err != nil {
+			log.Printf("Failed to get transactions for last month (%s %d): %s", m, y, err)
+		} else {
+			datasets = append(datasets, getGraphData(lastMonthTransactions, lastMonth.Year, lastMonth.Month))
 		}
 	}
 

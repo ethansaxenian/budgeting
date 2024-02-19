@@ -119,6 +119,10 @@ func (m Month) StartEndDates() (time.Time, time.Time) {
 	return start, end
 }
 
+func (m Month) Date() (time.Time, error) {
+	return time.Parse("2006-01", m.FormatStr())
+}
+
 type BudgetCreate struct {
 	MonthID  int
 	Category Category
