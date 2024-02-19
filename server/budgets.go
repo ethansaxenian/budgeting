@@ -20,13 +20,13 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 
 	transactionType := types.TransactionType(chi.URLParam(r, "transactionType"))
 
-	monthBudgets, err := s.db.GetBudgetsByMonthID(monthID, transactionType)
+	monthBudgets, err := s.db.GetBudgetsByMonthIDAndType(monthID, transactionType)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	monthTransactions, err := s.db.GetTransactionsByMonthID(monthID, transactionType)
+	monthTransactions, err := s.db.GetTransactionsByMonthIDAndType(monthID, transactionType)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -51,6 +51,7 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 			Category: b.Category,
 			Planned:  b.Amount,
 			Actual:   byCategory[b.Category],
+			Type:     b.Type,
 		})
 	}
 
@@ -86,23 +87,15 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allTransactions, err := s.db.GetTransactions()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	month, err := s.db.GetMonthByID(budget.MonthID)
+	monthTransactions, err := s.db.GetTransactionsByMonthIDAndCategoryAndType(budget.MonthID, budget.Category, budget.Type)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	var actual float64
-	for _, t := range allTransactions {
-		if month.HasDate(t.Date) && t.Type == budget.Type && t.Category == budget.Category {
-			actual += t.Amount
-		}
+	for _, t := range monthTransactions {
+		actual += t.Amount
 	}
 
 	budgetItem := types.BudgetItem{
@@ -110,9 +103,9 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 		Category: budget.Category,
 		Planned:  budget.Amount,
 		Actual:   actual,
+		Type:     budget.Type,
 	}
 
 	w.WriteHeader(http.StatusOK)
-	ctx := util.WithTransactionTypeCtx(r.Context(), string(budget.Type))
-	budgets.BudgetRow(budgetItem).Render(ctx, w)
+	budgets.BudgetRow(budgetItem).Render(r.Context(), w)
 }

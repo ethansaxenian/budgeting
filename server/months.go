@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/ethansaxenian/budgeting/components/months"
-	"github.com/ethansaxenian/budgeting/types"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -23,19 +22,6 @@ func (s *Server) HandleMonthShow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allTransactions, err := s.db.GetTransactions()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	monthTransactions := []types.Transaction{}
-	for _, tr := range allTransactions {
-		if tr.Date.Month() == month.Month && tr.Date.Year() == month.Year {
-			monthTransactions = append(monthTransactions, tr)
-		}
-	}
-
 	allMonths, err := s.db.GetMonths()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -47,5 +33,5 @@ func (s *Server) HandleMonthShow(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	months.MonthPage(month, monthTransactions, allMonths).Render(r.Context(), w)
+	months.MonthPage(month, allMonths).Render(r.Context(), w)
 }

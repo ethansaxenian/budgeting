@@ -10,7 +10,7 @@ templ TransactionTable(transactions []types.Transaction, monthID int, transactio
 	<table
 		id="transaction-table"
 		class="text-left border-collapse h-0"
-		hx-get={ fmt.Sprintf("/transactions?type=%s&month_id=%d", transactionType, monthID) }
+		hx-get={ fmt.Sprintf("/months/%d/transactions/%s", monthID, transactionType) }
 		hx-swap="outerHTML"
 		hx-trigger="editTransaction from:#transaction-date, newTransaction from:#add-transaction-button"
 	>
@@ -30,7 +30,7 @@ templ TransactionTable(transactions []types.Transaction, monthID int, transactio
 					scope="col"
 					class="px-6 py-4"
 					hx-trigger="click"
-					hx-get={ fmt.Sprintf("/months/%d/transactions/%s?sort=date%s", monthID, transactionType, util.GetNextSortCtx(ctx)) }
+					hx-get={ fmt.Sprintf("/months/%d/transactions/%s?sort=amount%s", monthID, transactionType, util.GetNextSortCtx(ctx)) }
 					hx-target="closest #transaction-table"
 					hx-swap="outerHTML"
 				>

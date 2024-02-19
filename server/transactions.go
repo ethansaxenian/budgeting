@@ -43,7 +43,7 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 
 	transactionType := types.TransactionType(chi.URLParam(r, "transactionType"))
 
-	monthTransactions, err := s.db.GetTransactionsByMonthID(monthID, transactionType)
+	monthTransactions, err := s.db.GetTransactionsByMonthIDAndType(monthID, transactionType)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

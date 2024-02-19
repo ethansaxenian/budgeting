@@ -141,6 +141,7 @@ type BudgetItem struct {
 	Category Category
 	Planned  float64
 	Actual   float64
+	Type     TransactionType
 }
 
 type GraphData struct {

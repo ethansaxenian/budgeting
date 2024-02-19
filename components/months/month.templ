@@ -9,12 +9,12 @@ import (
 	"github.com/ethansaxenian/budgeting/components/layout"
 )
 
-templ MonthPage(month types.Month, monthTransactions []types.Transaction, allMonths []types.Month) {
+templ MonthPage(month types.Month, allMonths []types.Month) {
 	@layout.Base() {
 		<span id="month-page">
 			@monthSelector(allMonths, month.ID)
 			@addTransactionForm()
-			@monthTables(month, monthTransactions)
+			@monthTables(month)
 		</span>
 	}
 }
@@ -86,7 +86,7 @@ templ addTransactionForm() {
 	</div>
 }
 
-templ monthTables(month types.Month, monthTransactions []types.Transaction) {
+templ monthTables(month types.Month) {
 	<div class="flex flex-row justify-evenly gap-x-4">
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Planned Expenses</div>

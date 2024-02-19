@@ -38,7 +38,6 @@ func NewServer() (*http.Server, error) {
 		Handler: s.InitRouter(),
 		BaseContext: func(_ net.Listener) context.Context {
 			ctx := context.Background()
-			ctx = util.WithCurrMonthIDCtx(ctx, util.GetCurrMonthIDCtx(ctx))
 			ctx = util.WithNextSortCtx(ctx, util.GetNextSortCtx(ctx))
 			return ctx
 		},
