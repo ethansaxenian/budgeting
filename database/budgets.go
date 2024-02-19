@@ -2,8 +2,8 @@ package database
 
 import "github.com/ethansaxenian/budgeting/types"
 
-func (db *DB) GetBudgets(monthID int) ([]types.Budget, error) {
-	rows, err := db.DB.Query("SELECT id, month_id, category, amount, transaction_type FROM budgets WHERE month_id = $1", monthID)
+func (db *DB) GetBudgetsByMonthID(monthID int, transactionType types.TransactionType) ([]types.Budget, error) {
+	rows, err := db.DB.Query("SELECT id, month_id, category, amount, transaction_type FROM budgets WHERE month_id = $1 AND transaction_type = $2", monthID, transactionType)
 	if err != nil {
 		return nil, err
 	}

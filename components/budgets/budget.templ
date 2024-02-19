@@ -22,10 +22,10 @@ func sumActual(items []types.BudgetItem) float64 {
 	return sum
 }
 
-templ BudgetTable(items []types.BudgetItem) {
+templ BudgetTable(items []types.BudgetItem, monthID int, transactionType types.TransactionType) {
 	<table
 		class="text-left border-collapse h-0"
-		hx-get={ fmt.Sprintf("/budgets?type=%s&month_id=%d", util.GetTransactionTypeCtx(ctx), util.GetCurrMonthIDCtx(ctx)) }
+		hx-get={ fmt.Sprintf("/months/%d/budgets/%s", monthID, transactionType) }
 		hx-swap="outerHTML"
 		hx-trigger="editTransaction from:body, newTransaction from:#add-transaction-button, deleteTransaction from:body"
 		hx-target="this"

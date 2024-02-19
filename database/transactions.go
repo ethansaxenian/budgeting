@@ -41,9 +41,18 @@ func (db *DB) GetTransactionsByMonthID(monthID int, transactionType types.Transa
 
 	startDate, endDate := month.StartEndDates()
 
-	rows, err := db.DB.Query("SELECT id, date, amount, description, category, transaction_type FROM transactions WHERE date BETWEEN $1 AND $2 AND transaction_type == $3", startDate, endDate, transactionType)
+	rows, err := db.DB.Query(`
+			SELECT id, date, amount, description, category, transaction_type
+			FROM transactions
+			WHERE date BETWEEN $1 AND $2 AND transaction_type = $3
+		`,
+		startDate,
+		endDate,
+		transactionType,
+	)
+
 	if err != nil {
-		return nil, fmt.Errorf("error retrieving transactions for %s %d", month.Month.String(), month.Year)
+		return nil, fmt.Errorf("error retrieving transactions for %s %d: %v", month.Month.String(), month.Year, err)
 	}
 
 	var transactions []types.Transaction
