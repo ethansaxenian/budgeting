@@ -21,7 +21,7 @@ templ TransactionTable(transactions []types.Transaction) {
 					class="px-6 py-4"
 					hx-trigger="click"
 					hx-get={ fmt.Sprintf("/transactions?sort=date%s&month_id=%d&type=%s", util.GetNextSortCtx(ctx), util.GetCurrMonthIDCtx(ctx), util.GetTransactionTypeCtx(ctx)) }
-					hx-target="#transaction-table"
+					hx-target="closest #transaction-table"
 					hx-swap="outerHTML"
 				>
 					Date
@@ -31,7 +31,7 @@ templ TransactionTable(transactions []types.Transaction) {
 					class="px-6 py-4"
 					hx-trigger="click"
 					hx-get={ fmt.Sprintf("/transactions?sort=amount%s&month_id=%d&type=%s", util.GetNextSortCtx(ctx), util.GetCurrMonthIDCtx(ctx), util.GetTransactionTypeCtx(ctx)) }
-					hx-target="#transaction-table"
+					hx-target="closest #transaction-table"
 					hx-swap="outerHTML"
 				>
 					Amount
