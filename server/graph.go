@@ -8,6 +8,7 @@ import (
 
 	"github.com/ethansaxenian/budgeting/components/graph"
 	"github.com/ethansaxenian/budgeting/types"
+	"github.com/ethansaxenian/budgeting/util"
 )
 
 func getGraphData(transactions []types.Transaction, year int, month time.Month) types.GraphData {
@@ -54,7 +55,7 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 
 	datasets := []types.GraphData{}
 	for _, m := range months {
-		if (m.Month == time.Now().Month() || m.Month == time.Now().Month()-1) && m.Year == time.Now().Year() {
+		if (m.Month == util.CurrentMonth() || m.Month == util.CurrentMonth()-1) && m.Year == util.CurrentYear() {
 			datasets = append(datasets, getGraphData(transactions, m.Year, m.Month))
 		}
 	}

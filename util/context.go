@@ -37,19 +37,6 @@ func WithNextSortCtx(ctx context.Context, dir string) context.Context {
 	return context.WithValue(ctx, ContextKeySortDir, dir)
 }
 
-func GetCurrMonthCtx(ctx context.Context) string {
-	month, ok := ctx.Value(ContextKeyCurrMonth).(string)
-	if !ok {
-		return GetCurrentMonthStr()
-	}
-
-	return month
-}
-
-func WithCurrMonthCtx(ctx context.Context, month string) context.Context {
-	return context.WithValue(ctx, ContextKeyCurrMonth, month)
-}
-
 func GetCurrMonthIDCtx(ctx context.Context) int {
 	monthID, ok := ctx.Value(ContextKeyCurrMonthID).(int)
 	if !ok {

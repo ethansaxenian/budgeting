@@ -104,6 +104,10 @@ func (m Month) FormatStr() string {
 	return fmt.Sprintf("%d-%02d", m.Year, m.Month)
 }
 
+func (m Month) HasDate(date time.Time) bool {
+	return m.Month == date.Month() && m.Year == date.Year()
+}
+
 type BudgetCreate struct {
 	MonthID  int
 	Category Category

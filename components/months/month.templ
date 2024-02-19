@@ -4,14 +4,94 @@ import (
 	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
 	"fmt"
+	"strconv"
+	"time"
+	"github.com/ethansaxenian/budgeting/components/layout"
 )
 
-templ MonthPage(month types.Month, monthTransactions []types.Transaction) {
+templ MonthPage(month types.Month, monthTransactions []types.Transaction, allMonths []types.Month) {
+	@layout.Base() {
+		<span id="month-page">
+			@monthSelector(allMonths, month.ID)
+			@addTransactionForm()
+			@monthTables(month, monthTransactions)
+		</span>
+	}
+}
+
+templ monthSelector(allMonths []types.Month, currMonthID int) {
+	<div class="flex flex-row w-full justify-center">
+		<select
+			id="month-selector"
+			class="rounded-md m-2 p-2 bg-zinc-800 border border-gray-500"
+			hx-target="#month-page"
+			hx-swap="innerHTML"
+			hx-get="/months"
+			hx-on="htmx:configRequest: event.detail.path = /months/ + this.value"
+			hx-trigger="change"
+			hx-push-url="true"
+		>
+			for _, month := range allMonths {
+				<option
+					selected?={ month.ID == currMonthID }
+					value={ strconv.Itoa(month.ID) }
+				>
+					{ month.Month.String() } { strconv.Itoa(month.Year) }
+				</option>
+			}
+		</select>
+	</div>
+}
+
+templ addTransactionForm() {
+	<div id="add-transaction-form" class="flex flex-row w-full justify-center">
+		<input
+			name="date"
+			type="date"
+			class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2 w-30"
+			value={ util.FormatDate(time.Now()) }
+		/>
+		<input
+			name="amount"
+			type="number"
+			placeholder="00.00"
+			class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2 w-24"
+		/>
+		<input
+			name="description"
+			type="text"
+			placeholder="description"
+			class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2"
+		/>
+		<select name="category" class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2">
+			for _, cat := range types.ALL_CATEGORIES {
+				<option value={ string(cat) } selected?={ cat == types.TRANSPORTATION }>
+					{ util.Capitalize(string(cat)) }
+				</option>
+			}
+		</select>
+		<select name="type" class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2">
+			<option selected value={ string(types.EXPENSE) }>Expense</option>
+			<option value={ string(types.INCOME) }>Income</option>
+		</select>
+		<button
+			id="add-transaction-button"
+			class="bg-green-500 hover:bg-green-700 text-white font-bold p-2 m-2 rounded-md"
+			hx-post="/transactions"
+			hx-include="closest #add-transaction-form"
+			hx-swap="none"
+		>
+			Add
+		</button>
+	</div>
+}
+
+templ monthTables(month types.Month, monthTransactions []types.Transaction) {
 	<div class="flex flex-row justify-evenly gap-x-4">
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Planned Expenses</div>
 			<span
-				hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=expense", month.ID) }
+				hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=%s", month.ID, types.EXPENSE) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"
@@ -20,7 +100,7 @@ templ MonthPage(month types.Month, monthTransactions []types.Transaction) {
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Planned Income</div>
 			<span
-				hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=income", month.ID) }
+				hx-get={ fmt.Sprintf("/budgets?month_id=%d&type=%s", month.ID, types.INCOME) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"
@@ -31,7 +111,7 @@ templ MonthPage(month types.Month, monthTransactions []types.Transaction) {
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Expenses</div>
 			<span
-				hx-get={ fmt.Sprintf("/transactions?month=%s&type=expense", util.GetCurrMonthCtx(ctx)) }
+				hx-get={ fmt.Sprintf("/transactions?month_id=%d&type=%s", month.ID, types.EXPENSE) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"
@@ -40,7 +120,7 @@ templ MonthPage(month types.Month, monthTransactions []types.Transaction) {
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Income</div>
 			<span
-				hx-get={ fmt.Sprintf("/transactions?month=%s&type=income", util.GetCurrMonthCtx(ctx)) }
+				hx-get={ fmt.Sprintf("/transactions?month_id=%d&type=%s", month.ID, types.INCOME) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"

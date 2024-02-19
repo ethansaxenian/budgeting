@@ -2,11 +2,11 @@ package server
 
 import (
 	"net/http"
+	"sort"
 	"strconv"
 
 	"github.com/ethansaxenian/budgeting/components/months"
 	"github.com/ethansaxenian/budgeting/types"
-	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -36,7 +36,16 @@ func (s *Server) HandleMonthShow(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ctx := util.WithCurrMonthCtx(r.Context(), month.FormatStr())
+	allMonths, err := s.db.GetMonths()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sort.Slice(allMonths, func(i, j int) bool {
+		return allMonths[i].Year > allMonths[j].Year || (allMonths[i].Year == allMonths[j].Year && allMonths[i].Month > allMonths[j].Month)
+	})
+
 	w.WriteHeader(http.StatusOK)
-	months.MonthPage(month, monthTransactions).Render(ctx, w)
+	months.MonthPage(month, monthTransactions, allMonths).Render(r.Context(), w)
 }
