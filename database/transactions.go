@@ -2,14 +2,48 @@ package database
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/ethansaxenian/budgeting/types"
 )
 
 func (db *DB) GetTransactions() ([]types.Transaction, error) {
-	rows, err := db.DB.Query("SELECT id, date, amount, description, category, type FROM transactions")
+	rows, err := db.DB.Query("SELECT id, date, amount, description, category, transaction_type FROM transactions")
 	if err != nil {
 		return nil, errors.New("error retrieving transactions")
+	}
+
+	var transactions []types.Transaction
+
+	for rows.Next() {
+		tr := types.Transaction{}
+		if err = rows.Scan(
+			&tr.ID,
+			&tr.Date,
+			&tr.Amount,
+			&tr.Description,
+			&tr.Category,
+			&tr.Type,
+		); err != nil {
+			return nil, err
+		}
+		transactions = append(transactions, tr)
+	}
+
+	return transactions, nil
+}
+
+func (db *DB) GetTransactionsByMonthID(monthID int, transactionType types.TransactionType) ([]types.Transaction, error) {
+	month, err := db.GetMonthByID(monthID)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving month with id %d", monthID)
+	}
+
+	startDate, endDate := month.StartEndDates()
+
+	rows, err := db.DB.Query("SELECT id, date, amount, description, category, transaction_type FROM transactions WHERE date BETWEEN $1 AND $2 AND transaction_type == $3", startDate, endDate, transactionType)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving transactions for %s %d", month.Month.String(), month.Year)
 	}
 
 	var transactions []types.Transaction
