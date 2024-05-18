@@ -42,7 +42,7 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 	availableCategories := types.CATEGORIES_BY_TYPE[transactionType]
 
 	for _, b := range monthBudgets {
-		if !util.Includes[types.Category](availableCategories, b.Category) {
+		if !util.Includes(availableCategories, b.Category) {
 			continue
 		}
 

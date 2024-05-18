@@ -52,6 +52,9 @@ migrate: db install
 migrate-create: db
 	@GOOSE_DBSTRING="user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST} sslmode=disable" GOOSE_DRIVER=postgres goose -dir cmd/migrate/migrations create $(name) sql
 
+migrate-rollback: db
+	@GOOSE_DBSTRING="user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST} sslmode=disable" GOOSE_DRIVER=postgres goose -dir cmd/migrate/migrations down
+
 stop:
 	@docker-compose down
 
