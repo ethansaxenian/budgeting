@@ -1,12 +1,12 @@
 module github.com/ethansaxenian/budgeting
 
-go 1.21.5
+go 1.22.4
 
 require (
-	github.com/a-h/templ v0.2.513
-	github.com/go-chi/chi/v5 v5.0.10
+	github.com/a-h/templ v0.2.731
+	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-chi/cors v1.2.1
-	github.com/jackc/pgx/v5 v5.5.2
+	github.com/jackc/pgx/v5 v5.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/pressly/goose/v3 v3.18.0
 )

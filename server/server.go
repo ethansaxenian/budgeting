@@ -13,8 +13,8 @@ import (
 )
 
 type Server struct {
-	port int
 	db   *database.DB
+	port int
 }
 
 func NewServer() (*http.Server, error) {
@@ -29,12 +29,12 @@ func NewServer() (*http.Server, error) {
 	}
 
 	s := &Server{
-		port: port,
 		db:   db,
+		port: port,
 	}
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf("localhost:%d", port),
+		Addr:    fmt.Sprintf(":%d", port),
 		Handler: s.InitRouter(),
 		BaseContext: func(_ net.Listener) context.Context {
 			ctx := context.Background()

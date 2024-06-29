@@ -1,14 +1,14 @@
 root = "."
 
 [build]
-  bin = "bin/main"
-  cmd = "make db; make build"
-  exclude_dir = ["postgres-data", "assets/dist", "bin", "backups", "cmd/migrate/"]
-  exclude_regex = ["_templ\\.go"]
-  exclude_unchanged = true
-  include_ext = ["go", "templ", "html"]
+pre_cmd = ["tailwindcss -i ./assets/main.css -o ./assets/dist/tailwind.css", "templ generate"]
+cmd = "go build -o bin/main cmd/app/main.go"
+bin = "bin/main"
+run_after_build = "chmod +x main"
+include_ext = ["go", "templ", "html"]
+exclude_dir = ["postgres-data", "assets/dist", "bin", "backups", "cmd/migrate/"]
+exclude_regex = ["_templ\\.go"]
+exclude_unchanged = true
 
-[misc]
-clean_on_exit = true
-
-
+[log]
+level = "debug"
