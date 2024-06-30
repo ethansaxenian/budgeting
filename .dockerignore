@@ -1,3 +1,6 @@
 .git
 postgres-data
 backups
+LICENSE
+Makefile
+README.md

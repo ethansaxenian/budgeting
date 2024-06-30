@@ -76,21 +76,21 @@ var CATEGORIES_BY_TYPE = map[TransactionType][]Category{
 }
 
 type TransactionCreate struct {
-	Description string
-	Amount      float64
 	Date        time.Time
+	Description string
 	Category    Category
 	Type        TransactionType
+	Amount      float64
 }
 
 type TransactionUpdate TransactionCreate
 
 type Transaction struct {
-	Description string
-	Amount      float64
 	Date        time.Time
+	Description string
 	Category    Category
 	Type        TransactionType
+	Amount      float64
 	ID          int
 }
 
@@ -124,28 +124,28 @@ func (m Month) Date() (time.Time, error) {
 }
 
 type BudgetCreate struct {
-	MonthID  int
 	Category Category
-	Amount   float64
 	Type     TransactionType
+	MonthID  int
+	Amount   float64
 }
 
 type BudgetUpdate BudgetCreate
 
 type Budget struct {
-	MonthID  int
 	Category Category
-	Amount   float64
 	Type     TransactionType
+	MonthID  int
+	Amount   float64
 	ID       int
 }
 
 type BudgetItem struct {
-	ID       int
 	Category Category
+	Type     TransactionType
+	ID       int
 	Planned  float64
 	Actual   float64
-	Type     TransactionType
 }
 
 type GraphData struct {

@@ -3,7 +3,7 @@ include .env
 .PHONY: start stop logs migrate migrate-create migrate-rollback
 
 start:
-	@docker-compose up -d
+	@docker-compose up -d --wait
 
 stop:
 	@docker-compose down
