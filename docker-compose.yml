@@ -11,6 +11,7 @@ services:
       - "${APP_PORT}:8000"
     volumes:
       - ./:/app
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
       db:
         condition: service_healthy

@@ -32,7 +32,7 @@ func (s *Server) InitRouter() chi.Router {
 func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
 	currMonth, err := s.db.GetOrCreateCurrentMonth()
 	if err != nil {
-		http.Error(w, fmt.Errorf("failed to create new month for %s %d", time.Now().Month().String(), time.Now().Year()).Error(), http.StatusInternalServerError)
+		http.Error(w, fmt.Errorf("failed to create new month for %s %d: %v", time.Now().Month().String(), time.Now().Year(), err).Error(), http.StatusInternalServerError)
 		return
 	}
 
