@@ -1,7 +1,7 @@
 root = "."
 
 [build]
-pre_cmd = ["tailwindcss -i ./assets/main.css -o ./assets/dist/tailwind.css", "templ generate"]
+pre_cmd = ["templ generate"]
 cmd = "go build -o bin/main cmd/app/main.go"
 bin = "bin/main"
 run_after_build = "chmod +x main"
