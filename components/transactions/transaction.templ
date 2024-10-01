@@ -10,7 +10,7 @@ templ TransactionTable(transactions []types.Transaction, monthID int, transactio
 	<table
 		id="transaction-table"
 		class="text-left border-collapse h-0"
-		hx-get={ fmt.Sprintf("/months/%d/transactions/%s", monthID, transactionType) }
+		hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/transactions/%s", monthID, transactionType))) }
 		hx-swap="outerHTML"
 		hx-trigger="editTransaction from:#transaction-date, newTransaction from:#add-transaction-button"
 	>
@@ -20,7 +20,7 @@ templ TransactionTable(transactions []types.Transaction, monthID int, transactio
 					scope="col"
 					class="px-6 py-4"
 					hx-trigger="click"
-					hx-get={ fmt.Sprintf("/months/%d/transactions/%s?sort=date%s", monthID, transactionType, util.GetNextSortCtx(ctx)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/transactions/%s?sort=date%s", monthID, transactionType, util.GetNextSortCtx(ctx)))) }
 					hx-target="closest #transaction-table"
 					hx-swap="outerHTML"
 				>
@@ -30,7 +30,7 @@ templ TransactionTable(transactions []types.Transaction, monthID int, transactio
 					scope="col"
 					class="px-6 py-4"
 					hx-trigger="click"
-					hx-get={ fmt.Sprintf("/months/%d/transactions/%s?sort=amount%s", monthID, transactionType, util.GetNextSortCtx(ctx)) }
+					hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/transactions/%s?sort=amount%s", monthID, transactionType, util.GetNextSortCtx(ctx)))) }
 					hx-target="closest #transaction-table"
 					hx-swap="outerHTML"
 				>
@@ -66,7 +66,7 @@ templ TransactionRow(t types.Transaction) {
 			<button
 				class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
 				hx-target="closest tr"
-				hx-delete={ fmt.Sprintf("/transactions/%d", t.ID) }
+				hx-delete={ string(templ.URL(fmt.Sprintf("/transactions/%d", t.ID))) }
 			>
 				X
 			</button>
@@ -81,7 +81,7 @@ templ date(t types.Transaction) {
 		type="date"
 		class="bg-zinc-900 py-2 text-sm w-28"
 		value={ util.FormatDate(t.Date) }
-		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
+		hx-put={ string(templ.URL(fmt.Sprintf("/transactions/%d", t.ID))) }
 		hx-include="closest #transaction-row"
 	/>
 }
@@ -98,7 +98,7 @@ templ amount(t types.Transaction) {
 			step=".01"
 			placeholder="00.00"
 			value={ util.FormatAmount(t.Amount) }
-			hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
+			hx-put={ string(templ.URL(fmt.Sprintf("/transactions/%d", t.ID))) }
 			hx-include="closest #transaction-row"
 		/>
 	</span>
@@ -110,7 +110,7 @@ templ desc(t types.Transaction) {
 		class="bg-zinc-900 py-2 text-sm"
 		placeholder="description"
 		value={ t.Description }
-		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
+		hx-put={ string(templ.URL(fmt.Sprintf("/transactions/%d", t.ID))) }
 		hx-include="closest #transaction-row"
 	/>
 }
@@ -119,7 +119,7 @@ templ category(t types.Transaction) {
 	<select
 		name="category"
 		class="bg-zinc-900 py-2 text-sm"
-		hx-put={ fmt.Sprintf("/transactions/%d", t.ID) }
+		hx-put={ string(templ.URL(fmt.Sprintf("/transactions/%d", t.ID))) }
 		hx-include="closest #transaction-row"
 	>
 		for _, cat := range types.ALL_CATEGORIES {

@@ -1,12 +1,12 @@
 root = "."
 
 [build]
-pre_cmd = ["templ generate"]
+pre_cmd = ["templ generate -v"]
 cmd = "go build -o bin/main cmd/app/main.go"
 bin = "bin/main"
 run_after_build = "chmod +x main"
 include_ext = ["go", "templ", "html"]
-exclude_dir = ["postgres-data", "assets/dist", "bin", "backups", "cmd/migrate/"]
+exclude_dir = ["postgres-data", "assets/dist", "bin", "backups", "cmd/migrate/", "migrations"]
 exclude_regex = ["_templ\\.go"]
 exclude_unchanged = true
 

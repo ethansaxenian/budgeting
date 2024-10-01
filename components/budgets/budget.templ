@@ -25,7 +25,7 @@ func sumActual(items []types.BudgetItem) float64 {
 templ BudgetTable(items []types.BudgetItem, monthID int, transactionType types.TransactionType) {
 	<table
 		class="text-left border-collapse h-0"
-		hx-get={ fmt.Sprintf("/months/%d/budgets/%s", monthID, transactionType) }
+		hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/budgets/%s", monthID, transactionType))) }
 		hx-swap="outerHTML"
 		hx-trigger="editTransaction from:body, newTransaction from:#add-transaction-button, deleteTransaction from:body"
 		hx-target="this"
@@ -95,7 +95,7 @@ templ planned(b types.BudgetItem) {
 			step=".01"
 			placeholder="00.00"
 			value={ util.FormatAmount(b.Planned) }
-			hx-patch={ fmt.Sprintf("/budgets/%d", b.ID) }
+			hx-patch={ string(templ.URL(fmt.Sprintf("/budgets/%d", b.ID))) }
 			hx-target="closest tr"
 		/>
 	</span>

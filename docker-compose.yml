@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   web:
     container_name: budgeting-web
@@ -11,7 +9,6 @@ services:
       - "${APP_PORT}:8000"
     volumes:
       - ./:/app
-      - /etc/localtime:/etc/localtime:ro
     depends_on:
       db:
         condition: service_healthy

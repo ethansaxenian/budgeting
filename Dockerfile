@@ -1,9 +1,9 @@
-FROM golang:1.22-alpine
+FROM golang:1.23-alpine
 
 WORKDIR /app
 
 RUN apk update && \
-  apk add curl && \
+  apk add curl tzdata && \
   curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64 && \
   chmod +x tailwindcss-linux-x64 && \
   mv tailwindcss-linux-x64 /usr/local/bin/tailwindcss && \
@@ -16,5 +16,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+
+ENV TZ="America/New_York"
 
 CMD ["air", "-c", ".air.toml"]
