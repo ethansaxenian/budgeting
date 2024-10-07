@@ -8,7 +8,7 @@ services:
     ports:
       - "${APP_PORT}:7331"
     environment:
-      - GOOSE_DBSTRING="user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST} sslmode=disable"
+      - GOOSE_DBSTRING=user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST}
       - GOOSE_DRIVER=postgres
       - GOOSE_MIGRATION_DIR=cmd/migrate/migrations
     volumes:
