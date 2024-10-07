@@ -14,14 +14,17 @@ logs:
 rebuild:
 	docker-compose up --build -d --wait
 
+shell:
+	docker exec -it budgeting-web sh
+
 migrate:
-	docker exec -i budgeting-web sh -c "go run cmd/migrate/main.go"
+	docker exec -i budgeting-web sh -c "go run cmd/migrate/main.go up"
 
 migrate-create:
-	docker exec -i budgeting-web sh -c "GOOSE_DBSTRING=\"user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST} sslmode=disable\" GOOSE_DRIVER=postgres goose -dir cmd/migrate/migrations create $(name) sql"
+	docker exec -i budgeting-web sh -c "goose create $(name) sql"
 
 migrate-rollback:
-	docker exec -i budgeting-web sh -c "GOOSE_DBSTRING=\"user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST} sslmode=disable\" GOOSE_DRIVER=postgres goose -dir cmd/migrate/migrations down"
+	docker exec -i budgeting-web sh -c "go run cmd/migrate/main.go down"
 
 backup:
 	docker exec -i budgeting-db sh -c "pg_dump --data-only postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}" > "backups/backup_$(shell date --iso="seconds").sql"
