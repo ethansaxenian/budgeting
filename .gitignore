@@ -2,6 +2,9 @@ postgres-data
 .env
 assets/dist/*
 *_templ.go
+*_templ.txt
 bin
 backups
 tmp
+supervisord.log
+supervisord.pid

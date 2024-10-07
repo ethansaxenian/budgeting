@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${APP_PORT}:8000"
+      - "${APP_PORT}:7331"
     volumes:
       - ./:/app
     depends_on:
