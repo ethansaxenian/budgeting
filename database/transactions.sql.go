@@ -96,8 +96,6 @@ JOIN
         (DATE_TRUNC('month', TO_DATE(m.year || '-' || m.month || '-01', 'YYYY-MM-DD')) + INTERVAL '1 month' - INTERVAL '1 day')
 WHERE
     m.id = $1 AND t.transaction_type = $2
-ORDER BY
-    t.date
 `
 
 type GetTransactionsByMonthIDAndTypeParams struct {
