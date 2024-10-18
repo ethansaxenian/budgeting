@@ -1,19 +1,18 @@
 package server
 
 import (
-	"context"
 	"net/http"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/ethansaxenian/budgeting/components/transactions"
-	"github.com/ethansaxenian/budgeting/types"
+	"github.com/ethansaxenian/budgeting/database"
 	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
 )
 
-func sortTransactions(transactionSlice []types.Transaction, sortParam string) {
+func sortTransactions(transactionSlice []database.Transaction, sortParam string) {
 	switch sortParam {
 	case "dateDesc":
 		sort.Slice(transactionSlice, func(i, j int) bool {
@@ -35,15 +34,32 @@ func sortTransactions(transactionSlice []types.Transaction, sortParam string) {
 }
 
 func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	monthID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	transactionType := types.TransactionType(chi.URLParam(r, "transactionType"))
+	transactionType := database.TransactionType(chi.URLParam(r, "transactionType"))
 
-	monthTransactions, err := s.db.GetTransactionsByMonthIDAndType(monthID, transactionType)
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	q := database.New(conn)
+
+	monthTransactions, err := q.GetTransactionsByMonthIDAndType(
+		ctx,
+		database.GetTransactionsByMonthIDAndTypeParams{
+			ID:              monthID,
+			TransactionType: transactionType,
+		},
+	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -63,13 +79,15 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 		nextDir = util.ContextValueSortDirAsc
 	}
 
-	ctx := util.WithNextSortCtx(r.Context(), nextDir)
+	ctx = util.WithNextSortCtx(ctx, nextDir)
 
 	w.WriteHeader(http.StatusOK)
 	transactions.TransactionTable(monthTransactions, monthID, transactionType).Render(ctx, w)
 }
 
 func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -89,41 +107,53 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	desc := r.FormValue("description")
-	cat := types.Category(r.FormValue("category"))
+	cat := database.Category(r.FormValue("category"))
 
-	newTransaction := types.TransactionUpdate{
-		Description: desc,
-		Amount:      amt,
-		Date:        date,
-		Category:    cat,
-	}
-
-	if err = s.db.UpdateTransaction(id, newTransaction); err != nil {
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	defer conn.Close()
 
-	t := types.Transaction{
+	q := database.New(conn)
+
+	t, err := q.UpdateTransaction(ctx, database.UpdateTransactionParams{
 		Description: desc,
 		Amount:      amt,
 		Date:        date,
 		Category:    cat,
 		ID:          id,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("HX-Trigger", "editTransaction")
 	w.WriteHeader(http.StatusOK)
-	transactions.TransactionRow(t).Render(context.Background(), w)
+	transactions.TransactionRow(t).Render(ctx, w)
 }
 
 func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err = s.db.DeleteTransaction(id); err != nil {
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	q := database.New(conn)
+
+	if err = q.DeleteTransaction(ctx, id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -133,6 +163,8 @@ func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -145,15 +177,24 @@ func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newTransaction := types.TransactionCreate{
-		Description: r.FormValue("description"),
-		Amount:      amt,
-		Date:        date,
-		Category:    types.Category(r.FormValue("category")),
-		Type:        types.TransactionType(r.FormValue("type")),
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	q := database.New(conn)
+
+	newTransaction := database.CreateTransactionParams{
+		Description:     r.FormValue("description"),
+		Amount:          amt,
+		Date:            date,
+		Category:        database.Category(r.FormValue("category")),
+		TransactionType: database.TransactionType(r.FormValue("type")),
 	}
 
-	if err := s.db.CreateTransaction(newTransaction); err != nil {
+	if _, err := q.CreateTransaction(ctx, newTransaction); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

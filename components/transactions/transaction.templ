@@ -2,11 +2,11 @@ package transactions
 
 import (
 	"fmt"
-	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
+	"github.com/ethansaxenian/budgeting/database"
 )
 
-templ TransactionTable(transactions []types.Transaction, monthID int, transactionType types.TransactionType) {
+templ TransactionTable(transactions []database.Transaction, monthID int, transactionType database.TransactionType) {
 	<table
 		id="transaction-table"
 		class="text-left border-collapse h-0"
@@ -48,7 +48,7 @@ templ TransactionTable(transactions []types.Transaction, monthID int, transactio
 	</table>
 }
 
-templ TransactionRow(t types.Transaction) {
+templ TransactionRow(t database.Transaction) {
 	<tr class="border-b" id="transaction-row" hx-target="this" hx-swap="outerHTML">
 		<td class="px-4 py-2">
 			@date(t)
@@ -74,7 +74,7 @@ templ TransactionRow(t types.Transaction) {
 	</tr>
 }
 
-templ date(t types.Transaction) {
+templ date(t database.Transaction) {
 	<input
 		id="transaction-date"
 		name="date"
@@ -86,7 +86,7 @@ templ date(t types.Transaction) {
 	/>
 }
 
-templ amount(t types.Transaction) {
+templ amount(t database.Transaction) {
 	<span class="flex flex-nowrap">
 		<span class="py-2 text-sm">$</span>
 		<input
@@ -104,7 +104,7 @@ templ amount(t types.Transaction) {
 	</span>
 }
 
-templ desc(t types.Transaction) {
+templ desc(t database.Transaction) {
 	<input
 		name="description"
 		class="bg-zinc-900 py-2 text-sm"
@@ -115,14 +115,14 @@ templ desc(t types.Transaction) {
 	/>
 }
 
-templ category(t types.Transaction) {
+templ category(t database.Transaction) {
 	<select
 		name="category"
 		class="bg-zinc-900 py-2 text-sm"
 		hx-put={ string(templ.URL(fmt.Sprintf("/transactions/%d", t.ID))) }
 		hx-include="closest #transaction-row"
 	>
-		for _, cat := range types.ALL_CATEGORIES {
+		for _, cat := range database.AllCategoryValues() {
 			<option
 				selected?={ t.Category == cat }
 				value={ string(cat) }

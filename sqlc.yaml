@@ -1,0 +1,31 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    schema: "./cmd/migrate/migrations"
+    queries: "./queries"
+    gen:
+      go:
+        out: "database"
+        emit_empty_slices: true
+        emit_all_enum_values: true
+        overrides:
+          - db_type: "serial"
+            go_type: "int"
+          - column: "months.month"
+            go_type:
+              import: "time"
+              type: "Month"
+          - column: "months.year"
+            go_type: "int"
+          - column: "transactions.amount"
+            go_type: "float64"
+          - column: "budgets.month_id"
+            go_type: "int"
+          - column: "budgets.amount"
+            go_type: "float64"
+          - column: "budget_items.month_id"
+            go_type: "int"
+          - column: "budget_items.planned"
+            go_type: "float64"
+          - column: "budget_items.actual"
+            go_type: "float64"

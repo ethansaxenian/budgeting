@@ -1,12 +1,12 @@
 package budgets
 
 import (
-	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
 	"fmt"
+	"github.com/ethansaxenian/budgeting/database"
 )
 
-func sumPlanned(items []types.BudgetItem) float64 {
+func sumPlanned(items []database.BudgetItem) float64 {
 	sum := 0.0
 	for _, item := range items {
 		sum += item.Planned
@@ -14,7 +14,7 @@ func sumPlanned(items []types.BudgetItem) float64 {
 	return sum
 }
 
-func sumActual(items []types.BudgetItem) float64 {
+func sumActual(items []database.BudgetItem) float64 {
 	sum := 0.0
 	for _, item := range items {
 		sum += item.Actual
@@ -22,8 +22,9 @@ func sumActual(items []types.BudgetItem) float64 {
 	return sum
 }
 
-templ BudgetTable(items []types.BudgetItem, monthID int, transactionType types.TransactionType) {
+templ BudgetTable(items []database.BudgetItem, monthID int, transactionType database.TransactionType) {
 	<table
+		id="budget-table"
 		class="text-left border-collapse h-0"
 		hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/budgets/%s", monthID, transactionType))) }
 		hx-swap="outerHTML"
@@ -57,7 +58,7 @@ templ BudgetTable(items []types.BudgetItem, monthID int, transactionType types.T
 	</table>
 }
 
-templ BudgetRow(b types.BudgetItem) {
+templ BudgetRow(b database.BudgetItem) {
 	<tr class="border-b">
 		<td class="px-4 py-2">
 			@category(b.Category)
@@ -68,7 +69,7 @@ templ BudgetRow(b types.BudgetItem) {
 		<td class="px-4 py-2">
 			@actual(b.Actual)
 		</td>
-		if b.Type == types.EXPENSE {
+		if b.TransactionType == database.TransactionTypeExpense {
 			<td class="px-4 py-2">
 				@difference(b.Planned - b.Actual)
 			</td>
@@ -80,11 +81,11 @@ templ BudgetRow(b types.BudgetItem) {
 	</tr>
 }
 
-templ category(category types.Category) {
+templ category(category database.Category) {
 	<span class="py-2 text-sm">{ util.Capitalize(string(category)) } </span>
 }
 
-templ planned(b types.BudgetItem) {
+templ planned(b database.BudgetItem) {
 	<span class="flex flex-nowrap">
 		<span class="py-2 text-sm">$</span>
 		<input
@@ -95,8 +96,8 @@ templ planned(b types.BudgetItem) {
 			step=".01"
 			placeholder="00.00"
 			value={ util.FormatAmount(b.Planned) }
-			hx-patch={ string(templ.URL(fmt.Sprintf("/budgets/%d", b.ID))) }
-			hx-target="closest tr"
+			hx-patch={ string(templ.URL(fmt.Sprintf("/budgets/%d", b.BudgetID))) }
+			hx-target="closest #budget-table"
 		/>
 	</span>
 }
@@ -118,7 +119,7 @@ templ difference(difference float64) {
 	</span>
 }
 
-templ totalRow(items []types.BudgetItem, sumPlanned, sumActual float64, transactionType types.TransactionType) {
+templ totalRow(items []database.BudgetItem, sumPlanned, sumActual float64, transactionType database.TransactionType) {
 	<tr>
 		<td class="px-4 py-2">
 			<span class="py-2 text-sm font-bold">Total</span>
@@ -131,7 +132,7 @@ templ totalRow(items []types.BudgetItem, sumPlanned, sumActual float64, transact
 		</td>
 		<td class="px-4 py-2">
 			switch transactionType {
-				case types.EXPENSE:
+				case database.TransactionTypeExpense:
 					<span
 						class={
 							"py-2",
@@ -142,7 +143,7 @@ templ totalRow(items []types.BudgetItem, sumPlanned, sumActual float64, transact
 					>
 						{ util.FormatAmountWithDollarSign(sumPlanned-sumActual) }
 					</span>
-				case types.INCOME:
+				case database.TransactionTypeIncome:
 					<span
 						class={
 							"py-2",

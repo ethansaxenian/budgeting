@@ -8,10 +8,11 @@ import (
 )
 
 func main() {
-	server, err := server.NewServer()
+	server, close, err := server.NewServer()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer close()
 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
