@@ -1,4 +1,4 @@
-package types
+package util
 
 import "github.com/ethansaxenian/budgeting/database"
 

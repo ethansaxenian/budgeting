@@ -10,11 +10,11 @@ import (
 
 	"github.com/ethansaxenian/budgeting/components/graph"
 	"github.com/ethansaxenian/budgeting/database"
-	"github.com/ethansaxenian/budgeting/types"
+	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
 )
 
-func getGraphData(transactions []database.Transaction, year int, month time.Month) types.GraphData {
+func getGraphData(transactions []database.Transaction, year int, month time.Month) util.GraphData {
 	dayTotals := map[int]float64{}
 	for _, t := range transactions {
 		if t.Date.Month() == month && t.TransactionType == database.TransactionTypeExpense {
@@ -37,7 +37,7 @@ func getGraphData(transactions []database.Transaction, year int, month time.Mont
 
 	sort.Float64s(amounts)
 
-	return types.GraphData{
+	return util.GraphData{
 		Label: fmt.Sprintf("%s %d", month.String(), year),
 		Data:  amounts,
 	}
@@ -82,7 +82,7 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	datasets := []types.GraphData{getGraphData(monthTransactions, month.Year, month.Month)}
+	datasets := []util.GraphData{getGraphData(monthTransactions, month.Year, month.Month)}
 
 	y, m, _ := monthDate.AddDate(0, -1, 0).Date()
 	lastMonth, err := db.GetMonthByMonthAndYear(ctx, database.GetMonthByMonthAndYearParams{Month: m, Year: y})
