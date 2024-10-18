@@ -1,9 +1,5 @@
 package types
 
-import (
-	"time"
-)
-
 type TransactionType string
 
 const (
@@ -72,23 +68,6 @@ var INCOME_CATEGORIES = []Category{
 var CATEGORIES_BY_TYPE = map[TransactionType][]Category{
 	EXPENSE: EXPENSE_CATEGORIES,
 	INCOME:  INCOME_CATEGORIES,
-}
-
-type BudgetCreate struct {
-	Category Category
-	Type     TransactionType
-	MonthID  int
-	Amount   float64
-}
-
-type BudgetUpdate BudgetCreate
-
-type Budget struct {
-	Category Category
-	Type     TransactionType
-	MonthID  int
-	Amount   float64
-	ID       int
 }
 
 type BudgetItem struct {

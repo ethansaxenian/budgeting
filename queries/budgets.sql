@@ -6,8 +6,9 @@ SELECT id, month_id, category, amount, transaction_type
 FROM budgets
 WHERE month_id = $1 AND transaction_type = $2;
 
--- name: UpdateBudget :exec
-UPDATE budgets SET amount = $1 WHERE id = $2;
+-- name: PatchBudget :one
+UPDATE budgets SET amount = $1 WHERE id = $2
+RETURNING *;
 
 -- name: CreateNewBudgetsForMonth :many
 INSERT INTO budgets (month_id, category, amount, transaction_type)

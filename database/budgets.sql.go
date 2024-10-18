@@ -143,16 +143,27 @@ func (q *Queries) GetBudgetsByMonthIDAndType(ctx context.Context, arg GetBudgets
 	return items, nil
 }
 
-const updateBudget = `-- name: UpdateBudget :exec
+const patchBudget = `-- name: PatchBudget :one
 UPDATE budgets SET amount = $1 WHERE id = $2
+RETURNING id, month_id, category, amount, transaction_type, created_at, updated_at
 `
 
-type UpdateBudgetParams struct {
+type PatchBudgetParams struct {
 	Amount float64
 	ID     int
 }
 
-func (q *Queries) UpdateBudget(ctx context.Context, arg UpdateBudgetParams) error {
-	_, err := q.db.ExecContext(ctx, updateBudget, arg.Amount, arg.ID)
-	return err
+func (q *Queries) PatchBudget(ctx context.Context, arg PatchBudgetParams) (Budget, error) {
+	row := q.db.QueryRowContext(ctx, patchBudget, arg.Amount, arg.ID)
+	var i Budget
+	err := row.Scan(
+		&i.ID,
+		&i.MonthID,
+		&i.Category,
+		&i.Amount,
+		&i.TransactionType,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

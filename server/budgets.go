@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/ethansaxenian/budgeting/components/budgets"
+	"github.com/ethansaxenian/budgeting/database"
 	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
@@ -20,13 +21,30 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 
 	transactionType := types.TransactionType(chi.URLParam(r, "transactionType"))
 
-	monthBudgets, err := s.db.GetBudgetsByMonthIDAndType(monthID, transactionType)
+	ctx := r.Context()
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	db := database.New(conn)
+
+	monthBudgets, err := db.GetBudgetsByMonthIDAndType(ctx, database.GetBudgetsByMonthIDAndTypeParams{MonthID: monthID, TransactionType: transactionType})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	monthTransactions, err := s.db.GetTransactionsByMonthIDAndType(monthID, transactionType)
+	month, err := db.GetMonthByID(ctx, monthID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	startDate, endDate := month.StartEndDates()
+	monthTransactions, err := db.GetTransactionsByTypeInDateRange(ctx, database.GetTransactionsByTypeInDateRangeParams{StartDate: startDate, EndDate: endDate})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -51,7 +69,7 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 			Category: b.Category,
 			Planned:  b.Amount,
 			Actual:   byCategory[b.Category],
-			Type:     b.Type,
+			Type:     b.TransactionType,
 		})
 	}
 
@@ -76,18 +94,39 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = s.db.PatchBudget(id, amt); err != nil {
+	ctx := r.Context()
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	defer conn.Close()
 
-	budget, err := s.db.GetBudgetByID(id)
+	db := database.New(conn)
+
+	budget, err := db.PatchBudget(ctx, database.PatchBudgetParams{Amount: amt, ID: id})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	monthTransactions, err := s.db.GetTransactionsByMonthIDAndCategoryAndType(budget.MonthID, budget.Category, budget.Type)
+	month, err := db.GetMonthByID(ctx, budget.MonthID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	startDate, endDate := month.StartEndDates()
+
+	monthTransactions, err := db.GetTransactionsByTypeAndCategoryInDateRange(
+		ctx,
+		database.GetTransactionsByTypeAndCategoryInDateRangeParams{
+			TransactionType: budget.TransactionType,
+			Category:        budget.Category,
+			StartDate:       startDate,
+			EndDate:         endDate,
+		},
+	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -103,7 +142,7 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 		Category: budget.Category,
 		Planned:  budget.Amount,
 		Actual:   actual,
-		Type:     budget.Type,
+		Type:     budget.TransactionType,
 	}
 
 	w.WriteHeader(http.StatusOK)
