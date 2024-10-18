@@ -44,7 +44,14 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	startDate, endDate := month.StartEndDates()
-	monthTransactions, err := db.GetTransactionsByTypeInDateRange(ctx, database.GetTransactionsByTypeInDateRangeParams{StartDate: startDate, EndDate: endDate})
+	monthTransactions, err := db.GetTransactionsByTypeInDateRange(
+		ctx,
+		database.GetTransactionsByTypeInDateRangeParams{
+			StartDate:       startDate,
+			EndDate:         endDate,
+			TransactionType: transactionType,
+		},
+	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
