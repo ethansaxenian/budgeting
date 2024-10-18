@@ -76,7 +76,7 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	monthDate, err := month.Date()
+	monthDate, err := time.Parse("2006-01", fmt.Sprintf("%d-%02d", month.Year, month.Month))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
