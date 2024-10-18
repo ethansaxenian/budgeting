@@ -26,5 +26,5 @@ GROUP BY
 
 -- +goose Down
 -- +goose StatementBegin
-DROP VIEW IF EXISTS budget_item
+DROP VIEW IF EXISTS budget_items
 -- +goose StatementEnd
