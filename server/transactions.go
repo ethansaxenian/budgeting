@@ -88,6 +88,8 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 }
 
 func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -109,7 +111,6 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 	desc := r.FormValue("description")
 	cat := types.Category(r.FormValue("category"))
 
-	ctx := r.Context()
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -133,17 +134,18 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("HX-Trigger", "editTransaction")
 	w.WriteHeader(http.StatusOK)
-	transactions.TransactionRow(t).Render(context.Background(), w)
+	transactions.TransactionRow(t).Render(ctx, w)
 }
 
 func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	ctx := r.Context()
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -163,6 +165,8 @@ func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -175,7 +179,6 @@ func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

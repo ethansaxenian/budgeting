@@ -52,6 +52,8 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -64,7 +66,6 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
