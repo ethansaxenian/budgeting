@@ -1,0 +1,41 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    schema: "./cmd/migrate/migrations"
+    queries: "./queries"
+    gen:
+      go:
+        package: "database"
+        out: "database"
+        overrides:
+          - db_type: "serial"
+            go_type: "int"
+          - column: "months.month"
+            go_type:
+              import: "time"
+              type: "Month"
+          - column: "months.year"
+            go_type: "int"
+          - column: "transactions.amount"
+            go_type: "float64"
+          - column: "transactions.category"
+            go_type:
+              import: "github.com/ethansaxenian/budgeting/types"
+              type: "Category"
+          - column: "transactions.transaction_type"
+            go_type:
+              import: "github.com/ethansaxenian/budgeting/types"
+              type: "TransactionType"
+          - column: "budgets.month_id"
+            go_type: "int"
+          - column: "budgets.amount"
+            go_type: "float64"
+          - column: "budgets.category"
+            go_type:
+              import: "github.com/ethansaxenian/budgeting/types"
+              type: "Category"
+          - column: "budgets.transaction_type"
+            go_type:
+              import: "github.com/ethansaxenian/budgeting/types"
+              type: "TransactionType"
+
