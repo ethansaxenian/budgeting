@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"sort"
 	"strconv"
@@ -118,24 +119,26 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 	desc := r.FormValue("description")
 	cat := types.Category(r.FormValue("category"))
 
-	newTransaction := types.TransactionUpdate{
-		Description: desc,
-		Amount:      amt,
-		Date:        date,
-		Category:    cat,
-	}
-
-	if err = s.db.UpdateTransaction(id, newTransaction); err != nil {
+	ctx := r.Context()
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	defer conn.Close()
 
-	t := types.Transaction{
+	db := database.New(conn)
+
+	t, err := db.UpdateTransaction(ctx, database.UpdateTransactionParams{
 		Description: desc,
 		Amount:      amt,
 		Date:        date,
 		Category:    cat,
 		ID:          id,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("HX-Trigger", "editTransaction")
@@ -150,7 +153,17 @@ func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if err = s.db.DeleteTransaction(id); err != nil {
+	ctx := r.Context()
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	db := database.New(conn)
+
+	if err = db.DeleteTransaction(ctx, id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -172,15 +185,25 @@ func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newTransaction := types.TransactionCreate{
-		Description: r.FormValue("description"),
-		Amount:      amt,
-		Date:        date,
-		Category:    types.Category(r.FormValue("category")),
-		Type:        types.TransactionType(r.FormValue("type")),
+	ctx := r.Context()
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	db := database.New(conn)
+
+	newTransaction := database.CreateTransactionParams{
+		Description:     r.FormValue("description"),
+		Amount:          amt,
+		Date:            date,
+		Category:        types.Category(r.FormValue("category")),
+		TransactionType: types.TransactionType(r.FormValue("type")),
 	}
 
-	if err := s.db.CreateTransaction(newTransaction); err != nil {
+	if _, err := db.CreateTransaction(ctx, newTransaction); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

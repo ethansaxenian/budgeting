@@ -17,10 +17,11 @@ INSERT INTO transactions (description, amount, date, category, transaction_type)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
--- name: UpdateTransaction :exec
+-- name: UpdateTransaction :one
 UPDATE transactions
 SET description = $1, amount = $2, date = $3, category = $4
-WHERE id = $5;
+WHERE id = $5
+RETURNING *;
 
 -- name: DeleteTransaction :exec
 DELETE FROM transactions WHERE id = $1;

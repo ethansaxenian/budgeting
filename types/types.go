@@ -74,25 +74,6 @@ var CATEGORIES_BY_TYPE = map[TransactionType][]Category{
 	INCOME:  INCOME_CATEGORIES,
 }
 
-type TransactionCreate struct {
-	Date        time.Time
-	Description string
-	Category    Category
-	Type        TransactionType
-	Amount      float64
-}
-
-type TransactionUpdate TransactionCreate
-
-type Transaction struct {
-	Date        time.Time
-	Description string
-	Category    Category
-	Type        TransactionType
-	Amount      float64
-	ID          int
-}
-
 type BudgetCreate struct {
 	Category Category
 	Type     TransactionType

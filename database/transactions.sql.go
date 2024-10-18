@@ -7,7 +7,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/ethansaxenian/budgeting/types"
@@ -20,7 +19,7 @@ RETURNING id, date, amount, description, category, transaction_type, created_at,
 `
 
 type CreateTransactionParams struct {
-	Description     sql.NullString
+	Description     string
 	Amount          float64
 	Date            time.Time
 	Category        types.Category
@@ -172,27 +171,39 @@ func (q *Queries) GetTransactionsByTypeInDateRange(ctx context.Context, arg GetT
 	return items, nil
 }
 
-const updateTransaction = `-- name: UpdateTransaction :exec
+const updateTransaction = `-- name: UpdateTransaction :one
 UPDATE transactions
 SET description = $1, amount = $2, date = $3, category = $4
 WHERE id = $5
+RETURNING id, date, amount, description, category, transaction_type, created_at, updated_at
 `
 
 type UpdateTransactionParams struct {
-	Description sql.NullString
+	Description string
 	Amount      float64
 	Date        time.Time
 	Category    types.Category
 	ID          int
 }
 
-func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) error {
-	_, err := q.db.ExecContext(ctx, updateTransaction,
+func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) (Transaction, error) {
+	row := q.db.QueryRowContext(ctx, updateTransaction,
 		arg.Description,
 		arg.Amount,
 		arg.Date,
 		arg.Category,
 		arg.ID,
 	)
-	return err
+	var i Transaction
+	err := row.Scan(
+		&i.ID,
+		&i.Date,
+		&i.Amount,
+		&i.Description,
+		&i.Category,
+		&i.TransactionType,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

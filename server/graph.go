@@ -9,14 +9,15 @@ import (
 	"time"
 
 	"github.com/ethansaxenian/budgeting/components/graph"
+	"github.com/ethansaxenian/budgeting/database"
 	"github.com/ethansaxenian/budgeting/types"
 	"github.com/go-chi/chi/v5"
 )
 
-func getGraphData(transactions []types.Transaction, year int, month time.Month) types.GraphData {
+func getGraphData(transactions []database.Transaction, year int, month time.Month) types.GraphData {
 	dayTotals := map[int]float64{}
 	for _, t := range transactions {
-		if t.Date.Month() == month && t.Type == types.EXPENSE {
+		if t.Date.Month() == month && t.TransactionType == types.EXPENSE {
 			dayTotals[t.Date.Day()] += t.Amount
 		}
 	}

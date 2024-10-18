@@ -33,7 +33,7 @@ type Transaction struct {
 	ID              int
 	Date            time.Time
 	Amount          float64
-	Description     sql.NullString
+	Description     string
 	Category        types.Category
 	TransactionType types.TransactionType
 	CreatedAt       time.Time
