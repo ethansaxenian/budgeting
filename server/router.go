@@ -1,10 +1,6 @@
 package server
 
 import (
-	"fmt"
-	"net/http"
-	"time"
-
 	"github.com/ethansaxenian/budgeting/assets"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -27,16 +23,6 @@ func (s *Server) InitRouter() chi.Router {
 	r.Mount("/budgets", s.initBudgetsRouter())
 
 	return r
-}
-
-func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
-	currMonth, err := s.db.GetOrCreateCurrentMonth()
-	if err != nil {
-		http.Error(w, fmt.Errorf("failed to create new month for %s %d: %v", time.Now().Month().String(), time.Now().Year(), err).Error(), http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, fmt.Sprintf("/months/%d", currMonth.ID), http.StatusFound)
 }
 
 func (s *Server) initMonthsRouter() chi.Router {

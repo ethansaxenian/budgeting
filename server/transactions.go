@@ -8,12 +8,13 @@ import (
 	"strings"
 
 	"github.com/ethansaxenian/budgeting/components/transactions"
+	"github.com/ethansaxenian/budgeting/database"
 	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
 )
 
-func sortTransactions(transactionSlice []types.Transaction, sortParam string) {
+func sortTransactions(transactionSlice []database.Transaction, sortParam string) {
 	switch sortParam {
 	case "dateDesc":
 		sort.Slice(transactionSlice, func(i, j int) bool {
@@ -35,6 +36,8 @@ func sortTransactions(transactionSlice []types.Transaction, sortParam string) {
 }
 
 func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	monthID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -43,7 +46,31 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 
 	transactionType := types.TransactionType(chi.URLParam(r, "transactionType"))
 
-	monthTransactions, err := s.db.GetTransactionsByMonthIDAndType(monthID, transactionType)
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	db := database.New(conn)
+
+	month, err := db.GetMonthByID(ctx, monthID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	startDate, endDate := month.StartEndDates()
+	monthTransactions, err := db.GetTransactionsByTypeInDateRange(
+		ctx,
+		database.GetTransactionsByTypeInDateRangeParams{
+			TransactionType: transactionType,
+			StartDate:       startDate,
+			EndDate:         endDate,
+		},
+	)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -63,7 +90,7 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 		nextDir = util.ContextValueSortDirAsc
 	}
 
-	ctx := util.WithNextSortCtx(r.Context(), nextDir)
+	ctx = util.WithNextSortCtx(ctx, nextDir)
 
 	w.WriteHeader(http.StatusOK)
 	transactions.TransactionTable(monthTransactions, monthID, transactionType).Render(ctx, w)

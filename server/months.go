@@ -6,23 +6,35 @@ import (
 	"strconv"
 
 	"github.com/ethansaxenian/budgeting/components/months"
+	"github.com/ethansaxenian/budgeting/database"
 	"github.com/go-chi/chi/v5"
 )
 
 func (s *Server) HandleMonthShow(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	month, err := s.db.GetMonthByID(id)
+	conn, err := s.db.Conn(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close()
+
+	db := database.New(conn)
+
+	month, err := db.GetMonthByID(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	allMonths, err := s.db.GetMonths()
+	allMonths, err := db.GetAllMonths(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

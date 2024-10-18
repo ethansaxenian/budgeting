@@ -2,25 +2,28 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net"
 	"net/http"
 	"os"
 	"strconv"
 
-	"github.com/ethansaxenian/budgeting/database"
 	"github.com/ethansaxenian/budgeting/util"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 type Server struct {
-	db   *database.DB
+	db   *sql.DB
 	port int
 }
 
-func NewServer() (*http.Server, error) {
-	db, err := database.InitDB()
+func noop() error { return nil }
+
+func NewServer() (*http.Server, func() error, error) {
+	db, err := sql.Open("pgx", os.Getenv("DB_URL"))
 	if err != nil {
-		return nil, err
+		return nil, noop, err
 	}
 
 	port, err := strconv.Atoi(os.Getenv("APP_PORT"))
@@ -43,5 +46,17 @@ func NewServer() (*http.Server, error) {
 		},
 	}
 
-	return server, nil
+	close := func() error {
+		if err := db.Close(); err != nil {
+			return err
+		}
+
+		if err := server.Close(); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return server, close, nil
 }
