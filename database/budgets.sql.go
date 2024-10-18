@@ -95,6 +95,75 @@ func (q *Queries) GetBudgetByID(ctx context.Context, id int) (Budget, error) {
 	return i, err
 }
 
+const getBudgetItemsForMonthIDByTransactionType = `-- name: GetBudgetItemsForMonthIDByTransactionType :many
+SELECT
+    b.id AS budget_id,
+    b.category,
+    b.transaction_type AS type,
+    b.amount AS planned,
+    COALESCE(SUM(t.amount), 0)::float8 AS actual
+FROM
+    budgets b
+JOIN
+    months m ON b.month_id = m.id
+LEFT JOIN
+    transactions t
+    ON b.category = t.category
+    AND b.transaction_type = t.transaction_type
+    AND t.date BETWEEN
+        (DATE_TRUNC('month', TO_DATE(m.year || '-' || m.month || '-01', 'YYYY-MM-DD')))
+        AND
+        (DATE_TRUNC('month', TO_DATE(m.year || '-' || m.month || '-01', 'YYYY-MM-DD')) + INTERVAL '1 month' - INTERVAL '1 day')
+WHERE
+    b.month_id = $1 AND b.transaction_type = $2
+GROUP BY
+    b.id, b.category, b.transaction_type, b.amount
+ORDER BY
+    b.category, b.transaction_type
+`
+
+type GetBudgetItemsForMonthIDByTransactionTypeParams struct {
+	MonthID         int
+	TransactionType types.TransactionType
+}
+
+type GetBudgetItemsForMonthIDByTransactionTypeRow struct {
+	BudgetID int
+	Category types.Category
+	Type     types.TransactionType
+	Planned  float64
+	Actual   float64
+}
+
+func (q *Queries) GetBudgetItemsForMonthIDByTransactionType(ctx context.Context, arg GetBudgetItemsForMonthIDByTransactionTypeParams) ([]GetBudgetItemsForMonthIDByTransactionTypeRow, error) {
+	rows, err := q.db.QueryContext(ctx, getBudgetItemsForMonthIDByTransactionType, arg.MonthID, arg.TransactionType)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetBudgetItemsForMonthIDByTransactionTypeRow
+	for rows.Next() {
+		var i GetBudgetItemsForMonthIDByTransactionTypeRow
+		if err := rows.Scan(
+			&i.BudgetID,
+			&i.Category,
+			&i.Type,
+			&i.Planned,
+			&i.Actual,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getBudgetsByMonthIDAndType = `-- name: GetBudgetsByMonthIDAndType :many
 SELECT id, month_id, category, amount, transaction_type
 FROM budgets

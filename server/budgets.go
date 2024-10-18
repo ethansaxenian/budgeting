@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"sort"
 	"strconv"
 
 	"github.com/ethansaxenian/budgeting/components/budgets"
@@ -13,6 +12,8 @@ import (
 )
 
 func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	monthID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -21,7 +22,6 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 
 	transactionType := types.TransactionType(chi.URLParam(r, "transactionType"))
 
-	ctx := r.Context()
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -31,61 +31,24 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 
 	db := database.New(conn)
 
-	monthBudgets, err := db.GetBudgetsByMonthIDAndType(ctx, database.GetBudgetsByMonthIDAndTypeParams{MonthID: monthID, TransactionType: transactionType})
+	allBudgetItems, err := db.GetBudgetItemsForMonthIDByTransactionType(ctx, database.GetBudgetItemsForMonthIDByTransactionTypeParams{MonthID: monthID, TransactionType: transactionType})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	month, err := db.GetMonthByID(ctx, monthID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	startDate, endDate := month.StartEndDates()
-	monthTransactions, err := db.GetTransactionsByTypeInDateRange(
-		ctx,
-		database.GetTransactionsByTypeInDateRangeParams{
-			StartDate:       startDate,
-			EndDate:         endDate,
-			TransactionType: transactionType,
-		},
-	)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	byCategory := map[types.Category]float64{}
-	for _, t := range monthTransactions {
-		byCategory[t.Category] += t.Amount
-	}
-
-	budgetItems := []types.BudgetItem{}
+	budgetItems := []database.GetBudgetItemsForMonthIDByTransactionTypeRow{}
 
 	availableCategories := types.CATEGORIES_BY_TYPE[transactionType]
 
-	for _, b := range monthBudgets {
-		if !util.Includes(availableCategories, b.Category) {
-			continue
+	for _, b := range allBudgetItems {
+		if util.Includes(availableCategories, b.Category) {
+			budgetItems = append(budgetItems, b)
 		}
-
-		budgetItems = append(budgetItems, types.BudgetItem{
-			ID:       b.ID,
-			Category: b.Category,
-			Planned:  b.Amount,
-			Actual:   byCategory[b.Category],
-			Type:     b.TransactionType,
-		})
 	}
 
-	sort.Slice(budgetItems, func(i, j int) bool {
-		return budgetItems[i].Category < budgetItems[j].Category
-	})
-
 	w.WriteHeader(http.StatusOK)
-	budgets.BudgetTable(budgetItems, monthID, transactionType).Render(r.Context(), w)
+	budgets.BudgetTable(budgetItems, monthID, transactionType).Render(ctx, w)
 }
 
 func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
@@ -117,41 +80,29 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	month, err := db.GetMonthByID(ctx, budget.MonthID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	startDate, endDate := month.StartEndDates()
-
-	monthTransactions, err := db.GetTransactionsByTypeAndCategoryInDateRange(
+	allBudgetItems, err := db.GetBudgetItemsForMonthIDByTransactionType(
 		ctx,
-		database.GetTransactionsByTypeAndCategoryInDateRangeParams{
+		database.GetBudgetItemsForMonthIDByTransactionTypeParams{
+			MonthID:         budget.MonthID,
 			TransactionType: budget.TransactionType,
-			Category:        budget.Category,
-			StartDate:       startDate,
-			EndDate:         endDate,
 		},
 	)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var actual float64
-	for _, t := range monthTransactions {
-		actual += t.Amount
-	}
+	budgetItems := []database.GetBudgetItemsForMonthIDByTransactionTypeRow{}
 
-	budgetItem := types.BudgetItem{
-		ID:       budget.ID,
-		Category: budget.Category,
-		Planned:  budget.Amount,
-		Actual:   actual,
-		Type:     budget.TransactionType,
+	availableCategories := types.CATEGORIES_BY_TYPE[budget.TransactionType]
+
+	for _, b := range allBudgetItems {
+		if util.Includes(availableCategories, b.Category) {
+			budgetItems = append(budgetItems, b)
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)
-	budgets.BudgetRow(budgetItem).Render(r.Context(), w)
+	budgets.BudgetTable(budgetItems, budget.MonthID, budget.TransactionType).Render(ctx, w)
 }
