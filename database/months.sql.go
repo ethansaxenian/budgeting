@@ -22,11 +22,6 @@ type CreateMonthParams struct {
 	Year  int
 }
 
-// CreateMonth
-//
-//	INSERT INTO months (month, year)
-//	VALUES ($1, $2)
-//	RETURNING id, year, month, created_at, updated_at
 func (q *Queries) CreateMonth(ctx context.Context, arg CreateMonthParams) (Month, error) {
 	row := q.db.QueryRowContext(ctx, createMonth, arg.Month, arg.Year)
 	var i Month
@@ -44,9 +39,6 @@ const getAllMonths = `-- name: GetAllMonths :many
 SELECT id, year, month, created_at, updated_at FROM months
 `
 
-// GetAllMonths
-//
-//	SELECT id, year, month, created_at, updated_at FROM months
 func (q *Queries) GetAllMonths(ctx context.Context) ([]Month, error) {
 	rows, err := q.db.QueryContext(ctx, getAllMonths)
 	if err != nil {
@@ -80,9 +72,6 @@ const getMonthByID = `-- name: GetMonthByID :one
 SELECT id, year, month, created_at, updated_at FROM months WHERE id = $1
 `
 
-// GetMonthByID
-//
-//	SELECT id, year, month, created_at, updated_at FROM months WHERE id = $1
 func (q *Queries) GetMonthByID(ctx context.Context, id int) (Month, error) {
 	row := q.db.QueryRowContext(ctx, getMonthByID, id)
 	var i Month
@@ -105,9 +94,6 @@ type GetMonthByMonthAndYearParams struct {
 	Year  int
 }
 
-// GetMonthByMonthAndYear
-//
-//	SELECT id, year, month, created_at, updated_at FROM months WHERE month=$1 AND year=$2
 func (q *Queries) GetMonthByMonthAndYear(ctx context.Context, arg GetMonthByMonthAndYearParams) (Month, error) {
 	row := q.db.QueryRowContext(ctx, getMonthByMonthAndYear, arg.Month, arg.Year)
 	var i Month
