@@ -57,26 +57,6 @@ func (q *Queries) DeleteTransaction(ctx context.Context, id int) error {
 	return err
 }
 
-const getTransactionByRow = `-- name: GetTransactionByRow :one
-SELECT id, date, amount, description, category, transaction_type, created_at, updated_at FROM transactions WHERE id = $1
-`
-
-func (q *Queries) GetTransactionByRow(ctx context.Context, id int) (Transaction, error) {
-	row := q.db.QueryRowContext(ctx, getTransactionByRow, id)
-	var i Transaction
-	err := row.Scan(
-		&i.ID,
-		&i.Date,
-		&i.Amount,
-		&i.Description,
-		&i.Category,
-		&i.TransactionType,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getTransactionsByMonthIDAndType = `-- name: GetTransactionsByMonthIDAndType :many
 SELECT
     t.id,

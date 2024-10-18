@@ -1,11 +1,3 @@
--- name: GetBudgetByID :one
-SELECT * FROM budgets WHERE id = $1;
-
--- name: GetBudgetsByMonthIDAndType :many
-SELECT id, month_id, category, amount, transaction_type
-FROM budgets
-WHERE month_id = $1 AND transaction_type = $2;
-
 -- name: PatchBudget :one
 UPDATE budgets SET amount = $1 WHERE id = $2
 RETURNING *;

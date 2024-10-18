@@ -1,6 +1,3 @@
--- name: GetTransactionByRow :one
-SELECT * FROM transactions WHERE id = $1;
-
 -- name: GetTransactionsByMonthIDAndType :many
 SELECT
     t.id,
