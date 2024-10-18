@@ -1,6 +1,6 @@
 services:
-  web:
-    container_name: budgeting-web
+  app:
+    container_name: budgeting-app
     env_file: .env
     build:
       context: .
