@@ -28,9 +28,9 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	db := database.New(conn)
+	q := database.New(conn)
 
-	allBudgetItems, err := db.GetBudgetItemsByMonthIDAndTransactionType(
+	allBudgetItems, err := q.GetBudgetItemsByMonthIDAndTransactionType(
 		ctx,
 		database.GetBudgetItemsByMonthIDAndTransactionTypeParams{
 			MonthID:         monthID,
@@ -78,15 +78,15 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	db := database.New(conn)
+	q := database.New(conn)
 
-	budget, err := db.PatchBudget(ctx, database.PatchBudgetParams{Amount: amt, ID: id})
+	budget, err := q.PatchBudget(ctx, database.PatchBudgetParams{Amount: amt, ID: id})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	allBudgetItems, err := db.GetBudgetItemsByMonthIDAndTransactionType(
+	allBudgetItems, err := q.GetBudgetItemsByMonthIDAndTransactionType(
 		ctx,
 		database.GetBudgetItemsByMonthIDAndTransactionTypeParams{
 			MonthID:         budget.MonthID,

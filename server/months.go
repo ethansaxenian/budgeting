@@ -26,15 +26,15 @@ func (s *Server) HandleMonthShow(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	db := database.New(conn)
+	q := database.New(conn)
 
-	month, err := db.GetMonthByID(ctx, id)
+	month, err := q.GetMonthByID(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	allMonths, err := db.GetAllMonths(ctx)
+	allMonths, err := q.GetAllMonths(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

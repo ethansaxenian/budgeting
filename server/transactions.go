@@ -51,9 +51,9 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 	}
 	defer conn.Close()
 
-	db := database.New(conn)
+	q := database.New(conn)
 
-	monthTransactions, err := db.GetTransactionsByMonthIDAndType(
+	monthTransactions, err := q.GetTransactionsByMonthIDAndType(
 		ctx,
 		database.GetTransactionsByMonthIDAndTypeParams{
 			ID:              monthID,
@@ -116,9 +116,9 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	db := database.New(conn)
+	q := database.New(conn)
 
-	t, err := db.UpdateTransaction(ctx, database.UpdateTransactionParams{
+	t, err := q.UpdateTransaction(ctx, database.UpdateTransactionParams{
 		Description: desc,
 		Amount:      amt,
 		Date:        date,
@@ -151,9 +151,9 @@ func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request)
 	}
 	defer conn.Close()
 
-	db := database.New(conn)
+	q := database.New(conn)
 
-	if err = db.DeleteTransaction(ctx, id); err != nil {
+	if err = q.DeleteTransaction(ctx, id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -184,7 +184,7 @@ func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	db := database.New(conn)
+	q := database.New(conn)
 
 	newTransaction := database.CreateTransactionParams{
 		Description:     r.FormValue("description"),
@@ -194,7 +194,7 @@ func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
 		TransactionType: database.TransactionType(r.FormValue("type")),
 	}
 
-	if _, err := db.CreateTransaction(ctx, newTransaction); err != nil {
+	if _, err := q.CreateTransaction(ctx, newTransaction); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

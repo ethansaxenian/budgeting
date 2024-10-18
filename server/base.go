@@ -28,22 +28,22 @@ func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 
-	db := database.New(tx)
+	q := database.New(tx)
 
-	month, err := db.GetMonthByMonthAndYear(ctx, database.GetMonthByMonthAndYearParams{Month: currMonth, Year: currYear})
+	month, err := q.GetMonthByMonthAndYear(ctx, database.GetMonthByMonthAndYearParams{Month: currMonth, Year: currYear})
 
 	switch err {
 	case nil:
 		break
 
 	case sql.ErrNoRows:
-		month, err = db.CreateMonth(ctx, database.CreateMonthParams{Month: currMonth, Year: currYear})
+		month, err = q.CreateMonth(ctx, database.CreateMonthParams{Month: currMonth, Year: currYear})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		if _, err = db.CreateNewBudgetsForMonth(ctx, month.ID); err != nil {
+		if _, err = q.CreateNewBudgetsForMonth(ctx, month.ID); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}

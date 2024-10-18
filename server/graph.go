@@ -59,15 +59,15 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	db := database.New(conn)
+	q := database.New(conn)
 
-	month, err := db.GetMonthByID(ctx, monthID)
+	month, err := q.GetMonthByID(ctx, monthID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	monthTransactions, err := db.GetTransactionsByMonthIDAndType(
+	monthTransactions, err := q.GetTransactionsByMonthIDAndType(
 		ctx,
 		database.GetTransactionsByMonthIDAndTypeParams{ID: monthID, TransactionType: database.TransactionTypeExpense},
 	)
@@ -85,11 +85,11 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 	datasets := []util.GraphData{getGraphData(monthTransactions, month.Year, month.Month)}
 
 	y, m, _ := monthDate.AddDate(0, -1, 0).Date()
-	lastMonth, err := db.GetMonthByMonthAndYear(ctx, database.GetMonthByMonthAndYearParams{Month: m, Year: y})
+	lastMonth, err := q.GetMonthByMonthAndYear(ctx, database.GetMonthByMonthAndYearParams{Month: m, Year: y})
 	if err != nil {
 		log.Printf("Failed to get last month (%s %d): %s", m, y, err)
 	} else {
-		lastMonthTransactions, err := db.GetTransactionsByMonthIDAndType(
+		lastMonthTransactions, err := q.GetTransactionsByMonthIDAndType(
 			ctx,
 			database.GetTransactionsByMonthIDAndTypeParams{ID: lastMonth.ID, TransactionType: database.TransactionTypeExpense},
 		)
