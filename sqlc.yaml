@@ -5,8 +5,9 @@ sql:
     queries: "./queries"
     gen:
       go:
-        package: "database"
         out: "database"
+        emit_empty_slices: true
+        emit_sql_as_comment: true
         overrides:
           - db_type: "serial"
             go_type: "int"
@@ -38,4 +39,3 @@ sql:
             go_type:
               import: "github.com/ethansaxenian/budgeting/types"
               type: "TransactionType"
-
