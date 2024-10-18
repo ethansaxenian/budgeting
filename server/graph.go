@@ -44,13 +44,14 @@ func getGraphData(transactions []database.Transaction, year int, month time.Mont
 }
 
 func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	monthID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "Invalid month ID", http.StatusBadRequest)
 		return
 	}
 
-	ctx := r.Context()
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -66,12 +67,10 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	startDate, endDate := month.StartEndDates()
-	monthTransactions, err := db.GetTransactionsByTypeInDateRange(
+	monthTransactions, err := db.GetTransactionsByMonthIDAndType(
 		ctx,
-		database.GetTransactionsByTypeInDateRangeParams{StartDate: startDate, EndDate: endDate, TransactionType: types.EXPENSE},
+		database.GetTransactionsByMonthIDAndTypeParams{ID: monthID, TransactionType: types.EXPENSE},
 	)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -90,10 +89,9 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Failed to get last month (%s %d): %s", m, y, err)
 	} else {
-		startDate, endDate := lastMonth.StartEndDates()
-		lastMonthTransactions, err := db.GetTransactionsByTypeInDateRange(
+		lastMonthTransactions, err := db.GetTransactionsByMonthIDAndType(
 			ctx,
-			database.GetTransactionsByTypeInDateRangeParams{StartDate: startDate, EndDate: endDate, TransactionType: types.EXPENSE},
+			database.GetTransactionsByMonthIDAndTypeParams{ID: lastMonth.ID, TransactionType: types.EXPENSE},
 		)
 		if err != nil {
 			log.Printf("Failed to get transactions for last month (%s %d): %s", m, y, err)
@@ -103,5 +101,5 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	graph.Graph(datasets).Render(r.Context(), w)
+	graph.Graph(datasets).Render(ctx, w)
 }

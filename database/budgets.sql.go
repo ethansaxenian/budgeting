@@ -119,7 +119,7 @@ WHERE
 GROUP BY
     b.id, b.category, b.transaction_type, b.amount
 ORDER BY
-    b.category, b.transaction_type
+    b.category
 `
 
 type GetBudgetItemsForMonthIDByTransactionTypeParams struct {

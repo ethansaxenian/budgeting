@@ -55,19 +55,11 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 
 	db := database.New(conn)
 
-	month, err := db.GetMonthByID(ctx, monthID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	startDate, endDate := month.StartEndDates()
-	monthTransactions, err := db.GetTransactionsByTypeInDateRange(
+	monthTransactions, err := db.GetTransactionsByMonthIDAndType(
 		ctx,
-		database.GetTransactionsByTypeInDateRangeParams{
+		database.GetTransactionsByMonthIDAndTypeParams{
+			ID:              monthID,
 			TransactionType: transactionType,
-			StartDate:       startDate,
-			EndDate:         endDate,
 		},
 	)
 

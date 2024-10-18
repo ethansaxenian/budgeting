@@ -1,16 +1,27 @@
 -- name: GetTransactionByRow :one
 SELECT * FROM transactions WHERE id = $1;
 
--- name: GetTransactionsByTypeInDateRange :many
-SELECT *
-FROM transactions
-WHERE transaction_type = $1 AND date BETWEEN sqlc.arg(start_date)::date AND sqlc.arg(end_date)::date;
-
-
--- name: GetTransactionsByTypeAndCategoryInDateRange :many
-SELECT *
-FROM transactions
-WHERE transaction_type = $1 AND category = $2 AND date BETWEEN sqlc.arg(start_date)::date AND sqlc.arg(end_date)::date;
+-- name: GetTransactionsByMonthIDAndType :many
+SELECT
+    t.id,
+    t.date,
+    t.amount,
+    t.description,
+    t.category,
+    t.transaction_type,
+    t.created_at,
+    t.updated_at
+FROM
+    transactions t
+JOIN
+    months m ON t.date BETWEEN
+        (DATE_TRUNC('month', TO_DATE(m.year || '-' || m.month || '-01', 'YYYY-MM-DD')))
+        AND
+        (DATE_TRUNC('month', TO_DATE(m.year || '-' || m.month || '-01', 'YYYY-MM-DD')) + INTERVAL '1 month' - INTERVAL '1 day')
+WHERE
+    m.id = $1 AND t.transaction_type = $2
+ORDER BY
+    t.date;
 
 -- name: CreateTransaction :one
 INSERT INTO transactions (description, amount, date, category, transaction_type)
@@ -25,3 +36,4 @@ RETURNING *;
 
 -- name: DeleteTransaction :exec
 DELETE FROM transactions WHERE id = $1;
+
