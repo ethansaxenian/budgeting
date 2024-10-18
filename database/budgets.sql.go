@@ -7,8 +7,6 @@ package database
 
 import (
 	"context"
-
-	"github.com/ethansaxenian/budgeting/types"
 )
 
 const createNewBudgetsForMonth = `-- name: CreateNewBudgetsForMonth :many
@@ -76,59 +74,29 @@ func (q *Queries) CreateNewBudgetsForMonth(ctx context.Context, monthID int) ([]
 	return items, nil
 }
 
-const getBudgetItemsForMonthIDByTransactionType = `-- name: GetBudgetItemsForMonthIDByTransactionType :many
-SELECT
-    b.id AS budget_id,
-    b.category,
-    b.transaction_type AS type,
-    b.amount AS planned,
-    COALESCE(SUM(t.amount), 0)::float8 AS actual
-FROM
-    budgets b
-JOIN
-    months m ON b.month_id = m.id
-LEFT JOIN
-    transactions t
-    ON b.category = t.category
-    AND b.transaction_type = t.transaction_type
-    AND t.date BETWEEN
-        (DATE_TRUNC('month', TO_DATE(m.year || '-' || m.month || '-01', 'YYYY-MM-DD')))
-        AND
-        (DATE_TRUNC('month', TO_DATE(m.year || '-' || m.month || '-01', 'YYYY-MM-DD')) + INTERVAL '1 month' - INTERVAL '1 day')
-WHERE
-    b.month_id = $1 AND b.transaction_type = $2
-GROUP BY
-    b.id, b.category, b.transaction_type, b.amount
-ORDER BY
-    b.category
+const getBudgetItemsByMonthIDAndTransactionType = `-- name: GetBudgetItemsByMonthIDAndTransactionType :many
+SELECT budget_id, month_id, category, transaction_type, planned, actual FROM budget_items WHERE month_id = $1 AND transaction_type = $2
 `
 
-type GetBudgetItemsForMonthIDByTransactionTypeParams struct {
+type GetBudgetItemsByMonthIDAndTransactionTypeParams struct {
 	MonthID         int
-	TransactionType types.TransactionType
+	TransactionType TransactionType
 }
 
-type GetBudgetItemsForMonthIDByTransactionTypeRow struct {
-	BudgetID int
-	Category types.Category
-	Type     types.TransactionType
-	Planned  float64
-	Actual   float64
-}
-
-func (q *Queries) GetBudgetItemsForMonthIDByTransactionType(ctx context.Context, arg GetBudgetItemsForMonthIDByTransactionTypeParams) ([]GetBudgetItemsForMonthIDByTransactionTypeRow, error) {
-	rows, err := q.db.QueryContext(ctx, getBudgetItemsForMonthIDByTransactionType, arg.MonthID, arg.TransactionType)
+func (q *Queries) GetBudgetItemsByMonthIDAndTransactionType(ctx context.Context, arg GetBudgetItemsByMonthIDAndTransactionTypeParams) ([]BudgetItem, error) {
+	rows, err := q.db.QueryContext(ctx, getBudgetItemsByMonthIDAndTransactionType, arg.MonthID, arg.TransactionType)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetBudgetItemsForMonthIDByTransactionTypeRow{}
+	items := []BudgetItem{}
 	for rows.Next() {
-		var i GetBudgetItemsForMonthIDByTransactionTypeRow
+		var i BudgetItem
 		if err := rows.Scan(
 			&i.BudgetID,
+			&i.MonthID,
 			&i.Category,
-			&i.Type,
+			&i.TransactionType,
 			&i.Planned,
 			&i.Actual,
 		); err != nil {

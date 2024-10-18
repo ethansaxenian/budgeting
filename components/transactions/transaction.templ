@@ -2,12 +2,11 @@ package transactions
 
 import (
 	"fmt"
-	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
 	"github.com/ethansaxenian/budgeting/database"
 )
 
-templ TransactionTable(transactions []database.Transaction, monthID int, transactionType types.TransactionType) {
+templ TransactionTable(transactions []database.Transaction, monthID int, transactionType database.TransactionType) {
 	<table
 		id="transaction-table"
 		class="text-left border-collapse h-0"
@@ -123,7 +122,7 @@ templ category(t database.Transaction) {
 		hx-put={ string(templ.URL(fmt.Sprintf("/transactions/%d", t.ID))) }
 		hx-include="closest #transaction-row"
 	>
-		for _, cat := range types.ALL_CATEGORIES {
+		for _, cat := range database.AllCategoryValues() {
 			<option
 				selected?={ t.Category == cat }
 				value={ string(cat) }

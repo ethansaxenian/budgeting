@@ -1,13 +1,12 @@
 package budgets
 
 import (
-	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
 	"fmt"
 	"github.com/ethansaxenian/budgeting/database"
 )
 
-func sumPlanned(items []database.GetBudgetItemsForMonthIDByTransactionTypeRow) float64 {
+func sumPlanned(items []database.BudgetItem) float64 {
 	sum := 0.0
 	for _, item := range items {
 		sum += item.Planned
@@ -15,7 +14,7 @@ func sumPlanned(items []database.GetBudgetItemsForMonthIDByTransactionTypeRow) f
 	return sum
 }
 
-func sumActual(items []database.GetBudgetItemsForMonthIDByTransactionTypeRow) float64 {
+func sumActual(items []database.BudgetItem) float64 {
 	sum := 0.0
 	for _, item := range items {
 		sum += item.Actual
@@ -23,7 +22,7 @@ func sumActual(items []database.GetBudgetItemsForMonthIDByTransactionTypeRow) fl
 	return sum
 }
 
-templ BudgetTable(items []database.GetBudgetItemsForMonthIDByTransactionTypeRow, monthID int, transactionType types.TransactionType) {
+templ BudgetTable(items []database.BudgetItem, monthID int, transactionType database.TransactionType) {
 	<table
 		id="budget-table"
 		class="text-left border-collapse h-0"
@@ -59,7 +58,7 @@ templ BudgetTable(items []database.GetBudgetItemsForMonthIDByTransactionTypeRow,
 	</table>
 }
 
-templ BudgetRow(b database.GetBudgetItemsForMonthIDByTransactionTypeRow) {
+templ BudgetRow(b database.BudgetItem) {
 	<tr class="border-b">
 		<td class="px-4 py-2">
 			@category(b.Category)
@@ -70,7 +69,7 @@ templ BudgetRow(b database.GetBudgetItemsForMonthIDByTransactionTypeRow) {
 		<td class="px-4 py-2">
 			@actual(b.Actual)
 		</td>
-		if b.Type == types.EXPENSE {
+		if b.TransactionType == database.TransactionTypeExpense {
 			<td class="px-4 py-2">
 				@difference(b.Planned - b.Actual)
 			</td>
@@ -82,11 +81,11 @@ templ BudgetRow(b database.GetBudgetItemsForMonthIDByTransactionTypeRow) {
 	</tr>
 }
 
-templ category(category types.Category) {
+templ category(category database.Category) {
 	<span class="py-2 text-sm">{ util.Capitalize(string(category)) } </span>
 }
 
-templ planned(b database.GetBudgetItemsForMonthIDByTransactionTypeRow) {
+templ planned(b database.BudgetItem) {
 	<span class="flex flex-nowrap">
 		<span class="py-2 text-sm">$</span>
 		<input
@@ -120,7 +119,7 @@ templ difference(difference float64) {
 	</span>
 }
 
-templ totalRow(items []database.GetBudgetItemsForMonthIDByTransactionTypeRow, sumPlanned, sumActual float64, transactionType types.TransactionType) {
+templ totalRow(items []database.BudgetItem, sumPlanned, sumActual float64, transactionType database.TransactionType) {
 	<tr>
 		<td class="px-4 py-2">
 			<span class="py-2 text-sm font-bold">Total</span>
@@ -133,7 +132,7 @@ templ totalRow(items []database.GetBudgetItemsForMonthIDByTransactionTypeRow, su
 		</td>
 		<td class="px-4 py-2">
 			switch transactionType {
-				case types.EXPENSE:
+				case database.TransactionTypeExpense:
 					<span
 						class={
 							"py-2",
@@ -144,7 +143,7 @@ templ totalRow(items []database.GetBudgetItemsForMonthIDByTransactionTypeRow, su
 					>
 						{ util.FormatAmountWithDollarSign(sumPlanned-sumActual) }
 					</span>
-				case types.INCOME:
+				case database.TransactionTypeIncome:
 					<span
 						class={
 							"py-2",

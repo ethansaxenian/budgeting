@@ -1,81 +1,32 @@
 package types
 
-type TransactionType string
+import "github.com/ethansaxenian/budgeting/database"
 
-const (
-	EXPENSE TransactionType = "expense"
-	INCOME  TransactionType = "income"
-)
-
-type Category string
-
-const (
-	FOOD           Category = "food"
-	GIFTS          Category = "gifts"
-	MEDICAL        Category = "medical"
-	HOME           Category = "home"
-	TRANSPORTATION Category = "transportation"
-	PERSONAL       Category = "personal"
-	SAVINGS        Category = "savings"
-	UTILITIES      Category = "utilities"
-	TRAVEL         Category = "travel"
-	OTHER          Category = "other"
-	PAYCHECK       Category = "paycheck"
-	BONUS          Category = "bonus"
-	INTEREST       Category = "interest"
-	CASHBACK       Category = "cashback"
-)
-
-var ALL_CATEGORIES = []Category{
-	FOOD,
-	GIFTS,
-	MEDICAL,
-	HOME,
-	TRANSPORTATION,
-	PERSONAL,
-	SAVINGS,
-	UTILITIES,
-	TRAVEL,
-	OTHER,
-	PAYCHECK,
-	BONUS,
-	INTEREST,
-	CASHBACK,
+var EXPENSE_CATEGORIES = []database.Category{
+	database.CategoryFood,
+	database.CategoryGifts,
+	database.CategoryMedical,
+	database.CategoryHome,
+	database.CategoryTransportation,
+	database.CategoryPersonal,
+	database.CategorySavings,
+	database.CategoryUtilities,
+	database.CategoryTravel,
+	database.CategoryOther,
 }
 
-var EXPENSE_CATEGORIES = []Category{
-	FOOD,
-	GIFTS,
-	MEDICAL,
-	HOME,
-	TRANSPORTATION,
-	PERSONAL,
-	SAVINGS,
-	UTILITIES,
-	TRAVEL,
-	OTHER,
+var INCOME_CATEGORIES = []database.Category{
+	database.CategoryPaycheck,
+	database.CategoryBonus,
+	database.CategoryInterest,
+	database.CategoryGifts,
+	database.CategoryOther,
+	database.CategoryCashback,
 }
 
-var INCOME_CATEGORIES = []Category{
-	PAYCHECK,
-	BONUS,
-	INTEREST,
-	GIFTS,
-	OTHER,
-	CASHBACK,
-}
-
-var CATEGORIES_BY_TYPE = map[TransactionType][]Category{
-	EXPENSE: EXPENSE_CATEGORIES,
-	INCOME:  INCOME_CATEGORIES,
-}
-
-type BudgetItem struct {
-	Category Category
-	Type     TransactionType
-	ID       int
-	Planned  float64
-	Actual   float64
+var CATEGORIES_BY_TYPE = map[database.TransactionType][]database.Category{
+	database.TransactionTypeExpense: EXPENSE_CATEGORIES,
+	database.TransactionTypeIncome:  INCOME_CATEGORIES,
 }
 
 type GraphData struct {

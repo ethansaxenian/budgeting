@@ -17,7 +17,7 @@ import (
 func getGraphData(transactions []database.Transaction, year int, month time.Month) types.GraphData {
 	dayTotals := map[int]float64{}
 	for _, t := range transactions {
-		if t.Date.Month() == month && t.TransactionType == types.EXPENSE {
+		if t.Date.Month() == month && t.TransactionType == database.TransactionTypeExpense {
 			dayTotals[t.Date.Day()] += t.Amount
 		}
 	}
@@ -69,7 +69,7 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 
 	monthTransactions, err := db.GetTransactionsByMonthIDAndType(
 		ctx,
-		database.GetTransactionsByMonthIDAndTypeParams{ID: monthID, TransactionType: types.EXPENSE},
+		database.GetTransactionsByMonthIDAndTypeParams{ID: monthID, TransactionType: database.TransactionTypeExpense},
 	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -91,7 +91,7 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 	} else {
 		lastMonthTransactions, err := db.GetTransactionsByMonthIDAndType(
 			ctx,
-			database.GetTransactionsByMonthIDAndTypeParams{ID: lastMonth.ID, TransactionType: types.EXPENSE},
+			database.GetTransactionsByMonthIDAndTypeParams{ID: lastMonth.ID, TransactionType: database.TransactionTypeExpense},
 		)
 		if err != nil {
 			log.Printf("Failed to get transactions for last month (%s %d): %s", m, y, err)

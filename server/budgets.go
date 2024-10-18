@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -20,7 +21,7 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transactionType := types.TransactionType(chi.URLParam(r, "transactionType"))
+	transactionType := database.TransactionType(chi.URLParam(r, "transactionType"))
 
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
@@ -31,21 +32,30 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 
 	db := database.New(conn)
 
-	allBudgetItems, err := db.GetBudgetItemsForMonthIDByTransactionType(ctx, database.GetBudgetItemsForMonthIDByTransactionTypeParams{MonthID: monthID, TransactionType: transactionType})
+	allBudgetItems, err := db.GetBudgetItemsByMonthIDAndTransactionType(
+		ctx,
+		database.GetBudgetItemsByMonthIDAndTransactionTypeParams{
+			MonthID:         monthID,
+			TransactionType: transactionType,
+		},
+	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	fmt.Println(allBudgetItems)
 
-	budgetItems := []database.GetBudgetItemsForMonthIDByTransactionTypeRow{}
+	budgetItems := []database.BudgetItem{}
 
 	availableCategories := types.CATEGORIES_BY_TYPE[transactionType]
+	fmt.Println(availableCategories)
 
 	for _, b := range allBudgetItems {
 		if util.Includes(availableCategories, b.Category) {
 			budgetItems = append(budgetItems, b)
 		}
 	}
+	fmt.Println(budgetItems)
 
 	w.WriteHeader(http.StatusOK)
 	budgets.BudgetTable(budgetItems, monthID, transactionType).Render(ctx, w)
@@ -81,9 +91,9 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allBudgetItems, err := db.GetBudgetItemsForMonthIDByTransactionType(
+	allBudgetItems, err := db.GetBudgetItemsByMonthIDAndTransactionType(
 		ctx,
-		database.GetBudgetItemsForMonthIDByTransactionTypeParams{
+		database.GetBudgetItemsByMonthIDAndTransactionTypeParams{
 			MonthID:         budget.MonthID,
 			TransactionType: budget.TransactionType,
 		},
@@ -94,7 +104,7 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	budgetItems := []database.GetBudgetItemsForMonthIDByTransactionTypeRow{}
+	budgetItems := []database.BudgetItem{}
 
 	availableCategories := types.CATEGORIES_BY_TYPE[budget.TransactionType]
 

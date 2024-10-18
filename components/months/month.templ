@@ -1,7 +1,6 @@
 package months
 
 import (
-	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
 	"fmt"
 	"strconv"
@@ -65,15 +64,15 @@ templ addTransactionForm() {
 			class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2"
 		/>
 		<select name="category" class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2">
-			for _, cat := range types.ALL_CATEGORIES {
-				<option value={ string(cat) } selected?={ cat == types.TRANSPORTATION }>
+			for _, cat := range database.AllCategoryValues() {
+				<option value={ string(cat) } selected?={ cat == database.CategoryTransportation }>
 					{ util.Capitalize(string(cat)) }
 				</option>
 			}
 		</select>
 		<select name="type" class="border border-gray-500 bg-zinc-800 rounded-md m-2 p-2">
-			<option selected value={ string(types.EXPENSE) }>Expense</option>
-			<option value={ string(types.INCOME) }>Income</option>
+			<option selected value={ string(database.TransactionTypeExpense) }>Expense</option>
+			<option value={ string(database.TransactionTypeIncome) }>Income</option>
 		</select>
 		<button
 			id="add-transaction-button"
@@ -92,7 +91,7 @@ templ monthTables(month database.Month) {
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Planned Expenses</div>
 			<span
-				hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/budgets/%s", month.ID, types.EXPENSE))) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/budgets/%s", month.ID, database.TransactionTypeExpense))) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"
@@ -101,7 +100,7 @@ templ monthTables(month database.Month) {
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Planned Income</div>
 			<span
-				hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/budgets/%s", month.ID, types.INCOME))) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/budgets/%s", month.ID, database.TransactionTypeIncome))) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"
@@ -112,7 +111,7 @@ templ monthTables(month database.Month) {
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Expenses</div>
 			<span
-				hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/transactions/%s", month.ID, types.EXPENSE))) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/transactions/%s", month.ID, database.TransactionTypeExpense))) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"
@@ -121,7 +120,7 @@ templ monthTables(month database.Month) {
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Income</div>
 			<span
-				hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/transactions/%s", month.ID, types.INCOME))) }
+				hx-get={ string(templ.URL(fmt.Sprintf("/months/%d/transactions/%s", month.ID, database.TransactionTypeIncome))) }
 				hx-target="this"
 				hx-swap="outerHTML"
 				hx-trigger="load"

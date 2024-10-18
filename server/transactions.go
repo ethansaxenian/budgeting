@@ -8,7 +8,6 @@ import (
 
 	"github.com/ethansaxenian/budgeting/components/transactions"
 	"github.com/ethansaxenian/budgeting/database"
-	"github.com/ethansaxenian/budgeting/types"
 	"github.com/ethansaxenian/budgeting/util"
 	"github.com/go-chi/chi/v5"
 )
@@ -43,7 +42,7 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	transactionType := types.TransactionType(chi.URLParam(r, "transactionType"))
+	transactionType := database.TransactionType(chi.URLParam(r, "transactionType"))
 
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
@@ -108,7 +107,7 @@ func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	desc := r.FormValue("description")
-	cat := types.Category(r.FormValue("category"))
+	cat := database.Category(r.FormValue("category"))
 
 	conn, err := s.db.Conn(ctx)
 	if err != nil {
@@ -191,8 +190,8 @@ func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
 		Description:     r.FormValue("description"),
 		Amount:          amt,
 		Date:            date,
-		Category:        types.Category(r.FormValue("category")),
-		TransactionType: types.TransactionType(r.FormValue("type")),
+		Category:        database.Category(r.FormValue("category")),
+		TransactionType: database.TransactionType(r.FormValue("type")),
 	}
 
 	if _, err := db.CreateTransaction(ctx, newTransaction); err != nil {

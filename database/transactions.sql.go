@@ -8,8 +8,6 @@ package database
 import (
 	"context"
 	"time"
-
-	"github.com/ethansaxenian/budgeting/types"
 )
 
 const createTransaction = `-- name: CreateTransaction :one
@@ -22,8 +20,8 @@ type CreateTransactionParams struct {
 	Description     string
 	Amount          float64
 	Date            time.Time
-	Category        types.Category
-	TransactionType types.TransactionType
+	Category        Category
+	TransactionType TransactionType
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
@@ -80,7 +78,7 @@ WHERE
 
 type GetTransactionsByMonthIDAndTypeParams struct {
 	ID              int
-	TransactionType types.TransactionType
+	TransactionType TransactionType
 }
 
 func (q *Queries) GetTransactionsByMonthIDAndType(ctx context.Context, arg GetTransactionsByMonthIDAndTypeParams) ([]Transaction, error) {
@@ -126,7 +124,7 @@ type UpdateTransactionParams struct {
 	Description string
 	Amount      float64
 	Date        time.Time
-	Category    types.Category
+	Category    Category
 	ID          int
 }
 
