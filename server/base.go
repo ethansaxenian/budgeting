@@ -9,26 +9,18 @@ import (
 	"github.com/ethansaxenian/budgeting/util"
 )
 
-func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
+func base(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
-
-	currYear, currMonth, _ := util.CurrentDate()
-
-	conn, err := s.db.Conn(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer conn.Close()
 
 	tx, err := conn.BeginTx(ctx, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 	defer tx.Rollback()
 
 	q := database.New(tx)
+
+	currYear, currMonth, _ := util.CurrentDate()
 
 	month, err := q.GetMonthByMonthAndYear(ctx, database.GetMonthByMonthAndYearParams{Month: currMonth, Year: currYear})
 
@@ -39,21 +31,20 @@ func (s *Server) baseHandler(w http.ResponseWriter, r *http.Request) {
 	case sql.ErrNoRows:
 		month, err = q.CreateMonth(ctx, database.CreateMonthParams{Month: currMonth, Year: currYear})
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return err
 		}
 
 		if _, err = q.CreateNewBudgetsForMonth(ctx, month.ID); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return err
 		}
 
 	default:
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	tx.Commit()
 
 	http.Redirect(w, r, fmt.Sprintf("/months/%d", month.ID), http.StatusFound)
+
+	return nil
 }

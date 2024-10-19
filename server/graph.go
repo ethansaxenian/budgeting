@@ -1,8 +1,9 @@
 package server
 
 import (
+	"database/sql"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"sort"
 	"strconv"
@@ -43,28 +44,21 @@ func getGraphData(transactions []database.Transaction, year int, month time.Mont
 	}
 }
 
-func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
+func HandleGraphShow(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
 	monthID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "Invalid month ID", http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid month ID"))
 	}
-
-	conn, err := s.db.Conn(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer conn.Close()
 
 	q := database.New(conn)
 
 	month, err := q.GetMonthByID(ctx, monthID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if err == sql.ErrNoRows {
+		return NewAPIError(http.StatusNotFound, fmt.Errorf("month with ID %d not found", monthID))
+	} else if err != nil {
+		return err
 	}
 
 	monthTransactions, err := q.GetTransactionsByMonthIDAndType(
@@ -72,14 +66,12 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 		database.GetTransactionsByMonthIDAndTypeParams{ID: monthID, TransactionType: database.TransactionTypeExpense},
 	)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	monthDate, err := time.Parse("2006-01", fmt.Sprintf("%d-%02d", month.Year, month.Month))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	datasets := []util.GraphData{getGraphData(monthTransactions, month.Year, month.Month)}
@@ -87,14 +79,14 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 	y, m, _ := monthDate.AddDate(0, -1, 0).Date()
 	lastMonth, err := q.GetMonthByMonthAndYear(ctx, database.GetMonthByMonthAndYearParams{Month: m, Year: y})
 	if err != nil {
-		log.Printf("Failed to get last month (%s %d): %s", m, y, err)
+		slog.Error("Failed to get last month", "month", m, "year", y, "err", err)
 	} else {
 		lastMonthTransactions, err := q.GetTransactionsByMonthIDAndType(
 			ctx,
 			database.GetTransactionsByMonthIDAndTypeParams{ID: lastMonth.ID, TransactionType: database.TransactionTypeExpense},
 		)
 		if err != nil {
-			log.Printf("Failed to get transactions for last month (%s %d): %s", m, y, err)
+			slog.Error("Failed to get transactions for last month", "month", m, "year", y, "err", err)
 		} else {
 			datasets = append(datasets, getGraphData(lastMonthTransactions, lastMonth.Year, lastMonth.Month))
 		}
@@ -102,4 +94,6 @@ func (s *Server) HandleGraphShow(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	graph.Graph(datasets).Render(ctx, w)
+
+	return nil
 }

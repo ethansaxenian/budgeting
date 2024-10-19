@@ -1,6 +1,8 @@
 package server
 
 import (
+	"database/sql"
+	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
@@ -33,23 +35,15 @@ func sortTransactions(transactionSlice []database.Transaction, sortParam string)
 	}
 }
 
-func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) {
+func HandleTransactionsShow(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
 	monthID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid month ID"))
 	}
 
 	transactionType := database.TransactionType(chi.URLParam(r, "transactionType"))
-
-	conn, err := s.db.Conn(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer conn.Close()
 
 	q := database.New(conn)
 
@@ -61,8 +55,7 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 		},
 	)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	sortParam := r.URL.Query().Get("sort")
@@ -83,106 +76,87 @@ func (s *Server) HandleTransactionsShow(w http.ResponseWriter, r *http.Request) 
 
 	w.WriteHeader(http.StatusOK)
 	transactions.TransactionTable(monthTransactions, monthID, transactionType).Render(ctx, w)
+
+	return nil
 }
 
-func (s *Server) HandleTransactionEdit(w http.ResponseWriter, r *http.Request) {
+func HandleTransactionEdit(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid transaction ID"))
 	}
 
 	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid amount"))
 	}
 
 	date, err := util.ParseDate(r.FormValue("date"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid date"))
 	}
 
-	desc := r.FormValue("description")
-	cat := database.Category(r.FormValue("category"))
-
-	conn, err := s.db.Conn(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer conn.Close()
+	description := r.FormValue("description")
+	category := database.Category(r.FormValue("category"))
 
 	q := database.New(conn)
 
 	t, err := q.UpdateTransaction(ctx, database.UpdateTransactionParams{
-		Description: desc,
+		Description: description,
 		Amount:      amt,
 		Date:        date,
-		Category:    cat,
+		Category:    category,
 		ID:          id,
 	})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if err == sql.ErrNoRows {
+		return NewAPIError(http.StatusNotFound, fmt.Errorf("transaction with ID %d not found", id))
+	} else if err != nil {
+		return err
 	}
 
 	w.Header().Set("HX-Trigger", "editTransaction")
 	w.WriteHeader(http.StatusOK)
 	transactions.TransactionRow(t).Render(ctx, w)
+
+	return nil
 }
 
-func (s *Server) HandleTransactionDelete(w http.ResponseWriter, r *http.Request) {
+func HandleTransactionDelete(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid transaction ID"))
 	}
-
-	conn, err := s.db.Conn(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer conn.Close()
 
 	q := database.New(conn)
 
-	if err = q.DeleteTransaction(ctx, id); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if err = q.DeleteTransaction(ctx, id); err == sql.ErrNoRows {
+		return NewAPIError(http.StatusNotFound, fmt.Errorf("transaction with ID %d not found", id))
+	} else if err != nil {
+		return err
 	}
 
 	w.Header().Set("HX-Trigger", "deleteTransaction")
 	w.WriteHeader(http.StatusOK)
+
+	return nil
 }
 
-func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
+func HandleTransactionAdd(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
 	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid amount"))
 	}
 
 	date, err := util.ParseDate(r.FormValue("date"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid date"))
 	}
-
-	conn, err := s.db.Conn(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer conn.Close()
 
 	q := database.New(conn)
 
@@ -195,10 +169,11 @@ func (s *Server) HandleTransactionAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := q.CreateTransaction(ctx, newTransaction); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	w.Header().Set("HX-Trigger", "newTransaction")
 	w.WriteHeader(http.StatusNoContent)
+
+	return nil
 }

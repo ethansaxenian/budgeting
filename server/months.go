@@ -1,8 +1,9 @@
 package server
 
 import (
+	"database/sql"
+	"fmt"
 	"net/http"
-	"sort"
 	"strconv"
 
 	"github.com/ethansaxenian/budgeting/components/months"
@@ -10,40 +11,30 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (s *Server) HandleMonthShow(w http.ResponseWriter, r *http.Request) {
+func HandleMonthShow(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid month ID"))
 	}
-
-	conn, err := s.db.Conn(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer conn.Close()
 
 	q := database.New(conn)
 
 	month, err := q.GetMonthByID(ctx, id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if err == sql.ErrNoRows {
+		return NewAPIError(http.StatusNotFound, fmt.Errorf("month with ID %d not found", id))
+	} else if err != nil {
+		return err
 	}
 
 	allMonths, err := q.GetAllMonths(ctx)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
-	sort.Slice(allMonths, func(i, j int) bool {
-		return allMonths[i].Year > allMonths[j].Year || (allMonths[i].Year == allMonths[j].Year && allMonths[i].Month > allMonths[j].Month)
-	})
-
 	w.WriteHeader(http.StatusOK)
-	months.MonthPage(month, allMonths).Render(r.Context(), w)
+	months.MonthPage(month, allMonths).Render(ctx, w)
+
+	return nil
 }

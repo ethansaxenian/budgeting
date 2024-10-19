@@ -6,29 +6,37 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
-	"strconv"
 
 	"github.com/ethansaxenian/budgeting/util"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 type Server struct {
-	db   *sql.DB
-	port int
+	db     *sql.DB
+	port   int
+	server *http.Server
 }
 
-func noop() error { return nil }
-
-func NewServer() (*http.Server, func() error, error) {
-	db, err := sql.Open("pgx", os.Getenv("DB_URL"))
-	if err != nil {
-		return nil, noop, err
+func (s *Server) Close() error {
+	if err := s.db.Close(); err != nil {
+		return err
 	}
 
-	port, err := strconv.Atoi(os.Getenv("APP_PORT"))
+	if err := s.server.Close(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Server) ListenAndServe() error {
+	return s.server.ListenAndServe()
+}
+
+func NewServer(port int, databaseURL string) (*Server, error) {
+	db, err := sql.Open("pgx", databaseURL)
 	if err != nil {
-		port = 8080
+		return nil, err
 	}
 
 	s := &Server{
@@ -46,17 +54,7 @@ func NewServer() (*http.Server, func() error, error) {
 		},
 	}
 
-	close := func() error {
-		if err := db.Close(); err != nil {
-			return err
-		}
+	s.server = server
 
-		if err := server.Close(); err != nil {
-			return err
-		}
-
-		return nil
-	}
-
-	return server, close, nil
+	return s, nil
 }

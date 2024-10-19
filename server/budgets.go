@@ -1,6 +1,8 @@
 package server
 
 import (
+	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -10,23 +12,15 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
+func HandleBudgetsShow(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
 	monthID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid month ID"))
 	}
 
 	transactionType := database.TransactionType(chi.URLParam(r, "transactionType"))
-
-	conn, err := s.db.Conn(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer conn.Close()
 
 	q := database.New(conn)
 
@@ -38,8 +32,7 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	budgetItems := []database.BudgetItem{}
@@ -54,36 +47,30 @@ func (s *Server) HandleBudgetsShow(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	budgets.BudgetTable(budgetItems, monthID, transactionType).Render(ctx, w)
+
+	return nil
 }
 
-func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
+func HandleBudgetEdit(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid budget ID"))
 	}
 
 	amt, err := strconv.ParseFloat(r.FormValue("amount"), 64)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return NewAPIError(http.StatusBadRequest, fmt.Errorf("invalid amount"))
 	}
-
-	conn, err := s.db.Conn(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer conn.Close()
 
 	q := database.New(conn)
 
 	budget, err := q.PatchBudget(ctx, database.PatchBudgetParams{Amount: amt, ID: id})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if err == sql.ErrNoRows {
+		return NewAPIError(http.StatusNotFound, fmt.Errorf("budget with ID %d not found", id))
+	} else if err != nil {
+		return err
 	}
 
 	allBudgetItems, err := q.GetBudgetItemsByMonthIDAndTransactionType(
@@ -93,10 +80,8 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 			TransactionType: budget.TransactionType,
 		},
 	)
-
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return err
 	}
 
 	budgetItems := []database.BudgetItem{}
@@ -111,4 +96,6 @@ func (s *Server) HandleBudgetEdit(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	budgets.BudgetTable(budgetItems, budget.MonthID, budget.TransactionType).Render(ctx, w)
+
+	return nil
 }

@@ -1,5 +1,5 @@
 -- name: GetAllMonths :many
-SELECT * FROM months;
+SELECT * FROM months ORDER BY year DESC, month DESC;
 
 -- name: GetMonthByID :one
 SELECT * FROM months WHERE id = $1;

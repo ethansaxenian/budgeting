@@ -36,7 +36,7 @@ func (q *Queries) CreateMonth(ctx context.Context, arg CreateMonthParams) (Month
 }
 
 const getAllMonths = `-- name: GetAllMonths :many
-SELECT id, year, month, created_at, updated_at FROM months
+SELECT id, year, month, created_at, updated_at FROM months ORDER BY year DESC, month DESC
 `
 
 func (q *Queries) GetAllMonths(ctx context.Context) ([]Month, error) {
