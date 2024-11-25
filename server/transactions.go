@@ -100,15 +100,17 @@ func HandleTransactionEdit(conn *sql.Conn, w http.ResponseWriter, r *http.Reques
 
 	description := r.FormValue("description")
 	category := database.Category(r.FormValue("category"))
+	transactionType := database.TransactionType(r.FormValue("transactionType"))
 
 	q := database.New(conn)
 
 	t, err := q.UpdateTransaction(ctx, database.UpdateTransactionParams{
-		Description: description,
-		Amount:      amt,
-		Date:        date,
-		Category:    category,
-		ID:          id,
+		Description:     description,
+		Amount:          amt,
+		Date:            date,
+		Category:        category,
+		TransactionType: transactionType,
+		ID:              id,
 	})
 	if err == sql.ErrNoRows {
 		return NewAPIError(http.StatusNotFound, fmt.Errorf("transaction with ID %d not found", id))

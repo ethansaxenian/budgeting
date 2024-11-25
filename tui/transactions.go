@@ -3,6 +3,7 @@ package tui
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -80,15 +81,12 @@ func (m model) transactionsUpdate(msg tea.Msg) (model, tea.Cmd) {
 		case "r":
 			m = m.transactionsRefresh()
 		case "n":
-			m, cmd = m.switchPage(newTransactionPage, nil)
+			m, cmd = m.switchPage(editorPage, nil)
 		case "enter":
-			var table table.Model
-			if m.state.transactions.focusedTable == database.TransactionTypeExpense {
-				table = m.state.transactions.expenseTable
-			} else {
-				table = m.state.transactions.incomeTable
-			}
-			m, cmd = m.switchPage(newTransactionPage, rowToTransaction(table.SelectedRow(), m.state.transactions.focusedTable))
+			m, cmd = m.switchPage(editorPage, rowToTransaction(m.selectedTransactionRow(), m.state.transactions.focusedTable))
+		case "backspace":
+			m.err = m.deleteTransaction()
+			m = m.transactionsRefresh()
 		}
 	}
 
@@ -98,6 +96,16 @@ func (m model) transactionsUpdate(msg tea.Msg) (model, tea.Cmd) {
 	m.state.transactions.incomeTable, cmd = m.state.transactions.incomeTable.Update(msg)
 	cmds = append(cmds, cmd)
 	return m, tea.Batch(cmds...)
+}
+
+func (m model) selectedTransactionRow() table.Row {
+	var table table.Model
+	if m.state.transactions.focusedTable == database.TransactionTypeExpense {
+		table = m.state.transactions.expenseTable
+	} else {
+		table = m.state.transactions.incomeTable
+	}
+	return table.SelectedRow()
 }
 
 func rowToTransaction(row table.Row, transactionType database.TransactionType) database.Transaction {
@@ -113,6 +121,18 @@ func rowToTransaction(row table.Row, transactionType database.TransactionType) d
 		TransactionType: transactionType,
 	}
 
+}
+
+func (m model) deleteTransaction() error {
+	ctx := context.Background()
+	q := database.New(m.db)
+
+	id, _ := strconv.Atoi(m.selectedTransactionRow()[0])
+	if err := q.DeleteTransaction(ctx, id); err != nil {
+		return fmt.Errorf("Error deleting transaction %d", id)
+	}
+
+	return nil
 }
 
 func transactionsInit(db *sql.DB, month database.Month) transactionsState {

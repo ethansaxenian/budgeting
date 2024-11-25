@@ -25,8 +25,8 @@ RETURNING *;
 
 -- name: UpdateTransaction :one
 UPDATE transactions
-SET description = $1, amount = $2, date = $3, category = $4
-WHERE id = $5
+SET description = $1, amount = $2, date = $3, category = $4, transaction_type = $5
+WHERE id = $6
 RETURNING *;
 
 -- name: DeleteTransaction :exec

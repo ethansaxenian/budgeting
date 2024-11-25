@@ -8,23 +8,32 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/ethansaxenian/budgeting/database"
 	"github.com/ethansaxenian/budgeting/util"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
 )
 
+const (
+	red = lipgloss.Color("#FF0000")
+)
+
+var (
+	errorStyle = lipgloss.NewStyle().Foreground(red)
+)
+
 type page int
 
 const (
-	newTransactionPage page = iota
+	editorPage page = iota
 	transactionsPage
 	budgetsPage
 )
 
 type state struct {
-	transactions   transactionsState
-	newTransaction newTransactionState
+	transactions transactionsState
+	editor       editorState
 }
 
 type model struct {
@@ -46,12 +55,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
-		// case "esc":
-		// 	if m.transactionsTable.Focused() {
-		// 		m.transactionsTable.Blur()
-		// 	} else {
-		// 		m.transactionsTable.Focus()
-		// 	}
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		}
@@ -59,8 +62,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 	switch m.page {
-	case newTransactionPage:
-		m, cmd = m.newTransactionUpdate(msg)
+	case editorPage:
+		m, cmd = m.editorUpdate(msg)
 	case transactionsPage:
 		m, cmd = m.transactionsUpdate(msg)
 	}
@@ -76,10 +79,15 @@ func (m model) View() string {
 	content.WriteString("\n\n")
 
 	switch m.page {
-	case newTransactionPage:
-		content.WriteString(m.newTransactionView())
+	case editorPage:
+		content.WriteString(m.editorView())
 	case transactionsPage:
 		content.WriteString(m.transactionsView())
+	}
+
+	if m.err != nil {
+		content.WriteString("\n")
+		content.WriteString(errorStyle.Render(m.err.Error()))
 	}
 
 	// var renderedTabs []string
@@ -117,8 +125,8 @@ func NewModel() (model, error) {
 		month: month,
 		page:  transactionsPage,
 		state: state{
-			transactions:   transactionsInit(db, month),
-			newTransaction: newTransactionInit(),
+			transactions: transactionsInit(db, month),
+			editor:       editorInit(),
 		},
 		err: nil,
 	}, nil
@@ -130,5 +138,6 @@ type onSwitchPageMsg struct {
 
 func (m model) switchPage(p page, data any) (model, tea.Cmd) {
 	m.page = p
+	m.err = nil
 	return m, func() tea.Msg { return onSwitchPageMsg{data} }
 }
