@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -31,11 +33,11 @@ func (m model) transactionsRefresh() model {
 	expenses, income := getTransactions(m.db, m.month)
 
 	for _, t := range expenses {
-		expenseRows = append(expenseRows, []string{util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
+		expenseRows = append(expenseRows, []string{strconv.Itoa(t.ID), util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
 	}
 
 	for _, t := range income {
-		incomeRows = append(incomeRows, []string{util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
+		incomeRows = append(incomeRows, []string{strconv.Itoa(t.ID), util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
 	}
 
 	m.state.transactions.expenseTable.SetRows(expenseRows)
@@ -62,7 +64,7 @@ func (m model) transactionsView() string {
 func (m model) transactionsUpdate(msg tea.Msg) (model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
-	case switchPageMsg:
+	case onSwitchPageMsg:
 		m = m.transactionsRefresh()
 
 	case tea.KeyMsg:
@@ -78,7 +80,15 @@ func (m model) transactionsUpdate(msg tea.Msg) (model, tea.Cmd) {
 		case "r":
 			m = m.transactionsRefresh()
 		case "n":
-			m, cmd = m.switchPage(newTransactionPage)
+			m, cmd = m.switchPage(newTransactionPage, nil)
+		case "enter":
+			var table table.Model
+			if m.state.transactions.focusedTable == database.TransactionTypeExpense {
+				table = m.state.transactions.expenseTable
+			} else {
+				table = m.state.transactions.incomeTable
+			}
+			m, cmd = m.switchPage(newTransactionPage, rowToTransaction(table.SelectedRow(), m.state.transactions.focusedTable))
 		}
 	}
 
@@ -90,8 +100,24 @@ func (m model) transactionsUpdate(msg tea.Msg) (model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
+func rowToTransaction(row table.Row, transactionType database.TransactionType) database.Transaction {
+	id, _ := strconv.Atoi(row[0])
+	date, _ := util.ParseDate(row[1])
+	amount, _ := strconv.ParseFloat(strings.TrimPrefix(row[2], "$"), 64)
+	return database.Transaction{
+		ID:              id,
+		Date:            date,
+		Amount:          amount,
+		Description:     row[3],
+		Category:        database.Category(row[4]),
+		TransactionType: transactionType,
+	}
+
+}
+
 func transactionsInit(db *sql.DB, month database.Month) transactionsState {
 	columns := []table.Column{
+		{Title: "ID", Width: 0},
 		{Title: "Date", Width: 15},
 		{Title: "Amount", Width: 10},
 		{Title: "Description", Width: 15},
@@ -104,25 +130,25 @@ func transactionsInit(db *sql.DB, month database.Month) transactionsState {
 	expenses, income := getTransactions(db, month)
 
 	for _, t := range expenses {
-		expenseRows = append(expenseRows, []string{util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
+		expenseRows = append(expenseRows, []string{strconv.Itoa(t.ID), util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
 	}
 
 	for _, t := range income {
-		incomeRows = append(incomeRows, []string{util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
+		incomeRows = append(incomeRows, []string{strconv.Itoa(t.ID), util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
 	}
 
 	expenseTable := table.New(
 		table.WithColumns(columns),
 		table.WithRows(expenseRows),
 		table.WithFocused(true),
-		table.WithHeight(50),
+		table.WithHeight(40),
 	)
 
 	incomeTable := table.New(
 		table.WithColumns(columns),
 		table.WithRows(incomeRows),
 		table.WithFocused(false),
-		table.WithHeight(50),
+		table.WithHeight(40),
 	)
 
 	return transactionsState{expenseTable: expenseTable, incomeTable: incomeTable, focusedTable: database.TransactionTypeExpense}

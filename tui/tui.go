@@ -124,9 +124,11 @@ func NewModel() (model, error) {
 	}, nil
 }
 
-type switchPageMsg struct{}
+type onSwitchPageMsg struct {
+	data any
+}
 
-func (m model) switchPage(p page) (model, tea.Cmd) {
+func (m model) switchPage(p page, data any) (model, tea.Cmd) {
 	m.page = p
-	return m, func() tea.Msg { return switchPageMsg{} }
+	return m, func() tea.Msg { return onSwitchPageMsg{data} }
 }

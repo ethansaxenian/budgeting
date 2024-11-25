@@ -42,12 +42,17 @@ var (
 type newTransactionState struct {
 	inputs  []textinput.Model
 	focused int
+	currID  *int
 }
 
 func (m model) newTransactionView() string {
 	inputs := m.state.newTransaction.inputs
+	var header = "New Transaction:"
+	if m.state.newTransaction.currID != nil {
+		header = fmt.Sprintf("Editing Transaction %d:", *m.state.newTransaction.currID)
+	}
 	content := fmt.Sprintf(
-		`New Transaction:
+		`%s
 %s
 %s
 
@@ -64,6 +69,7 @@ func (m model) newTransactionView() string {
 %s
 
 `,
+		header,
 		inputStyle.Width(11).Render("Date"),
 		inputs[date].View(),
 		inputStyle.Width(8).Render("Amount"),
@@ -76,17 +82,24 @@ func (m model) newTransactionView() string {
 		inputs[transactionType].View(),
 	)
 
-	// if m.err != nil {
-	// 	content += "\n" + errorStyle.Render(t.err.Error())
-	// }
+	if m.err != nil {
+		content += "\n" + errorStyle.Render(m.err.Error())
+	}
 
 	return content
 }
 
 func (m model) newTransactionUpdate(msg tea.Msg) (model, tea.Cmd) {
-	var cmds = make([]tea.Cmd, len(m.state.newTransaction.inputs))
+	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+	case onSwitchPageMsg:
+		switch msg.data.(type) {
+		case database.Transaction:
+			m = m.loadTransaction(msg.data.(database.Transaction))
+		default:
+			m = m.onNewTransactionSwitch()
+		}
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyShiftTab, tea.KeyCtrlK:
@@ -95,10 +108,11 @@ func (m model) newTransactionUpdate(msg tea.Msg) (model, tea.Cmd) {
 			m = m.newTransactionNextInput()
 		case tea.KeyEnter:
 			m.err = m.newTransactionSubmit()
+			if m.err == nil {
+				m, cmd = m.switchPage(transactionsPage, nil)
+			}
 		case tea.KeyEsc:
-			var cmd tea.Cmd
-			m, cmd = m.switchPage(transactionsPage)
-			cmds = append(cmds, cmd)
+			m, cmd = m.switchPage(transactionsPage, nil)
 		}
 
 		for i := range m.state.newTransaction.inputs {
@@ -107,8 +121,10 @@ func (m model) newTransactionUpdate(msg tea.Msg) (model, tea.Cmd) {
 		m.state.newTransaction.inputs[m.state.newTransaction.focused].Focus()
 	}
 
+	cmds := []tea.Cmd{cmd}
 	for i := range m.state.newTransaction.inputs {
-		m.state.newTransaction.inputs[i], cmds[i] = m.state.newTransaction.inputs[i].Update(msg)
+		m.state.newTransaction.inputs[i], cmd = m.state.newTransaction.inputs[i].Update(msg)
+		cmds = append(cmds, cmd)
 	}
 
 	return m, tea.Batch(cmds...)
@@ -125,6 +141,27 @@ func (m model) newTransactionPrevInput() model {
 		m.state.newTransaction.focused = len(m.state.newTransaction.inputs) - 1
 	}
 
+	return m
+}
+
+func (m model) onNewTransactionSwitch() model {
+	m.state.newTransaction.inputs[date].SetValue(util.FormatDate(time.Now()))
+	m.state.newTransaction.inputs[amount].SetValue("")
+	m.state.newTransaction.inputs[description].SetValue("")
+	m.state.newTransaction.inputs[category].SetValue(string(database.CategoryTransportation))
+	m.state.newTransaction.inputs[transactionType].SetValue(string(database.TransactionTypeExpense))
+	m.state.newTransaction.currID = nil
+	return m
+}
+
+func (m model) loadTransaction(transaction database.Transaction) model {
+	m.state.newTransaction.inputs[date].SetValue(util.FormatDate(transaction.Date))
+	m.state.newTransaction.inputs[amount].SetValue(util.FormatAmount(transaction.Amount))
+	m.state.newTransaction.inputs[description].SetValue(transaction.Description)
+	m.state.newTransaction.inputs[category].SetValue(string(transaction.Category))
+	m.state.newTransaction.inputs[transactionType].SetSuggestions([]string{})
+	m.state.newTransaction.inputs[transactionType].SetValue(string(transaction.TransactionType))
+	m.state.newTransaction.currID = &transaction.ID
 	return m
 }
 
@@ -150,14 +187,17 @@ func (m model) newTransactionSubmit() error {
 	ctx := context.Background()
 	q := database.New(m.db)
 
-	if _, err = q.CreateTransaction(ctx, database.CreateTransactionParams{
-		Description:     inputs[description].Value(),
-		Amount:          amountValue,
-		Date:            dateValue,
-		Category:        database.Category(inputs[category].Value()),
-		TransactionType: database.TransactionType(inputs[transactionType].Value()),
-	}); err != nil {
-		return fmt.Errorf("Error adding transaction")
+	switch id := m.state.newTransaction.currID; id {
+	case nil:
+		if _, err = q.CreateTransaction(ctx, database.CreateTransactionParams{
+			Description:     inputs[description].Value(),
+			Amount:          amountValue,
+			Date:            dateValue,
+			Category:        database.Category(inputs[category].Value()),
+			TransactionType: database.TransactionType(inputs[transactionType].Value()),
+		}); err != nil {
+			return fmt.Errorf("Error adding transaction")
+		}
 	}
 
 	return nil
@@ -246,5 +286,5 @@ func newTransactionInit() newTransactionState {
 		return nil
 	}
 
-	return newTransactionState{inputs: inputs, focused: date}
+	return newTransactionState{inputs: inputs, focused: date, currID: nil}
 }
