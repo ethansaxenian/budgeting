@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	databaseURL := os.Getenv("DB_URL")
+	databaseURL := os.Getenv("DATABASE_URL")
 	port, err := strconv.Atoi(os.Getenv("APP_PORT"))
 	if err != nil {
 		log.Fatal("No APP_PORT provided, exiting...")

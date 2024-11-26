@@ -18,7 +18,7 @@ var embedMigrations embed.FS
 func main() {
 	direction := os.Args[1]
 
-	db, err := sql.Open("pgx", os.Getenv("DB_URL"))
+	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
 	}

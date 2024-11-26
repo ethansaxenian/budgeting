@@ -106,7 +106,7 @@ func (m model) View() string {
 func NewModel() (model, error) {
 	ctx := context.Background()
 
-	databaseURL := os.Getenv("DB_URL")
+	databaseURL := os.Getenv("DATABASE_URL")
 
 	db, err := sql.Open("pgx", databaseURL)
 	if err != nil {
