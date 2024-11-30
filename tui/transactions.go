@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -15,36 +16,10 @@ import (
 	"github.com/ethansaxenian/budgeting/util"
 )
 
-var (
-	modelStyle        = lipgloss.NewStyle().Align(lipgloss.Center, lipgloss.Center).BorderStyle(lipgloss.HiddenBorder())
-	focusedModelStyle = lipgloss.NewStyle().Align(lipgloss.Center, lipgloss.Center).BorderStyle(lipgloss.NormalBorder()).BorderForeground(lipgloss.Color("#555555"))
-	tableHeaderStyle  = lipgloss.NewStyle().Align(lipgloss.Center, lipgloss.Center).Bold(true).PaddingBottom(1)
-)
-
 type transactionsState struct {
 	expenseTable table.Model
 	incomeTable  table.Model
 	focusedTable database.TransactionType
-}
-
-func (m model) transactionsRefresh() model {
-	expenseRows := []table.Row{}
-	incomeRows := []table.Row{}
-
-	expenses, income := getTransactions(m.db, m.month)
-
-	for _, t := range expenses {
-		expenseRows = append(expenseRows, []string{strconv.Itoa(t.ID), util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
-	}
-
-	for _, t := range income {
-		incomeRows = append(incomeRows, []string{strconv.Itoa(t.ID), util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
-	}
-
-	m.state.transactions.expenseTable.SetRows(expenseRows)
-	m.state.transactions.incomeTable.SetRows(incomeRows)
-
-	return m
 }
 
 func (m model) transactionsView() string {
@@ -80,6 +55,8 @@ func (m model) transactionsUpdate(msg tea.Msg) (model, tea.Cmd) {
 			m.state.transactions.focusedTable = database.TransactionTypeIncome
 		case "r":
 			m = m.transactionsRefresh()
+		case "b":
+			m, cmd = m.switchPage(budgetsPage, nil)
 		case "n":
 			m, cmd = m.switchPage(editorPage, nil)
 		case "enter":
@@ -96,6 +73,87 @@ func (m model) transactionsUpdate(msg tea.Msg) (model, tea.Cmd) {
 	m.state.transactions.incomeTable, cmd = m.state.transactions.incomeTable.Update(msg)
 	cmds = append(cmds, cmd)
 	return m, tea.Batch(cmds...)
+}
+
+func transactionsInit(db *sql.DB, month database.Month) transactionsState {
+	columns := []table.Column{
+		{Title: "ID", Width: 0},
+		{Title: "Date", Width: 15},
+		{Title: "Amount", Width: 10},
+		{Title: "Description", Width: 15},
+		{Title: "Category", Width: 15},
+	}
+
+	expenses, income := getTransactions(db, month)
+	expenseRows := formatTransactionsToRows(expenses)
+	incomeRows := formatTransactionsToRows(income)
+
+	keyMap := table.KeyMap{
+		LineUp: key.NewBinding(
+			key.WithKeys("up", "k"),
+			key.WithHelp("↑/k", "up"),
+		),
+		LineDown: key.NewBinding(
+			key.WithKeys("down", "j"),
+			key.WithHelp("↓/j", "down"),
+		),
+		HalfPageUp: key.NewBinding(
+			key.WithKeys("u", "ctrl+u"),
+			key.WithHelp("u", "½ page up"),
+		),
+		HalfPageDown: key.NewBinding(
+			key.WithKeys("d", "ctrl+d"),
+			key.WithHelp("d", "½ page down"),
+		),
+		GotoTop: key.NewBinding(
+			key.WithKeys("home", "g"),
+			key.WithHelp("g/home", "go to start"),
+		),
+		GotoBottom: key.NewBinding(
+			key.WithKeys("end", "G"),
+			key.WithHelp("G/end", "go to end"),
+		),
+	}
+
+	expenseTable := table.New(
+		table.WithColumns(columns),
+		table.WithRows(expenseRows),
+		table.WithFocused(true),
+		table.WithHeight(40),
+		table.WithKeyMap(keyMap),
+	)
+
+	incomeTable := table.New(
+		table.WithColumns(columns),
+		table.WithRows(incomeRows),
+		table.WithFocused(false),
+		table.WithHeight(40),
+		table.WithKeyMap(keyMap),
+	)
+
+	return transactionsState{expenseTable: expenseTable, incomeTable: incomeTable, focusedTable: database.TransactionTypeExpense}
+}
+
+func formatTransactionsToRows(transactions []database.Transaction) []table.Row {
+	rows := []table.Row{}
+
+	for _, t := range transactions {
+		rows = append(rows, []string{strconv.Itoa(t.ID), util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
+	}
+
+	return rows
+}
+
+func (m model) transactionsRefresh() model {
+	expenses, income := getTransactions(m.db, m.month)
+
+	expenseRows := formatTransactionsToRows(expenses)
+	incomeRows := formatTransactionsToRows(income)
+
+	m.state.transactions.expenseTable.SetRows(expenseRows)
+	m.state.transactions.incomeTable.SetRows(incomeRows)
+
+	return m
 }
 
 func (m model) selectedTransactionRow() table.Row {
@@ -120,7 +178,6 @@ func rowToTransaction(row table.Row, transactionType database.TransactionType) d
 		Category:        database.Category(row[4]),
 		TransactionType: transactionType,
 	}
-
 }
 
 func (m model) deleteTransaction() error {
@@ -133,47 +190,8 @@ func (m model) deleteTransaction() error {
 	}
 
 	return nil
+
 }
-
-func transactionsInit(db *sql.DB, month database.Month) transactionsState {
-	columns := []table.Column{
-		{Title: "ID", Width: 0},
-		{Title: "Date", Width: 15},
-		{Title: "Amount", Width: 10},
-		{Title: "Description", Width: 15},
-		{Title: "Category", Width: 15},
-	}
-
-	expenseRows := []table.Row{}
-	incomeRows := []table.Row{}
-
-	expenses, income := getTransactions(db, month)
-
-	for _, t := range expenses {
-		expenseRows = append(expenseRows, []string{strconv.Itoa(t.ID), util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
-	}
-
-	for _, t := range income {
-		incomeRows = append(incomeRows, []string{strconv.Itoa(t.ID), util.FormatDate(t.Date), util.FormatAmountWithDollarSign(t.Amount), t.Description, string(t.Category)})
-	}
-
-	expenseTable := table.New(
-		table.WithColumns(columns),
-		table.WithRows(expenseRows),
-		table.WithFocused(true),
-		table.WithHeight(40),
-	)
-
-	incomeTable := table.New(
-		table.WithColumns(columns),
-		table.WithRows(incomeRows),
-		table.WithFocused(false),
-		table.WithHeight(40),
-	)
-
-	return transactionsState{expenseTable: expenseTable, incomeTable: incomeTable, focusedTable: database.TransactionTypeExpense}
-}
-
 func getTransactions(db *sql.DB, month database.Month) ([]database.Transaction, []database.Transaction) {
 	ctx := context.Background()
 

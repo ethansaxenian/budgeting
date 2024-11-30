@@ -15,10 +15,6 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-const (
-	red = lipgloss.Color("#FF0000")
-)
-
 var (
 	errorStyle = lipgloss.NewStyle().Foreground(red)
 )
@@ -33,6 +29,7 @@ const (
 
 type state struct {
 	transactions transactionsState
+	budgets      budgetsState
 	editor       editorState
 }
 
@@ -66,6 +63,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m, cmd = m.editorUpdate(msg)
 	case transactionsPage:
 		m, cmd = m.transactionsUpdate(msg)
+	case budgetsPage:
+		m, cmd = m.budgetsUpdate(msg)
 	}
 
 	return m, cmd
@@ -83,6 +82,8 @@ func (m model) View() string {
 		content.WriteString(m.editorView())
 	case transactionsPage:
 		content.WriteString(m.transactionsView())
+	case budgetsPage:
+		content.WriteString(m.budgetsView())
 	}
 
 	if m.err != nil {
@@ -126,6 +127,7 @@ func NewModel() (model, error) {
 		page:  transactionsPage,
 		state: state{
 			transactions: transactionsInit(db, month),
+			budgets:      budgetsInit(db, month),
 			editor:       editorInit(),
 		},
 		err: nil,
