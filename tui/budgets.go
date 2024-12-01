@@ -58,6 +58,8 @@ func (m model) budgetsUpdate(msg tea.Msg) (model, tea.Cmd) {
 			m, cmd = m.switchPage(transactionsPage, nil)
 		case "n":
 			m, cmd = m.switchPage(editorPage, nil)
+		case "m":
+			m, cmd = m.switchPage(monthsPage, nil)
 		}
 	}
 

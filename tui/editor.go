@@ -95,10 +95,10 @@ func (m model) editorUpdate(msg tea.Msg) (model, tea.Cmd) {
 		case tea.KeyEnter:
 			m.err = m.editorSubmit()
 			if m.err == nil {
-				m, cmd = m.switchPage(transactionsPage, nil)
+				m, cmd = m.switchPage(m.lastPage, nil)
 			}
 		case tea.KeyEsc:
-			m, cmd = m.switchPage(transactionsPage, nil)
+			m, cmd = m.switchPage(m.lastPage, nil)
 		}
 
 		for i := range m.state.editor.inputs {

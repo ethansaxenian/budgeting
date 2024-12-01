@@ -2,17 +2,18 @@ package tui
 
 import "github.com/charmbracelet/lipgloss"
 
-var (
-	emptyStyle        = lipgloss.NewStyle()
-	modelStyle        = lipgloss.NewStyle().Align(lipgloss.Center, lipgloss.Center).BorderStyle(lipgloss.HiddenBorder())
-	focusedModelStyle = lipgloss.NewStyle().Align(lipgloss.Center, lipgloss.Center).BorderStyle(lipgloss.NormalBorder()).BorderForeground(lipgloss.Color("#555555"))
-	tableHeaderStyle  = lipgloss.NewStyle().Align(lipgloss.Center, lipgloss.Center).Bold(true).PaddingBottom(1)
-	bold              = lipgloss.NewStyle().Bold(true)
-)
-
 const (
 	red   = lipgloss.Color("#FF0000")
 	green = lipgloss.Color("#00FF00")
+	gray  = lipgloss.Color("#555555")
+)
+
+var (
+	emptyStyle        = lipgloss.NewStyle()
+	modelStyle        = lipgloss.NewStyle().Align(lipgloss.Center, lipgloss.Center).BorderStyle(lipgloss.HiddenBorder())
+	focusedModelStyle = lipgloss.NewStyle().Align(lipgloss.Center, lipgloss.Center).BorderStyle(lipgloss.NormalBorder()).BorderForeground(gray)
+	tableHeaderStyle  = lipgloss.NewStyle().Align(lipgloss.Center, lipgloss.Center).Bold(true).PaddingBottom(1)
+	bold              = lipgloss.NewStyle().Bold(true)
 )
 
 func colorAmount(amount float64) lipgloss.Style {

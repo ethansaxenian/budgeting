@@ -59,6 +59,8 @@ func (m model) transactionsUpdate(msg tea.Msg) (model, tea.Cmd) {
 			m, cmd = m.switchPage(budgetsPage, nil)
 		case "n":
 			m, cmd = m.switchPage(editorPage, nil)
+		case "m":
+			m, cmd = m.switchPage(monthsPage, nil)
 		case "enter":
 			m, cmd = m.switchPage(editorPage, rowToTransaction(m.selectedTransactionRow(), m.state.transactions.focusedTable))
 		case "backspace":

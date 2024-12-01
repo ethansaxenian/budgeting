@@ -25,20 +25,23 @@ const (
 	editorPage page = iota
 	transactionsPage
 	budgetsPage
+	monthsPage
 )
 
 type state struct {
 	transactions transactionsState
 	budgets      budgetsState
 	editor       editorState
+	months       monthsState
 }
 
 type model struct {
-	db    *sql.DB
-	month database.Month
-	page  page
-	state state
-	err   error
+	db       *sql.DB
+	month    database.Month
+	page     page
+	lastPage page
+	state    state
+	err      error
 }
 
 func (m model) Init() tea.Cmd {
@@ -65,6 +68,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m, cmd = m.transactionsUpdate(msg)
 	case budgetsPage:
 		m, cmd = m.budgetsUpdate(msg)
+	case monthsPage:
+		m, cmd = m.monthsUpdate(msg)
 	}
 
 	return m, cmd
@@ -84,6 +89,8 @@ func (m model) View() string {
 		content.WriteString(m.transactionsView())
 	case budgetsPage:
 		content.WriteString(m.budgetsView())
+	case monthsPage:
+		content.WriteString(m.monthsView())
 	}
 
 	if m.err != nil {
@@ -122,13 +129,15 @@ func NewModel() (model, error) {
 		return model{}, err
 	}
 	return model{
-		db:    db,
-		month: month,
-		page:  transactionsPage,
+		db:       db,
+		month:    month,
+		page:     transactionsPage,
+		lastPage: transactionsPage,
 		state: state{
 			transactions: transactionsInit(db, month),
 			budgets:      budgetsInit(db, month),
 			editor:       editorInit(),
+			months:       monthsInit(db),
 		},
 		err: nil,
 	}, nil
@@ -139,6 +148,7 @@ type onSwitchPageMsg struct {
 }
 
 func (m model) switchPage(p page, data any) (model, tea.Cmd) {
+	m.lastPage = m.page
 	m.page = p
 	m.err = nil
 	return m, func() tea.Msg { return onSwitchPageMsg{data} }
