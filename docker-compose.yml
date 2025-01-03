@@ -73,18 +73,3 @@ services:
       timeout: 5s
       retries: 5
 
-  backup:
-    container_name: backup
-    image: alpine/psql
-    env_file: .env
-    environment:
-      - PSQL_CONNECTION_STRING=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-    volumes:
-      - ./:/app
-    working_dir: /app
-    entrypoint: ./backup.sh
-    restart: always
-    depends_on:
-      db:
-        condition: service_healthy
-

@@ -6,6 +6,3 @@ include_ext = ["go", "templ", "html", "css"]
 delay = 100
 exclude_unchanged = true
 rerun = true
-
-[misc]
-clean_on_exit = true
