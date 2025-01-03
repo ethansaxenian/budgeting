@@ -1,6 +1,6 @@
 [build]
-pre_cmd = ["go install github.com/a-h/templ/cmd/templ@v0.2.778"]
-cmd = "templ generate --notify-proxy --proxybind=proxy -v"
+cmd = "curl -X POST http://proxy:7331/_templ/reload/events"
 bin = "/bin/true"
-include_dir = ["assets"]
-include_ext = ["css"]
+include_dir = ["assets/dist"]
+exclude_dir = []
+delay = 100

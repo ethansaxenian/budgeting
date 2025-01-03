@@ -1,8 +1,9 @@
 [build]
 cmd = "go build -o bin/main cmd/app/main.go"
 bin = "bin/main"
-exclude_dir = ["postgres-data", "assets/dist", "cmd/migrate", "backups", "migrations"]
-include_ext = ["go", "templ", "html"]
+exclude_dir = ["postgres-data", "cmd/migrate", "backups", "migrations"]
+include_ext = ["go", "templ", "html", "css"]
+delay = 100
 exclude_unchanged = true
 rerun = true
 
