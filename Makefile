@@ -27,7 +27,7 @@ migrate-rollback:
 	docker exec -i budgeting-app sh -c "go run cmd/migrate/main.go down"
 
 backup:
-	docker exec -i budgeting-db sh -c "pg_dump --data-only --exclude-table=goose_db_version ${DB_URL}" > "backups/backup_$(shell date --iso="seconds").sql"
+	docker exec -i budgeting-db sh -c "pg_dump --data-only --exclude-table=goose_db_version ${DATABASE_URL}" > "backups/backup_$(shell date --iso="seconds").sql"
 
 backup-restore:
 	docker exec -i budgeting-db sh -c "psql -U ${DB_USER} -d ${DB_NAME}" < "$(backup_file)"

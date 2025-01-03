@@ -115,17 +115,18 @@ func (q *Queries) GetTransactionsByMonthIDAndType(ctx context.Context, arg GetTr
 
 const updateTransaction = `-- name: UpdateTransaction :one
 UPDATE transactions
-SET description = $1, amount = $2, date = $3, category = $4
-WHERE id = $5
+SET description = $1, amount = $2, date = $3, category = $4, transaction_type = $5
+WHERE id = $6
 RETURNING id, date, amount, description, category, transaction_type, created_at, updated_at
 `
 
 type UpdateTransactionParams struct {
-	Description string
-	Amount      float64
-	Date        time.Time
-	Category    Category
-	ID          int
+	Description     string
+	Amount          float64
+	Date            time.Time
+	Category        Category
+	TransactionType TransactionType
+	ID              int
 }
 
 func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) (Transaction, error) {
@@ -134,6 +135,7 @@ func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionPa
 		arg.Amount,
 		arg.Date,
 		arg.Category,
+		arg.TransactionType,
 		arg.ID,
 	)
 	var i Transaction
