@@ -9,22 +9,22 @@ stop:
 	docker-compose down
 
 logs:
-	docker logs budgeting-app -f
+	docker compose logs -f
 
 rebuild:
 	docker-compose up --build -d --wait
 
 shell:
-	docker exec -it budgeting-app sh
+	docker exec -it budgeting-server sh
 
 migrate:
-	docker exec -i budgeting-app sh -c "go run cmd/migrate/main.go up"
+	docker exec -i budgeting-server sh -c "go run cmd/migrate/main.go up"
 
 migrate-create:
-	docker exec -i budgeting-app sh -c "goose create $(name) sql"
+	docker exec -i budgeting-server sh -c "goose create $(name) sql"
 
 migrate-rollback:
-	docker exec -i budgeting-app sh -c "go run cmd/migrate/main.go down"
+	docker exec -i budgeting-server sh -c "go run cmd/migrate/main.go down"
 
 backup:
 	docker exec -i budgeting-db sh -c "pg_dump --data-only --exclude-table=goose_db_version ${DATABASE_URL}" > "backups/backup_$(shell date --iso="seconds").sql"

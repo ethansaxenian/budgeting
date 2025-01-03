@@ -1,5 +1,6 @@
 [build]
-cmd = "templ generate --notify-proxy --proxybind=0.0.0.0 -v"
+pre_cmd = ["go install github.com/a-h/templ/cmd/templ@v0.2.778"]
+cmd = "templ generate --notify-proxy --proxybind=proxy -v"
 bin = "/bin/true"
 include_dir = ["assets"]
 include_ext = ["css"]

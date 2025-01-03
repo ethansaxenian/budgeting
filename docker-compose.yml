@@ -1,12 +1,10 @@
 services:
-  app:
-    container_name: budgeting-app
+  server:
+    container_name: server
     env_file: .env
     build:
       context: .
-      dockerfile: Dockerfile
-    ports:
-      - "${APP_PORT}:7331"
+      dockerfile: server.Dockerfile
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - GOOSE_DBSTRING=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
@@ -14,11 +12,52 @@ services:
       - GOOSE_MIGRATION_DIR=cmd/migrate/migrations
     volumes:
       - ./:/app
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --tries=1 --spider http://localhost:$$APP_PORT"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     depends_on:
       db:
         condition: service_healthy
+
+  proxy:
+    container_name: proxy
+    image: "ghcr.io/a-h/templ:v0.2.778"
+    env_file: .env
+    ports:
+      - "${APP_PORT}:7331"
+    command: generate --watch --proxy="http://server:$APP_PORT" --open-browser=false -v --proxybind=0.0.0.0
+    volumes:
+      - ./:/app
+    working_dir: /app
+    depends_on:
+      server:
+        condition: service_healthy
+
+  tailwind:
+    container_name: tailwind
+    env_file: .env
+    build:
+      context: .
+      dockerfile: tailwind.Dockerfile
+    volumes:
+      - ./:/app
+    tty: true
+
+  sync_assets:
+    container_name: sync_assets
+    image: cosmtrek/air
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: -c .air-assets.toml
+    depends_on:
+      proxy:
+        condition: service_started
+
   db:
-    container_name: budgeting-db
+    container_name: db
     env_file: .env
     image: "postgres:latest"
     ports:
