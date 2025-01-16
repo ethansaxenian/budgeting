@@ -13,7 +13,7 @@ services:
     volumes:
       - ./:/app
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --tries=1 --spider http://localhost:$$APP_PORT"]
+      test: [ "CMD-SHELL", "wget -q --tries=1 --spider http://localhost:$$APP_PORT" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -68,8 +68,7 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$DB_USER"]
+      test: [ "CMD-SHELL", "pg_isready -U $$DB_USER" ]
       interval: 5s
       timeout: 5s
       retries: 5
-

@@ -26,8 +26,8 @@ templ monthSelector(allMonths []database.Month, currMonthID int) {
 			class="rounded-md m-2 p-2 bg-zinc-800 border border-gray-500"
 			hx-target="#month-page"
 			hx-swap="innerHTML"
-			hx-get="/months"
-			hx-on="htmx:configRequest: event.detail.path = /months/ + this.value"
+			hx-get="/months/"
+			hx-on::config-request="event.detail.path += this.value"
 			hx-trigger="change"
 			hx-push-url="true"
 		>
