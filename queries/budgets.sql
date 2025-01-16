@@ -36,5 +36,5 @@ VALUES
 RETURNING *;
 
 -- name: GetBudgetItemsByMonthIDAndTransactionType :many
-SELECT * FROM budget_items WHERE month_id = $1 AND transaction_type = $2;
+SELECT * FROM budget_items WHERE month_id = $1 AND transaction_type = $2 ORDER BY category ASC;
 

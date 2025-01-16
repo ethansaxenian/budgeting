@@ -14,20 +14,20 @@ import (
 type Category string
 
 const (
+	CategoryBonus          Category = "bonus"
+	CategoryCashback       Category = "cashback"
 	CategoryFood           Category = "food"
 	CategoryGifts          Category = "gifts"
-	CategoryMedical        Category = "medical"
 	CategoryHome           Category = "home"
-	CategoryTransportation Category = "transportation"
-	CategoryPersonal       Category = "personal"
-	CategorySavings        Category = "savings"
-	CategoryUtilities      Category = "utilities"
-	CategoryTravel         Category = "travel"
+	CategoryInterest       Category = "interest"
+	CategoryMedical        Category = "medical"
 	CategoryOther          Category = "other"
 	CategoryPaycheck       Category = "paycheck"
-	CategoryBonus          Category = "bonus"
-	CategoryInterest       Category = "interest"
-	CategoryCashback       Category = "cashback"
+	CategoryPersonal       Category = "personal"
+	CategorySavings        Category = "savings"
+	CategoryTransportation Category = "transportation"
+	CategoryTravel         Category = "travel"
+	CategoryUtilities      Category = "utilities"
 )
 
 func (e *Category) Scan(src interface{}) error {

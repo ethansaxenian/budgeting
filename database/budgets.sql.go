@@ -75,7 +75,7 @@ func (q *Queries) CreateNewBudgetsForMonth(ctx context.Context, monthID int) ([]
 }
 
 const getBudgetItemsByMonthIDAndTransactionType = `-- name: GetBudgetItemsByMonthIDAndTransactionType :many
-SELECT budget_id, month_id, category, transaction_type, planned, actual FROM budget_items WHERE month_id = $1 AND transaction_type = $2
+SELECT budget_id, month_id, category, transaction_type, planned, actual FROM budget_items WHERE month_id = $1 AND transaction_type = $2 ORDER BY category ASC
 `
 
 type GetBudgetItemsByMonthIDAndTransactionTypeParams struct {
