@@ -1,6 +1,6 @@
 include .env
 
-.PHONY: start stop logs migrate migrate-create migrate-rollback
+.PHONY: start stop logs migrate migrate-create migrate-rollback sql
 
 start:
 	docker-compose up -d --wait
@@ -21,7 +21,7 @@ migrate:
 	docker exec -i server sh -c "go run cmd/migrate/main.go up"
 
 migrate-create:
-	docker exec -i server sh -c "goose create $(name) sql"
+	docker exec -i server sh -c "go tool goose create $(name) sql"
 
 migrate-rollback:
 	docker exec -i server sh -c "go run cmd/migrate/main.go down"
@@ -31,3 +31,6 @@ backup:
 
 backup-restore:
 	docker exec -i db sh -c "psql -U ${DB_USER} -d ${DB_NAME}" < "$(backup_file)"
+
+sql:
+	docker exec -i server sh -c "go tool sqlc generate"
