@@ -21,7 +21,7 @@ migrate:
 	docker exec -i server sh -c "go run cmd/migrate/main.go up"
 
 migrate-create:
-	docker exec -i server sh -c "go tool goose create $(name) sql"
+	GOOSE_MIGRATION_DIR=cmd/migrate/migrations go tool goose create $(name) sql
 
 migrate-rollback:
 	docker exec -i server sh -c "go run cmd/migrate/main.go down"
@@ -33,4 +33,7 @@ backup-restore:
 	docker exec -i db sh -c "psql -U ${DB_USER} -d ${DB_NAME}" < "$(backup_file)"
 
 sql:
-	docker exec -i server sh -c "go tool sqlc generate"
+	go tool sqlc generate
+
+lint:
+	go tool golangci-lint run

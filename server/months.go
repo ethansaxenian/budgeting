@@ -34,7 +34,5 @@ func HandleMonthShow(conn *sql.Conn, w http.ResponseWriter, r *http.Request) err
 	}
 
 	w.WriteHeader(http.StatusOK)
-	months.MonthPage(month, allMonths).Render(ctx, w)
-
-	return nil
+	return months.MonthPage(month, allMonths).Render(ctx, w)
 }

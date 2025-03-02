@@ -16,8 +16,6 @@ import (
 	"github.com/ethansaxenian/budgeting/util"
 )
 
-type errMsg error
-
 const (
 	date = iota
 	amount

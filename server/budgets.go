@@ -46,9 +46,7 @@ func HandleBudgetsShow(conn *sql.Conn, w http.ResponseWriter, r *http.Request) e
 	}
 
 	w.WriteHeader(http.StatusOK)
-	budgets.BudgetTable(budgetItems, monthID, transactionType).Render(ctx, w)
-
-	return nil
+	return budgets.BudgetTable(budgetItems, monthID, transactionType).Render(ctx, w)
 }
 
 func HandleBudgetEdit(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
@@ -95,7 +93,5 @@ func HandleBudgetEdit(conn *sql.Conn, w http.ResponseWriter, r *http.Request) er
 	}
 
 	w.WriteHeader(http.StatusOK)
-	budgets.BudgetTable(budgetItems, budget.MonthID, budget.TransactionType).Render(ctx, w)
-
-	return nil
+	return budgets.BudgetTable(budgetItems, budget.MonthID, budget.TransactionType).Render(ctx, w)
 }

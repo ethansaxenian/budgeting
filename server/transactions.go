@@ -75,9 +75,7 @@ func HandleTransactionsShow(conn *sql.Conn, w http.ResponseWriter, r *http.Reque
 	ctx = util.WithNextSortCtx(ctx, nextDir)
 
 	w.WriteHeader(http.StatusOK)
-	transactions.TransactionTable(monthTransactions, monthID, transactionType).Render(ctx, w)
-
-	return nil
+	return transactions.TransactionTable(monthTransactions, monthID, transactionType).Render(ctx, w)
 }
 
 func HandleTransactionEdit(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
@@ -120,9 +118,7 @@ func HandleTransactionEdit(conn *sql.Conn, w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("HX-Trigger", "editTransaction")
 	w.WriteHeader(http.StatusOK)
-	transactions.TransactionRow(t).Render(ctx, w)
-
-	return nil
+	return transactions.TransactionRow(t).Render(ctx, w)
 }
 
 func HandleTransactionDelete(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {

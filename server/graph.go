@@ -93,7 +93,5 @@ func HandleGraphShow(conn *sql.Conn, w http.ResponseWriter, r *http.Request) err
 	}
 
 	w.WriteHeader(http.StatusOK)
-	graph.Graph(datasets).Render(ctx, w)
-
-	return nil
+	return graph.Graph(datasets).Render(ctx, w)
 }

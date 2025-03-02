@@ -16,7 +16,10 @@ func base(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	var rollbackErr error
+	defer func() {
+		rollbackErr = tx.Rollback()
+	}()
 
 	q := database.New(tx)
 
@@ -42,9 +45,11 @@ func base(conn *sql.Conn, w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 
 	http.Redirect(w, r, fmt.Sprintf("/months/%d", month.ID), http.StatusFound)
 
-	return nil
+	return rollbackErr
 }
