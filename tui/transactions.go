@@ -188,7 +188,7 @@ func (m model) deleteTransaction() error {
 
 	id, _ := strconv.Atoi(m.selectedTransactionRow()[0])
 	if err := q.DeleteTransaction(ctx, id); err != nil {
-		return fmt.Errorf("Error deleting transaction %d", id)
+		return fmt.Errorf("error deleting transaction %d", id)
 	}
 
 	return nil

@@ -159,12 +159,12 @@ func (m model) editorSubmit() error {
 
 	dateValue, err := util.ParseDate(inputs[date].Value())
 	if err != nil {
-		return fmt.Errorf("Invalid date")
+		return fmt.Errorf("invalid date")
 	}
 
 	amountValue, err := strconv.ParseFloat(inputs[amount].Value(), 64)
 	if err != nil {
-		return fmt.Errorf("Invalid amount")
+		return fmt.Errorf("invalid amount")
 	}
 
 	ctx := context.Background()
@@ -179,7 +179,7 @@ func (m model) editorSubmit() error {
 			Category:        database.Category(inputs[category].Value()),
 			TransactionType: database.TransactionType(inputs[transactionType].Value()),
 		}); err != nil {
-			return fmt.Errorf("Error adding transaction")
+			return fmt.Errorf("error adding transaction")
 		}
 	default:
 		if _, err = q.UpdateTransaction(ctx, database.UpdateTransactionParams{
@@ -190,7 +190,7 @@ func (m model) editorSubmit() error {
 			Category:        database.Category(inputs[category].Value()),
 			TransactionType: database.TransactionType(inputs[transactionType].Value()),
 		}); err != nil {
-			return fmt.Errorf("Error updating transaction")
+			return fmt.Errorf("error updating transaction")
 		}
 	}
 
@@ -213,7 +213,7 @@ func editorInit() editorState {
 	inputs[date].SetValue(util.FormatDate(time.Now()))
 	inputs[date].Validate = func(s string) error {
 		if _, err := util.ParseDate(s); err != nil {
-			return fmt.Errorf("Invalid date")
+			return fmt.Errorf("invalid date")
 		}
 		return nil
 	}
@@ -226,7 +226,7 @@ func editorInit() editorState {
 	inputs[amount].Cursor.SetMode(cursor.CursorBlink)
 	inputs[amount].Validate = func(s string) error {
 		if _, err := strconv.ParseFloat(s, 64); err != nil {
-			return fmt.Errorf("Invalid amount")
+			return fmt.Errorf("invalid amount")
 		}
 		return nil
 	}
@@ -254,7 +254,7 @@ func editorInit() editorState {
 	inputs[category].KeyMap = keyMap
 	inputs[category].Validate = func(s string) error {
 		if !slices.Contains(database.AllCategoryValues(), database.Category(s)) {
-			return fmt.Errorf("Invalid category")
+			return fmt.Errorf("invalid category")
 		}
 		return nil
 	}
@@ -275,7 +275,7 @@ func editorInit() editorState {
 	inputs[transactionType].KeyMap = keyMap
 	inputs[transactionType].Validate = func(s string) error {
 		if !slices.Contains(database.AllTransactionTypeValues(), database.TransactionType(s)) {
-			return fmt.Errorf("Invalid transaction type")
+			return fmt.Errorf("invalid transaction type")
 		}
 		return nil
 	}

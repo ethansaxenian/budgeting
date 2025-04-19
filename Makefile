@@ -9,7 +9,7 @@ stop:
 	docker-compose down
 
 logs:
-	docker compose logs -f
+	docker-compose logs -f
 
 rebuild:
 	docker-compose up --build -d --wait
@@ -30,7 +30,7 @@ backup:
 	docker exec -i db sh -c "pg_dump --data-only --exclude-table=goose_db_version ${DATABASE_URL}" > "backups/backup_$(shell date --iso="seconds").sql"
 
 backup-restore:
-	docker exec -i db sh -c "psql -U ${DB_USER} -d ${DB_NAME}" < "$(backup_file)"
+	docker exec -i db sh -c "psql -U ${DB_USER} -d postgres" < "$(backup_file)"
 
 sql:
 	go tool sqlc generate

@@ -6,8 +6,8 @@ services:
       context: .
       dockerfile: server.Dockerfile
     environment:
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      - GOOSE_DBSTRING=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/postgres
+      - GOOSE_DBSTRING=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/postgres
       - GOOSE_DRIVER=postgres
       - GOOSE_MIGRATION_DIR=cmd/migrate/migrations
     volumes:

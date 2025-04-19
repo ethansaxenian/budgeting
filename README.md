@@ -1,18 +1,25 @@
-A simple web app to track monthly expenses. Yes, it doesn't look great. I don't care.
-This is just me messing around with go templ, tailwind, and htmx.
+A simple web app to track monthly expenses.
 
 Requirements:
-- go 1.21.5
-- docker-compose
-- tailwindcss
-- make (technically not necessary)
+- `make`
+- `docker-compose`
 
-To run the thing, just use `make`. That will:
-1. install dependencies
-2. start the database
-3. migrate the database
-4. compile tailwindcss and templ
-5. run the app
+### Running the app
+1. Create a `.env` file with the following contents:
+```sh
+APP_PORT=
+DB_PORT=
+DB_USER=
+DB_PASSWORD=
+```
+Any variables you set in `.env` will be set in the docker environment, so you can set the timezone with `TZ`, for example.
 
+2. Run `make start`. This will build and run 5 docker containers:
+  - `db`: The postgresql database, accessible locally on port `DB_PORT`.
+  - `server`: The main go webserver. Automatically reloads when app code is changed.
+  - `proxy`: A proxy for the web app that automatically reload the browser when changes are made to `.templ` files. This container exposes the app on port `APP_PORT`.
+  - `tailwind`: Rebuilds the main css file when changes are made.
+  - `sync_assets`: Sends a reload event to `proxy` to reload the browser when changes are made to the `assets/dist` folder
+3. Run `make migrate` to set up the database.
+4. Visit `http://localhost:<APP_PORT>` in your web browser.
 
-Run `make help` to see everything that you can do.
