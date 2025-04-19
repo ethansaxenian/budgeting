@@ -3,6 +3,7 @@ package tui
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -114,7 +115,12 @@ func (m model) View() string {
 func NewModel() (model, error) {
 	ctx := context.Background()
 
-	databaseURL := os.Getenv("DATABASE_URL")
+	databaseURL := fmt.Sprintf(
+		"postgresql://%s:%s@localhost:%s/postgres",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_PORT"),
+	)
 
 	db, err := sql.Open("pgx", databaseURL)
 	if err != nil {
