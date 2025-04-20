@@ -29,6 +29,12 @@ jobs:
       - name: Run sqlc diff
         run: go tool sqlc diff .
 
+      - name: Compile tailwind
+        run: |
+          curl -sSfL https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 -o tailwindcss
+          chmod +x tailwindcss
+          ./tailwindcss -i ./assets/main.css -o ./assets/dist/tailwind.css
+
       - name: Run golangci-lint
         run: go tool golangci-lint run --out-format colored-line-number
 
