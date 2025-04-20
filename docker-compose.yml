@@ -45,6 +45,15 @@ services:
       - ./:/app
     tty: true
 
+  sqlc:
+    container_name: sqlc
+    env_file: .env
+    build:
+      context: .
+      dockerfile: sqlc.Dockerfile
+    volumes:
+      - ./:/app
+
   sync_assets:
     container_name: sync_assets
     image: cosmtrek/air
