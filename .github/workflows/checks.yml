@@ -1,0 +1,34 @@
+name: Go Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    name: Run Go formatting, Templ, sqlc, and lint checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+
+      - name: Run gofmt
+        run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
+
+      - name: Run templ fmt
+        run: go tool templ fmt -fail .
+
+      - name: Run sqlc diff
+        run: go tool sqlc diff .
+
+      - name: Run golangci-lint
+        run: go tool golangci-lint run --out-format colored-line-number
+
