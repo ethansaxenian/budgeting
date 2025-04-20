@@ -9,6 +9,8 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+
+
 func main() {
 	databaseURL := os.Getenv("DATABASE_URL")
 	port, err := strconv.Atoi(os.Getenv("APP_PORT"))
