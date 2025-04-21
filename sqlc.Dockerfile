@@ -8,6 +8,4 @@ RUN go mod download
 
 COPY . .
 
-RUN go tool sqlc generate
-
 CMD ["go", "tool", "air", "-c", ".air-sqlc.toml"]

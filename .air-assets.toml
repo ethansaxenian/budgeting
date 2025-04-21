@@ -1,6 +1,0 @@
-[build]
-cmd = "curl -X POST http://proxy:7331/_templ/reload/events"
-bin = "/bin/true"
-include_dir = ["assets/dist"]
-exclude_dir = []
-delay = 100
