@@ -10,6 +10,4 @@ RUN go mod download
 
 COPY . .
 
-RUN go tool templ generate
-
 CMD ["go", "tool", "air", "-c", ".air-server.toml"]

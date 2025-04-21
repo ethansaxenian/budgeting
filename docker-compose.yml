@@ -23,7 +23,7 @@ services:
 
   proxy:
     container_name: proxy
-    image: "ghcr.io/a-h/templ:v0.2.778"
+    image: ghcr.io/a-h/templ:latest
     env_file: .env
     ports:
       - "${APP_PORT}:7331"
@@ -41,9 +41,12 @@ services:
     build:
       context: .
       dockerfile: tailwind.Dockerfile
+    command: -c .air-tailwind.toml
     volumes:
       - ./:/app
-    tty: true
+    depends_on:
+      proxy:
+        condition: service_started
 
   sqlc:
     container_name: sqlc
@@ -54,21 +57,10 @@ services:
     volumes:
       - ./:/app
 
-  sync_assets:
-    container_name: sync_assets
-    image: cosmtrek/air
-    volumes:
-      - ./:/app
-    working_dir: /app
-    command: -c .air-assets.toml
-    depends_on:
-      proxy:
-        condition: service_started
-
   db:
     container_name: db
     env_file: .env
-    image: "postgres:latest"
+    image: postgres:latest
     ports:
       - "${DB_PORT}:5432"
     environment:
