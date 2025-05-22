@@ -4,19 +4,19 @@ DATABASE_URL = postgresql://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/postg
 
 .PHONY: start
 start:
-	docker-compose up -d --wait
+	docker compose up -d --wait
 
 .PHONY: stop
 stop:
-	docker-compose down
+	docker compose down
 
 .PHONY: logs
 logs:
-	docker-compose logs -f
+	docker compose logs -f
 
 .PHONY: rebuild
 rebuild:
-	docker-compose up --build -d --wait
+	docker compose up --build -d --wait
 
 .PHONY: shell
 shell:
