@@ -1,0 +1,40 @@
+[env]
+_.file = ".env"
+DATABASE_URL = "postgresql://{{env.DB_USER}}:{{env.DB_PASSWORD}}@localhost:{{env.DB_PORT}}/postgres"
+GOOSE_MIGRATION_DIR = "cmd/migrate/migrations"
+
+[tasks.start]
+run = "docker compose up -d --wait"
+
+[tasks.stop]
+run =	"docker compose down"
+
+[tasks.logs]
+run =	"docker compose logs -f"
+
+[tasks.rebuild]
+run =	"docker compose up --build -d --wait"
+
+[tasks.shell]
+run =	"docker exec -it server sh"
+
+[tasks.migrate]
+run =	"docker exec -i server sh -c 'go run cmd/migrate/main.go up'"
+
+[tasks.migrate-create]
+run =	"go tool goose create {{arg(name='name')}} sql"
+
+[tasks.migrate-rollback]
+run =	"docker exec -i server sh -c 'go run cmd/migrate/main.go down'"
+
+[tasks.backup]
+run = 'docker exec -i db sh -c "pg_dump --data-only --exclude-table=goose_db_version $DATABASE_URL" > "backups/backup_$(date --iso=seconds).sql"'
+
+[tasks.backup-restore]
+run =	'docker exec -i db sh -c "psql -U $DB_USER -d postgres" < {{arg(name="file")}}'
+
+[tasks.sql]
+run =	"go tool sqlc generate"
+
+[tasks.lint]
+run =	"go tool golangci-lint run"
