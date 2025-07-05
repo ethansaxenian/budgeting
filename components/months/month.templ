@@ -44,7 +44,7 @@ templ monthSelector(allMonths []database.Month, currMonthID int) {
 }
 
 templ addTransactionForm() {
-	<div id="add-transaction-form" class="flex flex-row w-full justify-center">
+	<div id="add-transaction-form" class="flex flex-row max-sm:flex-col flex-wrap w-full justify-center">
 		<input
 			name="date"
 			type="date"
@@ -87,7 +87,7 @@ templ addTransactionForm() {
 }
 
 templ monthTables(month database.Month) {
-	<div class="flex flex-row justify-evenly gap-x-4">
+	<div class="flex flex-row flex-wrap justify-evenly gap-x-4">
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Planned Expenses</div>
 			<span
@@ -107,7 +107,7 @@ templ monthTables(month database.Month) {
 			></span>
 		</div>
 	</div>
-	<div class="flex flex-row justify-around gap-x-4">
+	<div class="flex flex-row flex-wrap justify-around gap-x-4">
 		<div class="flex flex-col items-center py-5">
 			<div class="font-bold text-2xl pb-2">Expenses</div>
 			<span
