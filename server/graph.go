@@ -3,9 +3,7 @@ package server
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 	"net/http"
-	"sort"
 	"strconv"
 	"time"
 
@@ -18,7 +16,7 @@ import (
 func getGraphData(transactions []database.Transaction, year int, month time.Month) util.GraphData {
 	dayTotals := map[int]float64{}
 	for _, t := range transactions {
-		if t.Date.Month() == month && t.TransactionType == database.TransactionTypeExpense {
+		if t.Date.Month() == month {
 			dayTotals[t.Date.Day()] += t.Amount
 		}
 	}
@@ -31,15 +29,15 @@ func getGraphData(transactions []database.Transaction, year int, month time.Mont
 		lastDay = time.Date(year, month+1, 0, 0, 0, 0, 0, time.Local).Day()
 	}
 
-	amounts := []float64{dayTotals[1]}
-	for day := 2; day <= lastDay; day++ {
-		amounts = append(amounts, dayTotals[day]+dayTotals[day-1])
+	total := 0.0
+	amounts := []float64{dayTotals[0]}
+	for day := 1; day <= lastDay; day++ {
+		total += dayTotals[day]
+		amounts = append(amounts, total)
 	}
 
-	sort.Float64s(amounts)
-
 	return util.GraphData{
-		Label: fmt.Sprintf("%s %d", month.String(), year),
+		Label: string(transactions[0].TransactionType),
 		Data:  amounts,
 	}
 }
@@ -61,37 +59,27 @@ func HandleGraphShow(conn *sql.Conn, w http.ResponseWriter, r *http.Request) err
 		return err
 	}
 
-	monthTransactions, err := q.GetTransactionsByMonthIDAndType(
+	income, err := q.GetTransactionsByMonthIDAndType(
 		ctx,
-		database.GetTransactionsByMonthIDAndTypeParams{ID: monthID, TransactionType: database.TransactionTypeExpense},
+		database.GetTransactionsByMonthIDAndTypeParams{ID: monthID, TransactionType: database.TransactionTypeIncome},
 	)
 	if err != nil {
 		return err
 	}
 
-	monthDate, err := time.Parse("2006-01", fmt.Sprintf("%d-%02d", month.Year, month.Month))
+	expenses, err := q.GetTransactionsByMonthIDAndType(
+		ctx,
+		database.GetTransactionsByMonthIDAndTypeParams{ID: month.ID, TransactionType: database.TransactionTypeExpense},
+	)
 	if err != nil {
 		return err
 	}
 
-	datasets := []util.GraphData{getGraphData(monthTransactions, month.Year, month.Month)}
-
-	y, m, _ := monthDate.AddDate(0, -1, 0).Date()
-	lastMonth, err := q.GetMonthByMonthAndYear(ctx, database.GetMonthByMonthAndYearParams{Month: m, Year: y})
-	if err != nil {
-		slog.Error("Failed to get last month", "month", m, "year", y, "err", err)
-	} else {
-		lastMonthTransactions, err := q.GetTransactionsByMonthIDAndType(
-			ctx,
-			database.GetTransactionsByMonthIDAndTypeParams{ID: lastMonth.ID, TransactionType: database.TransactionTypeExpense},
-		)
-		if err != nil {
-			slog.Error("Failed to get transactions for last month", "month", m, "year", y, "err", err)
-		} else {
-			datasets = append(datasets, getGraphData(lastMonthTransactions, lastMonth.Year, lastMonth.Month))
-		}
+	datasets := []util.GraphData{
+		getGraphData(income, month.Year, month.Month),
+		getGraphData(expenses, month.Year, month.Month),
 	}
 
 	w.WriteHeader(http.StatusOK)
-	return graph.Graph(datasets).Render(ctx, w)
+	return graph.Graph(fmt.Sprintf("%s %d", month.Month.String(), month.Year), datasets).Render(ctx, w)
 }

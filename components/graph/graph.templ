@@ -3,25 +3,33 @@ package graph
 import "github.com/ethansaxenian/budgeting/util"
 import "github.com/ethansaxenian/budgeting/components/layout"
 
-script showGraph(datasets []util.GraphData) {
-    new Chart(
-      document.getElementById('expense-chart'),
-      {
-        type: 'line',
-        data: {
-          labels: [...Array(31).keys()].map(i => i + 1),
-          datasets: datasets,
+script showGraph(title string, datasets []util.GraphData) {
+  new Chart(
+    document.getElementById('expense-chart'),
+    {
+      type: 'line',
+      data: {
+        labels: [...Array(31).keys()].map(i => i + 1),
+        datasets: datasets,
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: title,
+          },
         }
       }
-    );
+    }
+  );
 }
 
-templ Graph(datasets []util.GraphData) {
+templ Graph(title string, datasets []util.GraphData) {
 	@layout.Base() {
 		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 		<canvas id="expense-chart"></canvas>
 		<div>
-			@showGraph(datasets)
+			@showGraph(title, datasets)
 		</div>
 	}
 }
