@@ -1,40 +1,73 @@
+[tools]
+"aqua:a-h/templ" = "latest"
+"aqua:pressly/goose" = "latest"
+"aqua:tailwindlabs/tailwindcss" = "3.4.17"
+golangci-lint = "latest"
+sqlc = "latest"
+
 [env]
 _.file = ".env"
 DATABASE_URL = "postgresql://{{env.DB_USER}}:{{env.DB_PASSWORD}}@localhost:{{env.DB_PORT}}/postgres"
 GOOSE_MIGRATION_DIR = "cmd/migrate/migrations"
 
+[tasks.compile]
+depends = ["sql", "templ", "tailwind"]
+sources = ["**/*.go"]
+outputs = ["bin/budgeting"]
+env.CGO_ENABLED = 0
+env.GOOS = "linux"
+env.GOARCH = "arm64"
+run = """
+go build -tags production -trimpath -ldflags='-s -w' -o bin/budgeting ./cmd/app
+"""
+
+[tasks.sql]
+sources = ["cmd/migrate/migrations/*.sql"]
+run = "sqlc generate"
+
+[tasks.templ]
+sources = ["components/**/*.templ"]
+run = "templ generate"
+
+[tasks.tailwind]
+sources = ["assets/main.css"]
+run = "tailwindcss -i ./assets/main.css -o ./assets/dist/tailwind.css --minify"
+
 [tasks.start]
 run = "docker compose up -d --wait"
 
 [tasks.stop]
-run =	"docker compose down"
+run = "docker compose down"
 
 [tasks.logs]
-run =	"docker compose logs -f"
+run = "docker compose logs -f"
 
 [tasks.rebuild]
-run =	"docker compose up --build -d --wait"
+run = "docker compose up --build -d --wait"
 
 [tasks.shell]
-run =	"docker exec -it server sh"
+run = "docker exec -it server sh"
 
 [tasks.migrate]
-run =	"docker exec -i server sh -c 'go run cmd/migrate/main.go up'"
+run = "docker exec -i server sh -c 'go run cmd/migrate/main.go up'"
 
 [tasks.migrate-create]
-run =	"go tool goose create {{arg(name='name')}} sql"
+run = "goose create {{arg(name='name')}} sql"
 
 [tasks.migrate-rollback]
-run =	"docker exec -i server sh -c 'go run cmd/migrate/main.go down'"
+run = "docker exec -i server sh -c 'go run cmd/migrate/main.go down'"
 
 [tasks.backup]
-run = 'docker exec -i db sh -c "pg_dump --data-only --exclude-table=goose_db_version $DATABASE_URL" > "backups/backup_$(date --iso=seconds).sql"'
+run = """
+#!/usr/bin/env bash
+DIR=${BACKUP_DIR:-./backups}
+NOW=$(date --iso=seconds)
+FILENAME=${DIR}/backup_${NOW}.sql
+docker exec -i db sh -c "pg_dump $DATABASE_URL" > "$FILENAME"
+"""
 
 [tasks.backup-restore]
-run =	'docker exec -i db sh -c "psql -U $DB_USER -d postgres" < {{arg(name="file")}}'
-
-[tasks.sql]
-run =	"go tool sqlc generate"
+run = 'docker exec -i db sh -c "psql -U $DB_USER -d postgres" < {{arg(name="file")}}'
 
 [tasks.lint]
-run =	"go tool golangci-lint run"
+run = "golangci-lint run"

@@ -1,43 +1,28 @@
 package main
 
 import (
-	"database/sql"
-	"embed"
 	"log"
 	"os"
 
-	"github.com/pressly/goose/v3"
-
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/ethansaxenian/budgeting/cmd/migrate/migrations"
 	_ "github.com/joho/godotenv/autoload"
 )
 
-//go:embed migrations/*.sql
-var embedMigrations embed.FS
-
 func main() {
+	if len(os.Args) < 2 {
+		log.Fatal("migration direction required: up or down")
+	}
+
 	direction := os.Args[1]
-
-	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	goose.SetBaseFS(embedMigrations)
-
-	if err := goose.SetDialect("postgres"); err != nil {
-		log.Fatal(err)
-	}
 
 	switch direction {
 	case "up":
-		if err := goose.Up(db, "migrations"); err != nil {
+		if err := migrations.Up(os.Getenv("DATABASE_URL")); err != nil {
 			log.Fatal(err)
 		}
 
 	case "down":
-		if err := goose.Down(db, "migrations"); err != nil {
+		if err := migrations.Down(os.Getenv("DATABASE_URL")); err != nil {
 			log.Fatal(err)
 		}
 

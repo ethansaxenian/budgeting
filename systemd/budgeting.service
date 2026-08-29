@@ -1,0 +1,36 @@
+[Unit]
+Description=Budgeting web application
+Documentation=https://github.com/ethansaxenian/budgeting
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=budgeting
+Group=budgeting
+EnvironmentFile=/etc/budgeting/budgeting.env
+ExecStart=/usr/local/bin/budgeting
+
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=15s
+KillSignal=SIGTERM
+LimitNOFILE=65536
+UMask=0027
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectHome=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

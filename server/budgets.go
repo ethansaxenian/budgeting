@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 
 	"github.com/ethansaxenian/budgeting/components/budgets"
@@ -40,7 +41,7 @@ func HandleBudgetsShow(conn *sql.Conn, w http.ResponseWriter, r *http.Request) e
 	availableCategories := util.CATEGORIES_BY_TYPE[transactionType]
 
 	for _, b := range allBudgetItems {
-		if util.Includes(availableCategories, b.Category) {
+		if slices.Contains(availableCategories, b.Category) {
 			budgetItems = append(budgetItems, b)
 		}
 	}
@@ -87,7 +88,7 @@ func HandleBudgetEdit(conn *sql.Conn, w http.ResponseWriter, r *http.Request) er
 	availableCategories := util.CATEGORIES_BY_TYPE[budget.TransactionType]
 
 	for _, b := range allBudgetItems {
-		if util.Includes(availableCategories, b.Category) {
+		if slices.Contains(availableCategories, b.Category) {
 			budgetItems = append(budgetItems, b)
 		}
 	}

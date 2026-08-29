@@ -9,12 +9,12 @@ import (
 func FormatAmount(amount float64) string {
 	rounded := fmt.Sprintf("%.2f", amount)
 
-	if strings.HasSuffix(rounded, ".00") {
-		return strings.TrimSuffix(rounded, ".00")
+	if before, ok := strings.CutSuffix(rounded, ".00"); ok {
+		return before
 	}
 
-	if strings.HasSuffix(rounded, ".0") {
-		return strings.TrimSuffix(rounded, ".0")
+	if before, ok := strings.CutSuffix(rounded, ".0"); ok {
+		return before
 	}
 
 	return rounded
@@ -42,14 +42,4 @@ func Capitalize(str string) string {
 	runes := []rune(str)
 	runes[0] = unicode.ToUpper(runes[0])
 	return string(runes)
-}
-
-func Includes[T comparable](arr []T, item T) bool {
-	for _, i := range arr {
-		if i == item {
-			return true
-		}
-	}
-
-	return false
 }

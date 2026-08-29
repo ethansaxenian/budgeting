@@ -60,14 +60,14 @@ services:
   db:
     container_name: db
     env_file: .env
-    image: postgres:latest
+    image: postgres:18
     ports:
       - "${DB_PORT}:5432"
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ./postgres-data:/var/lib/postgresql/18/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $$DB_USER" ]
       interval: 5s
