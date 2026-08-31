@@ -1,4 +1,5 @@
 [tools]
+"aqua:air-verse/air" = "latest"
 "aqua:a-h/templ" = "latest"
 "aqua:pressly/goose" = "latest"
 "aqua:tailwindlabs/tailwindcss" = "3.4.17"
@@ -7,7 +8,7 @@ sqlc = "latest"
 
 [env]
 _.file = ".env"
-DATABASE_URL = "postgresql://{{env.DB_USER}}:{{env.DB_PASSWORD}}@localhost:{{env.DB_PORT}}/postgres"
+DATABASE_URL = "postgresql://{{env.DB_USER}}:{{env.DB_PASSWORD}}@{{env.DB_HOST}}:{{env.DB_PORT}}/{{env.DB_NAME}}"
 GOOSE_MIGRATION_DIR = "cmd/migrate/migrations"
 
 [tasks.compile]
@@ -17,9 +18,7 @@ outputs = ["bin/budgeting"]
 env.CGO_ENABLED = 0
 env.GOOS = "linux"
 env.GOARCH = "arm64"
-run = """
-go build -tags production -trimpath -ldflags='-s -w' -o bin/budgeting ./cmd/app
-"""
+run = "go build -tags production -trimpath -ldflags='-s -w' -o bin/budgeting ./cmd/app"
 
 [tasks.sql]
 sources = ["cmd/migrate/migrations/*.sql"]
@@ -33,41 +32,36 @@ run = "templ generate"
 sources = ["assets/main.css"]
 run = "tailwindcss -i ./assets/main.css -o ./assets/dist/tailwind.css --minify"
 
-[tasks.start]
-run = "docker compose up -d --wait"
+[tasks.db]
+run = "docker compose up -d --wait db"
 
-[tasks.stop]
-run = "docker compose down"
+[tasks.db-down]
+run = "docker compose stop db"
 
-[tasks.logs]
-run = "docker compose logs -f"
+[tasks.server]
+run = "air -c .air-server.toml"
 
-[tasks.rebuild]
-run = "docker compose up --build -d --wait"
+[tasks.proxy]
+run = "templ generate --watch --proxy=\"http://localhost:${APP_PORT}\" --open-browser=false -v --proxybind=0.0.0.0"
 
-[tasks.shell]
-run = "docker exec -it server sh"
+[tasks.tailwind-watch]
+run = "air -c .air-tailwind.toml"
+
+[tasks.sqlc-watch]
+run = "air -c .air-sqlc.toml"
+
+[tasks.dev]
+depends = ["db"]
+run = "mise run server ::: proxy ::: tailwind-watch ::: sqlc-watch"
 
 [tasks.migrate]
-run = "docker exec -i server sh -c 'go run cmd/migrate/main.go up'"
+run = "go run ./cmd/migrate up"
 
 [tasks.migrate-create]
 run = "goose create {{arg(name='name')}} sql"
 
 [tasks.migrate-rollback]
-run = "docker exec -i server sh -c 'go run cmd/migrate/main.go down'"
-
-[tasks.backup]
-run = """
-#!/usr/bin/env bash
-DIR=${BACKUP_DIR:-./backups}
-NOW=$(date --iso=seconds)
-FILENAME=${DIR}/backup_${NOW}.sql
-docker exec -i db sh -c "pg_dump $DATABASE_URL" > "$FILENAME"
-"""
-
-[tasks.backup-restore]
-run = 'docker exec -i db sh -c "psql -U $DB_USER -d postgres" < {{arg(name="file")}}'
+run = "go run ./cmd/migrate down"
 
 [tasks.lint]
 run = "golangci-lint run"

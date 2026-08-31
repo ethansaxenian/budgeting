@@ -1,7 +1,7 @@
 [build]
 pre_cmd = ["tailwindcss -i ./assets/main.css -o ./assets/dist/tailwind.css --minify"]
-cmd = "curl -X POST http://proxy:7331/_templ/reload/events"
-bin = "/bin/true"
+cmd = "curl -X POST http://localhost:7331/_templ/reload/events"
+bin = "/usr/bin/true"
 include_dir = ["assets"]
 include_ext = ["css"]
 exclude_dir = ["assets/dist"]

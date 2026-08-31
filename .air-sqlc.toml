@@ -1,6 +1,6 @@
 [build]
-cmd = "go tool sqlc generate"
-bin = "/bin/true"
+cmd = "sqlc generate"
+bin = "/usr/bin/true"
 include_dir = ["queries"]
 include_ext = ["sql"]
 delay = 100

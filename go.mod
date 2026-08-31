@@ -297,11 +297,3 @@ require (
 	mvdan.cc/gofumpt v0.7.0 // indirect
 	mvdan.cc/unparam v0.0.0-20240528143540-8a5130ca722f // indirect
 )
-
-tool (
-	github.com/a-h/templ/cmd/templ
-	github.com/air-verse/air
-	github.com/golangci/golangci-lint/cmd/golangci-lint
-	github.com/pressly/goose/v3/cmd/goose
-	github.com/sqlc-dev/sqlc/cmd/sqlc
-)
