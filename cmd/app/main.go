@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/ethansaxenian/budgeting/cmd/migrate/migrations"
+	"github.com/ethansaxenian/budgeting/migrate"
 	"github.com/ethansaxenian/budgeting/server"
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -21,7 +21,7 @@ func main() {
 		log.Fatal("No APP_PORT provided, exiting...")
 	}
 
-	if err := migrations.Up(databaseURL); err != nil {
+	if err := migrate.Up(databaseURL); err != nil {
 		log.Fatalf("running database migrations: %v", err)
 	}
 

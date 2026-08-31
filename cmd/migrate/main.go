@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/ethansaxenian/budgeting/cmd/migrate/migrations"
+	"github.com/ethansaxenian/budgeting/migrate"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -15,14 +15,16 @@ func main() {
 
 	direction := os.Args[1]
 
+	databaseURL := os.Getenv("DATABASE_URL")
+
 	switch direction {
 	case "up":
-		if err := migrations.Up(os.Getenv("DATABASE_URL")); err != nil {
+		if err := migrate.Up(databaseURL); err != nil {
 			log.Fatal(err)
 		}
 
 	case "down":
-		if err := migrations.Down(os.Getenv("DATABASE_URL")); err != nil {
+		if err := migrate.Down(databaseURL); err != nil {
 			log.Fatal(err)
 		}
 

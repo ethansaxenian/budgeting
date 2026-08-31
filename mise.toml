@@ -7,14 +7,14 @@ golangci-lint = "latest"
 sqlc = "latest"
 
 [env]
+_.file = ".env"
 DB_USER = { default = "postgres" }
 DB_PASSWORD = { default = "postgres" }
 DB_HOST = { default = "localhost" }
 DB_PORT = { default = 5432 }
 DB_NAME = { default = "budgeting" }
-_.file = ".env"
 DATABASE_URL = "postgresql://{{env.DB_USER}}:{{env.DB_PASSWORD}}@{{env.DB_HOST}}:{{env.DB_PORT}}/{{env.DB_NAME}}"
-GOOSE_MIGRATION_DIR = "cmd/migrate/migrations"
+GOOSE_MIGRATION_DIR = "migrate/migrations"
 
 [tasks.compile]
 depends = ["sql", "templ", "tailwind"]
@@ -26,7 +26,7 @@ env.GOARCH = "arm64"
 run = "go build -tags production -trimpath -ldflags='-s -w' -o bin/budgeting ./cmd/app"
 
 [tasks.sql]
-sources = ["cmd/migrate/migrations/*.sql"]
+sources = ["migrate/migrations/*.sql"]
 run = "sqlc generate"
 
 [tasks.templ]
@@ -63,7 +63,10 @@ run = "mise run server ::: proxy ::: tailwind-watch ::: sqlc-watch"
 run = "go run ./cmd/migrate up"
 
 [tasks.migrate-create]
-run = "goose create {{arg(name='name')}} sql"
+usage = '''
+arg "<name>" help="The name of the migration to create"
+'''
+run = "goose create {usage_name?} sql"
 
 [tasks.migrate-rollback]
 run = "go run ./cmd/migrate down"

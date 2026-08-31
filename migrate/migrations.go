@@ -1,4 +1,4 @@
-package migrations
+package migrate
 
 import (
 	"database/sql"
@@ -8,18 +8,18 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
-//go:embed *.sql
+//go:embed migrations/*.sql
 var files embed.FS
 
 func Up(databaseURL string) error {
 	return run(databaseURL, func(db *sql.DB) error {
-		return goose.Up(db, ".")
+		return goose.Up(db, "migrations")
 	})
 }
 
 func Down(databaseURL string) error {
 	return run(databaseURL, func(db *sql.DB) error {
-		return goose.Down(db, ".")
+		return goose.Down(db, "migrations")
 	})
 }
 
