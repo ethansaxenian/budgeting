@@ -1,25 +1,52 @@
+# Budgeting
+
 A simple web app to track monthly expenses.
 
-Requirements:
-- `make`
-- `docker-compose`
+## Requirements
 
-### Running the app
-1. Create a `.env` file with the following contents:
-```sh
-APP_PORT=
-DB_PORT=
-DB_USER=
-DB_PASSWORD=
+- [Mise](https://mise.jdx.dev/)
+- Docker
+- Docker Compose
+- Go 1.27.0 or later
+
+Mise installs the project tools, including air, templ, sqlc, goose, and tailwind.
+
+## Local development
+
+Create a `mise.local.toml` file:
+
+```toml
+[env]
+DB_USER = "postgres"
+DB_PASSWORD = "password"
+DB_HOST = "localhost"
+DB_PORT = 5432
+DB_NAME = "budgeting"
+APP_PORT = 8000
 ```
-Any variables you set in `.env` will be set in the docker environment, so you can set the timezone with `TZ`, for example.
 
-2. Run `make start`. This will build and run 5 docker containers:
-    - `db`: The postgresql database, accessible locally on port `DB_PORT`.
-    - `server`: The main go webserver. Automatically reloads when app code is changed.
-    - `proxy`: A proxy for the web app that automatically reload the browser when changes are made to `.templ` files. This container exposes the app on port `APP_PORT`.
-    - `tailwind`: Rebuilds the main css file when changes are made and sends a reload event to `proxy`.
-    - `sqlc`: Regenerates the sqlc files when changes are made to `queries/*.sql`.
-3. Run `make migrate` to set up the database.
-4. Visit `http://localhost:<APP_PORT>` in your web browser.
+Start the local development environment:
 
+```sh
+mise run dev
+```
+
+This starts PostgreSQL in Docker and runs the Go server with air, the templ proxy, the tailwind watcher, and the sqlc watcher locally. Open the app at:
+
+```
+http://localhost:8000
+```
+
+The templ development proxy listens on `APP_PORT` and forwards requests to the Go server on an internal port managed by Mise.
+
+Useful commands:
+
+```sh
+mise run db                  # Start PostgreSQL
+mise run db-down             # Stop PostgreSQL
+mise run migrate             # Run pending migrations
+mise run migrate-rollback   # Roll back the latest migration
+mise run migrate-create example
+```
+
+The application runs migrations automatically when `RUN_MIGRATIONS` is truthy.

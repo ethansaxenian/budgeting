@@ -1,9 +1,7 @@
 [build]
 cmd = "go build -o bin/main cmd/app/main.go"
 bin = "bin/main"
-exclude_dir = ["cmd/migrate", "backups", "migrate/migrations"]
-include_ext = ["go", "templ", "html", "css"]
-exclude_file = ["assets/main.css"]
+include_ext = ["go"]
 delay = 100
 exclude_unchanged = true
 rerun = true

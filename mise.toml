@@ -1,21 +1,16 @@
 [tools]
-"aqua:air-verse/air" = "latest"
-"aqua:a-h/templ" = "latest"
-"aqua:pressly/goose" = "latest"
+"aqua:air-verse/air" = "1.67.4"
+"aqua:a-h/templ" = "0.3.1020"
+"aqua:pressly/goose" = "3.27.3"
 "aqua:tailwindlabs/tailwindcss" = "3.4.17"
-golangci-lint = "latest"
-sqlc = "latest"
+golangci-lint = "2.13.2"
+sqlc = "1.31.1"
 
 [env]
-_.file = ".env"
-DB_USER = { default = "postgres" }
-DB_PASSWORD = { default = "postgres" }
-DB_HOST = { default = "localhost" }
-DB_PORT = { default = 5432 }
-DB_NAME = { default = "budgeting" }
-DATABASE_URL = "postgresql://{{env.DB_USER}}:{{env.DB_PASSWORD}}@{{env.DB_HOST}}:{{env.DB_PORT}}/{{env.DB_NAME}}"
+TEMPL_DEV_MODE = "true"
 GOOSE_MIGRATION_DIR = "migrate/migrations"
 RUN_MIGRATIONS = 1
+SERVER_PORT = 8001
 
 [tasks.compile]
 depends = ["sql", "templ", "tailwind"]
@@ -64,10 +59,12 @@ run = "docker compose up -d --wait db"
 run = "docker compose stop db"
 
 [tasks.server]
+env.DATABASE_URL = "postgresql://{{env.DB_USER}}:{{env.DB_PASSWORD}}@{{env.DB_HOST}}:{{env.DB_PORT}}/{{env.DB_NAME}}"
+env.APP_PORT = "{{env.SERVER_PORT}}"
 run = "air -c .air-server.toml"
 
 [tasks.proxy]
-run = "templ generate --watch --proxy=\"http://localhost:${APP_PORT}\" --open-browser=false --proxybind=localhost"
+run = "templ generate --watch --proxy=\"http://localhost:${SERVER_PORT}\" --proxyport=\"${APP_PORT}\" --open-browser=false"
 
 [tasks.tailwind-watch]
 run = "air -c .air-tailwind.toml"
@@ -77,7 +74,9 @@ run = "air -c .air-sqlc.toml"
 
 [tasks.dev]
 depends = ["db"]
-run = "mise run server ::: proxy ::: tailwind-watch ::: sqlc-watch"
+run = [
+  { tasks = ["server", "proxy", "tailwind-watch", "sqlc-watch"] },
+]
 
 [tasks.migrate]
 run = "go run ./cmd/migrate up"
@@ -86,7 +85,7 @@ run = "go run ./cmd/migrate up"
 usage = '''
 arg "<name>" help="The name of the migration to create"
 '''
-run = "goose create {usage_name?} sql"
+run = "goose create ${usage_name?} sql"
 
 [tasks.migrate-rollback]
 run = "go run ./cmd/migrate down"

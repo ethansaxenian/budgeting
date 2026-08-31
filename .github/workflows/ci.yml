@@ -36,7 +36,7 @@ jobs:
         run: sqlc diff .
 
   release:
-    name: Rolling Debian release
+    name: Debian release
     needs: check
     if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest

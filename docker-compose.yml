@@ -1,7 +1,6 @@
 services:
   db:
     container_name: db
-    env_file: .env
     image: postgres:17
     ports:
       - "${DB_PORT}:5432"
@@ -10,7 +9,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $$DB_USER" ]
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
       interval: 5s
       timeout: 5s
       retries: 5
