@@ -7,6 +7,11 @@ golangci-lint = "latest"
 sqlc = "latest"
 
 [env]
+DB_USER = { default = "postgres" }
+DB_PASSWORD = { default = "postgres" }
+DB_HOST = { default = "localhost" }
+DB_PORT = { default = 5432 }
+DB_NAME = { default = "budgeting" }
 _.file = ".env"
 DATABASE_URL = "postgresql://{{env.DB_USER}}:{{env.DB_PASSWORD}}@{{env.DB_HOST}}:{{env.DB_PORT}}/{{env.DB_NAME}}"
 GOOSE_MIGRATION_DIR = "cmd/migrate/migrations"
