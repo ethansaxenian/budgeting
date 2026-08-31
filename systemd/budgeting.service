@@ -6,31 +6,35 @@ After=network-online.target
 
 [Service]
 Type=simple
+ExecStart=/usr/bin/budgeting
 User=budgeting
 Group=budgeting
+
 EnvironmentFile=/etc/budgeting/budgeting.env
-ExecStart=/usr/local/bin/budgeting
 
 Restart=on-failure
 RestartSec=5s
-TimeoutStopSec=15s
-KillSignal=SIGTERM
-LimitNOFILE=65536
-UMask=0027
 
-NoNewPrivileges=true
-PrivateTmp=true
-PrivateDevices=true
-ProtectHome=true
 ProtectSystem=strict
-ProtectKernelTunables=true
-ProtectKernelModules=true
-ProtectControlGroups=true
-RestrictSUIDSGID=true
-LockPersonality=true
-RestrictRealtime=true
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectHome=yes
+PrivateDevices=yes
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+SystemCallArchitectures=native
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictSUIDSGID=yes
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 CapabilityBoundingSet=
+UMask=0027
 
 [Install]
 WantedBy=multi-user.target

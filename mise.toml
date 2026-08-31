@@ -15,6 +15,7 @@ DB_PORT = { default = 5432 }
 DB_NAME = { default = "budgeting" }
 DATABASE_URL = "postgresql://{{env.DB_USER}}:{{env.DB_PASSWORD}}@{{env.DB_HOST}}:{{env.DB_PORT}}/{{env.DB_NAME}}"
 GOOSE_MIGRATION_DIR = "migrate/migrations"
+RUN_MIGRATIONS = 1
 
 [tasks.compile]
 depends = ["sql", "templ", "tailwind"]
@@ -47,7 +48,7 @@ run = "docker compose stop db"
 run = "air -c .air-server.toml"
 
 [tasks.proxy]
-run = "templ generate --watch --proxy=\"http://localhost:${APP_PORT}\" --open-browser=false -v --proxybind=0.0.0.0"
+run = "templ generate --watch --proxy=\"http://localhost:${APP_PORT}\" --open-browser=false --proxybind=localhost"
 
 [tasks.tailwind-watch]
 run = "air -c .air-tailwind.toml"
