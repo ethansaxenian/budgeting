@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+if ! getent passwd budgeting >/dev/null; then
+    if getent group budgeting >/dev/null; then
+        adduser --system --no-create-home --home /nonexistent --shell /usr/sbin/nologin --ingroup budgeting budgeting
+    else
+        adduser --system --group --no-create-home --home /nonexistent --shell /usr/sbin/nologin budgeting
+    fi
+fi
+
+install -d -o root -g budgeting -m 0750 /etc/budgeting
+if [ ! -e /etc/budgeting/budgeting.env ]; then
+    install -o root -g budgeting -m 0640 /dev/null /etc/budgeting/budgeting.env
+fi
+
+if command -v systemctl >/dev/null; then
+    systemctl daemon-reload || true
+fi

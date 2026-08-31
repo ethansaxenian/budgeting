@@ -26,6 +26,25 @@ env.GOOS = "linux"
 env.GOARCH = "arm64"
 run = "go build -tags production -trimpath -ldflags='-s -w' -o bin/budgeting ./cmd/app"
 
+[tasks.deb]
+depends = ["compile"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+
+VERSION="${1:-0.1.0}"
+PACKAGE="budgeting_${VERSION}_arm64"
+OUTPUT="$(mktemp -d)"
+trap 'rm -rf "$OUTPUT"' EXIT
+
+docker buildx build \
+  --file packaging/Dockerfile \
+  --build-arg VERSION="$VERSION" \
+  --output "type=local,dest=$OUTPUT" \
+  .
+mv "$OUTPUT/$PACKAGE.deb" "bin/$PACKAGE.deb"
+"""
+
 [tasks.sql]
 sources = ["migrate/migrations/*.sql"]
 run = "sqlc generate"
