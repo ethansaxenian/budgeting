@@ -70,4 +70,5 @@ run = "goose create ${usage_name?} sql"
 run = "go run ./cmd/migrate down"
 
 [tasks.lint]
+depends = ["templ"]
 run = "golangci-lint run"
