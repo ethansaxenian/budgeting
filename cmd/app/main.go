@@ -10,6 +10,8 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+var version = "dev"
+
 func envBool(key string, defaultValue bool) (bool, error) {
 	value, ok := os.LookupEnv(key)
 	if !ok || value == "" {
@@ -20,6 +22,8 @@ func envBool(key string, defaultValue bool) (bool, error) {
 }
 
 func main() {
+	log.Printf("starting budgeting version %s", version)
+
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
 		log.Fatal("No DATABASE_URL provided, exiting...")
@@ -45,7 +49,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer server.Close()
+	defer func() {
+		if err := server.Close(); err != nil {
+			log.Printf("closing server: %v", err)
+		}
+	}()
 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)

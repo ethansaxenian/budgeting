@@ -23,12 +23,16 @@ func Down(databaseURL string) error {
 	})
 }
 
-func run(databaseURL string, migrate func(*sql.DB) error) error {
+func run(databaseURL string, migrate func(*sql.DB) error) (err error) {
 	db, err := sql.Open("pgx", databaseURL)
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer func() {
+		if closeErr := db.Close(); err == nil && closeErr != nil {
+			err = closeErr
+		}
+	}()
 
 	goose.SetBaseFS(files)
 	if err := goose.SetDialect("postgres"); err != nil {

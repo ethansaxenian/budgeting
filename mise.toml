@@ -1,10 +1,12 @@
 [tools]
+go = "1.27.4"
 "aqua:air-verse/air" = "1.67.4"
 "aqua:a-h/templ" = "0.3.1020"
 "aqua:pressly/goose" = "3.27.3"
 "aqua:tailwindlabs/tailwindcss" = "3.4.17"
-golangci-lint = "2.13.2"
+golangci-lint = "2.15.0"
 sqlc = "1.31.1"
+goreleaser = "latest"
 
 [env]
 TEMPL_DEV_MODE = "true"
@@ -12,33 +14,10 @@ GOOSE_MIGRATION_DIR = "migrate/migrations"
 RUN_MIGRATIONS = 1
 SERVER_PORT = 8001
 
-[tasks.compile]
+[tasks.build]
 depends = ["sql", "templ", "tailwind"]
-sources = ["**/*.go"]
-outputs = ["bin/budgeting"]
-env.CGO_ENABLED = 0
-env.GOOS = "linux"
-env.GOARCH = "arm64"
-run = "go build -tags production -trimpath -ldflags='-s -w' -o bin/budgeting ./cmd/app"
-
-[tasks.deb]
-depends = ["compile"]
-run = """
-#!/usr/bin/env bash
-set -euo pipefail
-
-VERSION="${1:-0.1.0}"
-PACKAGE="budgeting_${VERSION}_arm64"
-OUTPUT="$(mktemp -d)"
-trap 'rm -rf "$OUTPUT"' EXIT
-
-docker buildx build \
-  --file packaging/Dockerfile \
-  --build-arg VERSION="$VERSION" \
-  --output "type=local,dest=$OUTPUT" \
-  .
-mv "$OUTPUT/$PACKAGE.deb" "bin/$PACKAGE.deb"
-"""
+sources = ["**/*.go", "migrate/migrations/*.sql", "components/**/*.templ", "assets/main.css", "packaging/**", ".goreleaser.yaml"]
+run = "goreleaser release --snapshot --clean"
 
 [tasks.sql]
 sources = ["migrate/migrations/*.sql"]

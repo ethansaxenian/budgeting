@@ -39,7 +39,12 @@ func (s *Server) Handle(h APIFunc) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		defer conn.Close()
+
+		defer func() {
+			if err := conn.Close(); err != nil {
+				slog.Error("closing database connection", "err", err)
+			}
+		}()
 
 		if err := h(conn, w, r); err != nil {
 			slog.Error("Error", "err", err.Error(), "method", r.Method, "path", r.URL, "remoteAddr", r.RemoteAddr)

@@ -1,0 +1,37 @@
+version: 2
+
+builds:
+  - main: ./cmd/app
+    tags:
+      - production
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - arm64
+
+nfpms:
+  - id: budgeting
+    package_name: budgeting
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Arch }}"
+    maintainer: Ethan Saxenian
+    description: Monthly expense tracking web application
+    formats:
+      - deb
+    section: web
+    priority: optional
+    bindir: /usr/bin
+    contents:
+      - src: packaging/budgeting.service
+        dst: /usr/lib/systemd/system/budgeting.service
+    scripts:
+      postinstall: packaging/postinst
+
+changelog:
+  use: github-native
+

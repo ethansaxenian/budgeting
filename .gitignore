@@ -3,3 +3,4 @@ assets/dist/*
 *_templ.txt
 bin
 tmp
+dist/
